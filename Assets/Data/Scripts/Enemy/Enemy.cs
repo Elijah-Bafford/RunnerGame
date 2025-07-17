@@ -7,8 +7,9 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float hitForceMultiplier = 3f;
     [SerializeField] private float torqueMultiplier = 6f;
     [SerializeField] private Transform player;
-    [SerializeField] private float moveSpeed = 1f;
-    [SerializeField] private float turnSpeed = 180f;
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float turnSpeed = 360f;
+    [SerializeField] private float stopDistance = 1.25f;    // How close to the player for an attack
 
 
     private Rigidbody rb;
@@ -25,7 +26,7 @@ public class Enemy : MonoBehaviour, IDamageable {
         startRotation = rb.rotation;
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         RunCurrentState();
     }
 
@@ -53,12 +54,13 @@ public class Enemy : MonoBehaviour, IDamageable {
                 MoveTowardPlayer();
                 break;
             case State.Attack:
+                // TODO: Add attacking
+                currentState = State.Move;
                 break;
             case State.Dead:
                 StartCoroutine(DisableAfter(3f));
                 break;
         }
-        print(currentState);
     }
 
     public void Hit(Vector3 hitForce) {
@@ -80,23 +82,34 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void MoveTowardPlayer() {
         if (currentState == State.Dead) return;
-        // 1) get direction to player…
+
         Vector3 dir = player.position - transform.position;
-        // 2) kill vertical difference so we only turn on Y:
         dir.y = 0f;
 
-        // 3) make sure there's something to look at
-        if (dir.sqrMagnitude < 0.001f) return;
+        float sqrDist = dir.sqrMagnitude;
+        dir = dir.normalized;
 
-        // 4) build target rotation
-        Quaternion targetRot = Quaternion.LookRotation(dir);
+        if (sqrDist < 0.001f) return;
 
-        // 5) smoothly rotate toward it
+        FacePlayer(dir);
+
+        if (sqrDist > stopDistance * stopDistance) Move(dir);
+        else rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+    }
+
+    private void FacePlayer(Vector3 direction) {
+        Quaternion targetRot = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(
             transform.rotation,
             targetRot,
             turnSpeed * Time.deltaTime
         );
+    }
+
+    private void Move(Vector3 direction) {
+        Vector3 targetVelocity = direction * moveSpeed;
+        targetVelocity.y = rb.linearVelocity.y;
+        rb.linearVelocity = targetVelocity;
     }
 
 
