@@ -6,15 +6,19 @@ public class Enemy : MonoBehaviour, IDamageable {
     [Header("Hit multipliers")]
     [SerializeField] private float hitForceMultiplier = 3f;
     [SerializeField] private float torqueMultiplier = 6f;
-    [SerializeField] private Transform player;
+    [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float turnSpeed = 360f;
-    [SerializeField] private float stopDistance = 1.25f;    // How close to the player for an attack
-
+    [Tooltip("How close the enemy gets to the player.")]
+    [SerializeField] private float stopDistance = 1.25f;
+    [Header("Refs")]
+    [SerializeField] private Transform player;
+    [SerializeField] private Animator anim;
 
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
+    private bool canAttack = true;
 
     public enum State { Idle, Move, Attack, Dead }
     private State currentState;
@@ -45,7 +49,9 @@ public class Enemy : MonoBehaviour, IDamageable {
     }
 
     private void RunCurrentState() {
-        if (currentState == lastState && currentState != State.Move) return;
+        bool stateChanged = lastState != currentState;
+        // If the state didn't change return, unless state == move
+        if (!stateChanged && currentState != State.Move) return;
         lastState = currentState;
         switch (currentState) {
             case State.Idle:
@@ -54,8 +60,7 @@ public class Enemy : MonoBehaviour, IDamageable {
                 MoveTowardPlayer();
                 break;
             case State.Attack:
-                // TODO: Add attacking
-                currentState = State.Move;
+                AttackPlayer();
                 break;
             case State.Dead:
                 StartCoroutine(DisableAfter(3f));
@@ -80,8 +85,13 @@ public class Enemy : MonoBehaviour, IDamageable {
         SetState(State.Dead);
     }
 
+    private void AttackPlayer() {
+        if (!canAttack) return;
+
+    }
+
     private void MoveTowardPlayer() {
-        if (currentState == State.Dead) return;
+        if (currentState == State.Dead || currentState == State.Attack) return;
 
         Vector3 dir = player.position - transform.position;
         dir.y = 0f;
