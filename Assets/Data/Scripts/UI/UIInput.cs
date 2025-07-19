@@ -4,6 +4,9 @@ using UnityEngine.SceneManagement;
 
 public class UIInput : MonoBehaviour {
 
+    [SerializeField] GameObject pauseOverlay;
+    [SerializeField] GameTimer gameTimer;
+
     public enum GameState { MainMenu, Playing, Paused }
 
     private GameState state;
@@ -23,13 +26,18 @@ public class UIInput : MonoBehaviour {
     private void UpdateGameState() {
         switch (state) {
             case GameState.MainMenu:
+                gameTimer.ResetTimer();
+                // Does nothing yet
                 Time.timeScale = 1;
-                SceneManager.LoadScene("MainMenu");
                 break;
             case GameState.Playing:
+                gameTimer.StartTimer();
+                pauseOverlay.SetActive(false);
                 Time.timeScale = 1;
                 break;
             case GameState.Paused:
+                gameTimer.StopTimer();
+                pauseOverlay.SetActive(true);
                 Time.timeScale = 0;
                 break;
         }
