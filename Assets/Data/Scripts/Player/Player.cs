@@ -10,7 +10,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float currentSpeed = 0;
     [SerializeField] private float jumpForce = 7f;
     [Header("Refs")]
-    [SerializeField] private GameInput gameInput;
+    [SerializeField] private PlayerInput playerInput;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Animator anim;
     [Header("Ground Check")]

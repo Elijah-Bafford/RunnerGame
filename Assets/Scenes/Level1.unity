@@ -728,7 +728,7 @@ Transform:
   m_GameObject: {fileID: 211662377}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.322, z: -0.37}
+  m_LocalPosition: {x: 0, y: 0.32200006, z: -0.3699994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1399,7 +1399,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -0.309}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2578,6 +2578,7 @@ GameObject:
   m_Component:
   - component: {fileID: 479569803}
   - component: {fileID: 479569802}
+  - component: {fileID: 479569804}
   m_Layer: 0
   m_Name: Game Input
   m_TagString: Untagged
@@ -2613,6 +2614,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &479569804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 479569801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb59aa3834dcaa46afd01afc6878007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &483356696
 GameObject:
   m_ObjectHideFlags: 0
@@ -2687,7 +2700,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62d54399b04b4fa48a73e121d4937dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ReferenceFrame: 0
+  ReferenceFrame: 2
   RecenterTarget: 0
   PanAxis:
     Value: 0
@@ -2774,7 +2787,7 @@ Transform:
   m_GameObject: {fileID: 483356696}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.65760005, z: -0.074}
+  m_LocalPosition: {x: 0, y: 0.65760005, z: -0.07399988}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7294,6 +7307,26 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8c4003c2-6e4f-4fe8-9128-596cbb6045b8
+    m_ActionName: 'UI/Pause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 479569804}
+        m_TargetAssemblyTypeName: UIInput, Assembly-CSharp
+        m_MethodName: OnPauseKeyPressed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 433f1e6c-d338-49d1-b2e3-7e67a5852dea
+    m_ActionName: 'Player/Pause[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
@@ -7315,7 +7348,7 @@ MonoBehaviour:
   speedMult: 1
   currentSpeed: 0
   jumpForce: 4
-  gameInput: {fileID: 479569802}
+  playerInput: {fileID: 0}
   cameraTransform: {fileID: 330585546}
   anim: {fileID: 1889383181}
   groundCheck: {fileID: 1819965874}
