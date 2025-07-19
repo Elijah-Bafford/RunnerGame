@@ -18,7 +18,10 @@ public class Enemy : MonoBehaviour, IDamageable {
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
-    private bool canAttack = true;
+
+    private bool canDealDamage = false;
+
+    private bool disableStateChange = false;
 
     public enum State { Idle, Move, Attack, Dead }
     private State currentState;
@@ -46,24 +49,36 @@ public class Enemy : MonoBehaviour, IDamageable {
         rb.rotation = startRotation;
 
         rb.freezeRotation = true;
+        disableStateChange = false;
     }
 
     private void RunCurrentState() {
-        bool stateChanged = lastState != currentState;
-        // If the state didn't change return, unless state == move
-        if (!stateChanged && currentState != State.Move) return;
+        if (disableStateChange) return;
+
+        if (lastState == currentState && currentState != State.Move) return;
+
+        bool isMoveState = currentState == State.Move;
+        bool animIsMove = anim.GetBool("Move");
+       
+        if (!isMoveState && animIsMove) anim.SetBool("Move", false);
+
         lastState = currentState;
+
         switch (currentState) {
             case State.Idle:
                 break;
             case State.Move:
+                if (!animIsMove) anim.SetBool("Move", true);
                 MoveTowardPlayer();
                 break;
             case State.Attack:
+                anim.SetTrigger("Attack");
                 AttackPlayer();
                 break;
             case State.Dead:
+                anim.SetBool("Dead", true);
                 StartCoroutine(DisableAfter(3f));
+                disableStateChange = true;
                 break;
         }
     }
@@ -86,8 +101,10 @@ public class Enemy : MonoBehaviour, IDamageable {
     }
 
     private void AttackPlayer() {
-        if (!canAttack) return;
-
+        // If the any can't deal damage on this call, return.
+        if (!canDealDamage) return;
+        canDealDamage = false;
+        print("Player has died!");
     }
 
     private void MoveTowardPlayer() {
@@ -141,4 +158,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     public void SetState(State state) {
         currentState = state;
     }
+
+    // Animation event, called at a specific animation frame during an attack by AllowHitEvent script
+    public void AllowHit() { canDealDamage = true; }
 }
