@@ -939,7 +939,7 @@ GameObject:
   - component: {fileID: 1051051757}
   - component: {fileID: 1051051756}
   m_Layer: 5
-  m_Name: Main Menu
+  m_Name: MainMenuUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1384,6 +1384,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 142673415750973883, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
+      propertyPath: disableThis
+      value: 
+      objectReference: {fileID: 1051051755}
+    - target: {fileID: 142673415750973883, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
+      propertyPath: ObjToDisable
+      value: 
+      objectReference: {fileID: 1051051755}
     - target: {fileID: 4477843197095016659, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
       propertyPath: m_Name
       value: Scene Handler

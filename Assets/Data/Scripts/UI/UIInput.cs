@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 public class UIInput : MonoBehaviour {
 
     [SerializeField] GameObject pauseOverlay;
     [SerializeField] GameTimer gameTimer;
+    [SerializeField] SceneHandler sceneHandler;
+    [SerializeField] PlayerInput playerInput;
 
-    public enum GameState { MainMenu, Playing, Paused }
+    public enum GameState { MainMenu, Playing, Paused, LevelRestart }
 
     private GameState state;
     private GameState lastState;
@@ -19,28 +20,43 @@ public class UIInput : MonoBehaviour {
     private void Update() {
         if (state != lastState) {
             lastState = state;
-            UpdateGameState(); 
+            UpdateGameState();
         }
     }
 
     private void UpdateGameState() {
         switch (state) {
             case GameState.MainMenu:
-                gameTimer.ResetTimer();
-                // Does nothing yet
+                playerInput.SwitchCurrentActionMap("UI");
                 Time.timeScale = 1;
+                sceneHandler.LoadLevel(0);
                 break;
             case GameState.Playing:
-                gameTimer.StartTimer();
-                pauseOverlay.SetActive(false);
-                Time.timeScale = 1;
+                ShowPauseOverlay(false);
                 break;
             case GameState.Paused:
-                gameTimer.StopTimer();
-                pauseOverlay.SetActive(true);
-                Time.timeScale = 0;
+                ShowPauseOverlay(true);
+                break;
+            case GameState.LevelRestart:
+                ShowPauseOverlay(false);
+                sceneHandler.InstantLoad(SceneHandler.currentLevel);
+                state = GameState.Playing;
                 break;
         }
+    }
+
+    private void ShowPauseOverlay(bool paused) {
+        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = paused;
+
+        pauseOverlay.SetActive(paused);
+        gameTimer.RunTimer(!paused);
+
+        string input = paused ? "UI" : "Player";
+        int newTime = paused ? 0 : 1;
+
+        playerInput.SwitchCurrentActionMap(input);
+        Time.timeScale = newTime;
     }
 
     public GameState GetGameState() { return state; }
@@ -51,4 +67,8 @@ public class UIInput : MonoBehaviour {
             else state = GameState.Playing;
         }
     }
+
+    public void ButtonUnpause() { state = GameState.Playing; }
+    public void ButtonQuit() { state = GameState.MainMenu; }
+    public void ButtonRestart() { state = GameState.LevelRestart; }
 }

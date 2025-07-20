@@ -8,23 +8,58 @@ public class SceneHandler : MonoBehaviour {
     public static int currentLevel;
 
     [Header("Loading UI")]
+    [Tooltip("Set this index value of the scene this Handler is attached to")]
+    [SerializeField] private int thisLevel;
+
+    [Tooltip("Disable an element when loading starts. Not required.")]
+    [SerializeField] private GameObject ObjToDisable;
+
+    // If this is needed the logic is here
+    //[Tooltip("Enable an element when loading is finished. Not required.")]
+    //[SerializeField] private GameObject ObjToEnable;
+
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private Slider progressBar;
 
+    private void Start() {
+        currentLevel = thisLevel;
+    }
+
+    /// <summary>
+    /// Normally load a level.
+    /// </summary>
+    /// <param name="level"></param>
     public void LoadLevel(int level) { 
         currentLevel = level;
         StartCoroutine(LoadSceneAsync(level));
     }
+    /// <summary>
+    /// Load a level with no loading screen.
+    /// </summary>
+    /// <param name="level"></param>
+    public void InstantLoad(int level) {
+        currentLevel = level;
+        SceneManager.LoadScene(currentLevel);
+    }
 
     private IEnumerator LoadSceneAsync(int levelIndex) {
-        loadingScreen?.SetActive(true);
+        if (ObjToDisable) ObjToDisable.SetActive(false);
+        loadingScreen.SetActive(true);
+        progressBar.value = 0f;
 
+        yield return new WaitForSeconds(0.5f);      // Showing the loading sreen for debugging.
         AsyncOperation operation = SceneManager.LoadSceneAsync(levelIndex);
 
         while (operation.progress < 0.9f) {
             float progress = Mathf.Clamp01(operation.progress / 0.9f);
+            
             progressBar.value = progress;
+            yield return null;
         }
+
+        progressBar.value = 1f;
+
+        operation.allowSceneActivation = true;
 
         yield return null;
     }

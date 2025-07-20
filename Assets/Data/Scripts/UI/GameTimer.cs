@@ -25,7 +25,9 @@ public class GameTimer : MonoBehaviour {
         currentTime = 0f;
         UITimer.text = "00:00:00";
     }
-    public void StartTimer() { isRunning = true; }
-    public void StopTimer() { isRunning = false; }
+
+    public void RunTimer(bool isRunning) {
+        this.isRunning = isRunning;
+    }
 
 }

@@ -1,15 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInput : MonoBehaviour {
+public class PlayingInput : MonoBehaviour {
 
     [SerializeField] private Player player;
-    
-
-    private void Start() {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
 
     public void OnMove(InputAction.CallbackContext context) { player.Perform(Player.Act.Move, context.ReadValue<Vector2>().normalized); }
     public void OnJump(InputAction.CallbackContext context) {

@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour {
 
@@ -10,7 +8,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float currentSpeed = 0;
     [SerializeField] private float jumpForce = 7f;
     [Header("Refs")]
-    [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private PlayingInput playerInput;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Animator anim;
     [Header("Ground Check")]
