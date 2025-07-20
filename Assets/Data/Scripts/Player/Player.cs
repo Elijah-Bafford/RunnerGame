@@ -11,6 +11,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private PlayingInput playerInput;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Animator anim;
+    [SerializeField] private Animator cameraAnim;
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
@@ -18,21 +19,53 @@ public class Player : MonoBehaviour {
 
     private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
+    private Vector2 lastMoveVector = Vector2.zero;
 
     private bool isSliding = false;
     private bool isGrounded = false;
     private bool isAttacking = false;
 
     public enum Act { Attack, Slide, Jump, Move }
+    private enum Direction { Forward, Backward, Left, Right, None }
+
+    private Direction currentDir;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        currentDir = Direction.None;
     }
 
     private void FixedUpdate() {
+        UpdateDirection();
+        UpdateCamera();
         UpdateSpeedMult();
         Move();
+    }
+
+    private void UpdateDirection() {
+        if (moveVector == lastMoveVector) return;
+        lastMoveVector = moveVector;
+        if (moveVector == Vector2.up) {
+            currentDir = Direction.Forward;
+        } else if (moveVector == Vector2.down) {
+            currentDir = Direction.Backward;
+        } else if (moveVector == Vector2.left) {
+            currentDir = Direction.Left;
+        } else if (moveVector == Vector2.right) {
+            currentDir = Direction.Right;
+        } else {
+            currentDir = Direction.None;
+        }
+    }
+
+    private void UpdateCamera() {
+        if (!isGrounded) return;    // Once I implement wall running this will be changed.
+        if (cameraAnim.GetBool("LeanL") && currentDir == Direction.Left) return;
+        if (cameraAnim.GetBool("LeanR") && currentDir == Direction.Right) return;
+
+        cameraAnim.SetBool("LeanL", currentDir == Direction.Left);
+        cameraAnim.SetBool("LeanR", currentDir == Direction.Right);
     }
 
     private void UpdateSpeedMult() {

@@ -18,7 +18,6 @@ public class NotificationHandler : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider collision) {
-        print(collision.name);
         if (collision.CompareTag("Player")) {
             write.text = message;
             notificationBox.SetActive(true);
