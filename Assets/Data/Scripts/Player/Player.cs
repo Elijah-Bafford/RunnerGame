@@ -1,17 +1,19 @@
+using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float speedMult = 1f;
     [SerializeField] private float currentSpeed = 0;
     [SerializeField] private float jumpForce = 7f;
     [Header("Refs")]
     [SerializeField] private PlayingInput playerInput;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Animator anim;
-    [SerializeField] private Animator cameraAnim;
+    [SerializeField] private CinemachineCamera fstPersonCamera;
+    [SerializeField] private Slider speedBar;
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
@@ -24,6 +26,10 @@ public class Player : MonoBehaviour {
     private bool isSliding = false;
     private bool isGrounded = false;
     private bool isAttacking = false;
+
+    private float leanAmount = 0.0f;
+    private float speedLossMult = 1f;
+    private float speedMult = 1f;
 
     public enum Act { Attack, Slide, Jump, Move }
     private enum Direction { Forward, Backward, Left, Right, None }
@@ -54,38 +60,48 @@ public class Player : MonoBehaviour {
             currentDir = Direction.Left;
         } else if (moveVector == Vector2.right) {
             currentDir = Direction.Right;
-        } else {
-            currentDir = Direction.None;
-        }
+        } else { currentDir = Direction.None; }
     }
 
     private void UpdateCamera() {
-        if (!isGrounded) return;    // Once I implement wall running this will be changed.
-        if (cameraAnim.GetBool("LeanL") && currentDir == Direction.Left) return;
-        if (cameraAnim.GetBool("LeanR") && currentDir == Direction.Right) return;
-
-        cameraAnim.SetBool("LeanL", currentDir == Direction.Left);
-        cameraAnim.SetBool("LeanR", currentDir == Direction.Right);
+        if (currentDir == Direction.Right) leanAmount = -4f;
+        else if (currentDir == Direction.Left) leanAmount = 4f;
+        else leanAmount = 0.0f;
+        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
     }
 
     private void UpdateSpeedMult() {
+
+        
+        if (currentDir == Direction.Right || currentDir == Direction.Left) {
+            speedMult *= 0.8f;
+        } else if (currentDir == Direction.Backward) {
+            speedMult *= 0.6f;
+        }
+
         if (currentSpeed > 0) {
+            currentSpeed -= Time.deltaTime * speedLossMult;
             speedMult = 1.1f;
             if (isSliding && isGrounded) {
                 speedMult = 1.6f;
             }
         } else {
+            currentSpeed = 0.0f;
             speedMult = 0.8f;
             if (isSliding && isGrounded) {
                 speedMult = 0.65f;
             }
         }
+
+        speedBar.value = Mathf.Lerp(speedBar.value, currentSpeed, Time.deltaTime * 4);
     }
 
     private void Move() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+
         float speed = moveSpeed;
         speed *= speedMult;
+
         // Camera-relative movement
         Vector3 camForward = cameraTransform.forward;
         camForward.y = 0;
@@ -113,6 +129,7 @@ public class Player : MonoBehaviour {
     private void Slide() {
         isSliding = !isSliding;
         anim.SetBool("Slide", isSliding);
+        speedLossMult = isSliding ? speedLossMult + 1.5f : speedLossMult;
     }
 
     private void Jump(bool keyReleased) {
