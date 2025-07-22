@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable {
@@ -14,13 +15,16 @@ public class Enemy : MonoBehaviour, IDamageable {
     [Header("Refs")]
     [SerializeField] private Transform player;
     [SerializeField] private Animator anim;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
 
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
 
     private bool canDealDamage = false;
-
+    private bool isGrounded = false;
     private bool disableStateChange = false;
 
     public enum State { Idle, Move, Attack, Dead }
@@ -34,7 +38,12 @@ public class Enemy : MonoBehaviour, IDamageable {
     }
 
     private void FixedUpdate() {
+        UpdatePhysics();
         RunCurrentState();
+    }
+
+    private void UpdatePhysics() {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
     }
 
     private void OnEnable() {
@@ -109,7 +118,6 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void MoveTowardPlayer() {
         if (currentState == State.Dead || currentState == State.Attack) return;
-
         Vector3 dir = player.position - transform.position;
         dir.y = 0f;
 
@@ -119,8 +127,7 @@ public class Enemy : MonoBehaviour, IDamageable {
         if (sqrDist < 0.001f) return;
 
         FacePlayer(dir);
-
-        if (sqrDist > stopDistance * stopDistance) Move(dir);
+        if (sqrDist > stopDistance * stopDistance && isGrounded) Move(dir);
         else rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
     }
 
@@ -138,7 +145,6 @@ public class Enemy : MonoBehaviour, IDamageable {
         targetVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = targetVelocity;
     }
-
 
     /// <summary>
     /// Disables the enemy after {delay}

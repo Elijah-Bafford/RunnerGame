@@ -9,7 +9,7 @@ public class Player : MonoBehaviour {
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float speedStat = 0;
-    [SerializeField] private float speedLossMult = 2f;
+    [SerializeField] private float speedLossMult = 1f;
     [SerializeField] private float jumpForce = 7f;
     [Header("Refs")]
     [SerializeField] private PlayingInput playerInput;
@@ -109,28 +109,30 @@ public class Player : MonoBehaviour {
         }
 
         // Slope bonus
-        if (isOnSlope) targetMult += 0.04f;
+        if (isOnSlope) targetMult += 0.2f;
 
         // Sliding bonus
         if (hasSpeedStat && isGrounded && isSliding) {
-            targetMult += 0.06f;
-            if (!wasGroundedLastFrame) targetMult += 0.10f; // Landed while sliding
+            targetMult += 0.12f;
+            if (!wasGroundedLastFrame) targetMult += 0.15f; // Landed while sliding
         }
 
         // If just landed (grounded this frame, but NOT last frame) and NOT sliding, reset to 1× basis
         if (hasSpeedStat && isGrounded && !wasGroundedLastFrame && !isSliding) {
-            targetMult = 1f; // No sliding, lose speed
+            targetMult = 1.2f; // No sliding, lose speed
         }
 
         // Clamp to 0.5 if sliding with no speed stat
-        if (!hasSpeedStat && isSliding) targetMult = Mathf.Min(targetMult, 0.5f);
+        if (!hasSpeedStat && isSliding) targetMult = Mathf.Min(targetMult, 0.7f);
 
         targetMult *= basis;
 
         // Only update speedMult when grounded or just landed (so landing penalty applies)
         
         if (isGrounded || (!wasGroundedLastFrame && isGrounded)) {
-            speedMult = Mathf.Lerp(speedMult, targetMult, Time.deltaTime * 2f);
+            speedMult = Mathf.Lerp(speedMult, targetMult, Time.deltaTime);
+        } else {
+            speedMult += 0.05f * Time.deltaTime;
         }
 
         speedMultDisplay.text = "Speed Mult: " + speedMult;
