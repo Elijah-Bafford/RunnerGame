@@ -24,7 +24,7 @@ public class PlayerAttack : MonoBehaviour {
             if (target != null) {
                 Vector3 hitDirection = transform.forward + Vector3.up * 0.5f;
                 hitDirection.Normalize();
-                player.ChangeSpeed(15f);
+                player.ChangeSpeedStat(15f);
                 target.Hit(hitDirection);
                 DisableWeapon();
             }

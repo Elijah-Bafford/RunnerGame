@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8817131383092750843}
-  - component: {fileID: 2513416077277074166}
   - component: {fileID: 1579139954507163355}
-  m_Layer: 7
+  - component: {fileID: 2513416077277074166}
+  m_Layer: 0
   m_Name: Notification Node
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,21 +33,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2513416077277074166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4404671307206385367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fd4ff008bd287741b53a94664d47795, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  message: INFO HERE
-  displayTime: 0
-  notificationBox: {fileID: 0}
 --- !u!65 &1579139954507163355
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -69,3 +54,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1.2480168, z: 1.0226581}
   m_Center: {x: 0, y: -0.12400854, z: 0.33161223}
+--- !u!114 &2513416077277074166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4404671307206385367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fd4ff008bd287741b53a94664d47795, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  message: Move with W A S D
+  displayTime: 0
+  notificationBox: {fileID: 0}
+  messageTMP: {fileID: 0}

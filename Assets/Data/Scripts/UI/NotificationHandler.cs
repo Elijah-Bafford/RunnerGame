@@ -5,21 +5,21 @@ using UnityEngine;
 public class NotificationHandler : MonoBehaviour {
 
     [Header("Notification Settings")]
-    [Tooltip("Message to display")]
+    [Tooltip("Message to display on entering the collider.")]
     [SerializeField] private string message;
     [Tooltip("How long to display the notification after leaving collider.")]
     [SerializeField] private float displayTime;
 
     [SerializeField] private GameObject notificationBox;
-    private TextMeshProUGUI write;
+    private TextMeshProUGUI messageTMP;
 
-    private void Awake() {
-        write = notificationBox.GetComponentInChildren<TextMeshProUGUI>();
+    private void Start() {
+        messageTMP = notificationBox.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     private void OnTriggerEnter(Collider collision) {
         if (collision.CompareTag("Player")) {
-            write.text = message;
+            messageTMP.text = message;
             notificationBox.SetActive(true);
         }
     }
