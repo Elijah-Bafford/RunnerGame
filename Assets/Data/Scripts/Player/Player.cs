@@ -32,22 +32,9 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private float wallCheckRadius = 0.2f;
 
-    [Header("Lock-on/Grapple Mechanics")]
-    [SerializeField] private Camera mainCamera;
-    [SerializeField] private RectTransform lockOnReticle;
-    [SerializeField] private float detectRange = 20f;
-    [SerializeField] private float grappleRange = 10f;
-    [SerializeField] private float lockOnRadius = 0.5f;
-    [SerializeField] private float grappleSpeed = 30f;
-    private Enemy lockOnTarget = null;
-    private Enemy lastLockTarget = null;
-    private RawImage reticle;
-    private Vector3 lockOnOffset = new Vector3(0, 0.2f, 0);
-    private bool inGrappleRange = false;
-    private bool isGrappling = false;
-    private Vector3 grappleDirection;
-    private Vector3 grappleTarget;
-    private float grappleArrivalDistance = 1.0f;
+    private GrappleMechanic grappleMech;
+
+    
 
     private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
@@ -71,7 +58,7 @@ public class Player : MonoBehaviour {
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
-        reticle = lockOnReticle.GetComponent<RawImage>();
+        grappleMech = GetComponent<GrappleMechanic>();
         rb.freezeRotation = true;
         currentDir = Direction.None;
     }
@@ -86,18 +73,18 @@ public class Player : MonoBehaviour {
     }
 
     private bool UpdateGrapple() {
-        if (isGrappling) {
+        if (grappleMech.IsGrappling()) {
             speedMult += 0.1f * Time.deltaTime;
-            Vector3 toTarget = grappleTarget - transform.position;
+            Vector3 toTarget = grappleMech.GetGrappleTarget() - transform.position;
             float dist = toTarget.magnitude;
 
             // Move directly toward the enemy
-            rb.linearVelocity = grappleDirection * grappleSpeed;
+            rb.linearVelocity = grappleMech.GetGrappleDirection() * grappleMech.GetGrappleSpeed();
 
             // Stop when close enough
-            if (dist < grappleArrivalDistance) {
+            if (dist < grappleMech.GetGrappleArrivalDistance()) {
                 rb.linearVelocity = Vector3.zero;
-                isGrappling = false;
+                grappleMech.SetIsGrappling(false);
                 Attack();
             }
             return true;
@@ -106,7 +93,7 @@ public class Player : MonoBehaviour {
     }
 
     private void LateUpdate() {
-        UpdateLockOnReticle();
+        grappleMech.UpdateLockOnReticle(isGrounded, cameraTransform);
         wasGroundedLastFrame = isGrounded;
     }
 
@@ -138,53 +125,8 @@ public class Player : MonoBehaviour {
         isWallRunning = !isGrounded && Physics.CheckSphere(wallCheck.position, wallCheckRadius, wallLayer);
     }
 
-    private void UpdateLockOnReticle() {
-        // Always hide when grounded
-        if (isGrounded) {
-            lockOnTarget = null;
-            lastLockTarget = null;
-            lockOnReticle.gameObject.SetActive(false);
-            return;
-        }
-        // See if there is a target
-        lockOnTarget = null;
-        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
 
-        if (Physics.SphereCast(ray, lockOnRadius, out RaycastHit hit, detectRange)) {
-            lockOnTarget = hit.collider.GetComponentInParent<Enemy>();
-        }
-
-        // Decide the target to show the reticle on
-        if (lockOnTarget != null) {
-            if (lockOnTarget.IsDead()) return;
-            lastLockTarget = lockOnTarget;   // keep it
-        } else if (lastLockTarget != null) {
-            // Keep showing the old one only while still on screen & inside detectRange
-            bool stillVisible = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= detectRange;
-            if (!stillVisible) lastLockTarget = null;
-        }
-
-        // Update UI
-        if (lastLockTarget == null) {
-            lockOnReticle.gameObject.SetActive(false);
-            return;
-        }
-
-        Vector3 targetWorld = lastLockTarget.transform.position + lockOnOffset;
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(targetWorld);
-
-        if (screenPos.z <= 0f) {
-            lockOnReticle.gameObject.SetActive(false);
-            return;
-        }
-
-        lockOnReticle.gameObject.SetActive(true);
-        lockOnReticle.position = screenPos;
-
-        inGrappleRange = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= grappleRange;
-
-        reticle.color = inGrappleRange ? Color.red : Color.white;
-    }
+    
 
 
     private void UpdateSpeedMult() {
@@ -278,12 +220,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
-        if (isGrounded || !inGrappleRange || lastLockTarget == null) return;
-
-        // Set up the grapple state
-        isGrappling = true;
-        grappleTarget = lastLockTarget.transform.position + lockOnOffset;
-        grappleDirection = (grappleTarget - transform.position).normalized;
+        grappleMech.Grapple(isGrounded, transform.position);
 
         rb.linearVelocity = Vector3.zero;
     }
@@ -336,10 +273,4 @@ public class Player : MonoBehaviour {
     public void SetOnSlope(bool onSlope) {
         isOnSlope = onSlope;
     }
-    /*
-    private void OnDrawGizmos() {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(wallCheck.position, wallCheckRadius);
-    }
-    */
 }
