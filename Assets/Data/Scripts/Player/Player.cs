@@ -13,10 +13,10 @@ public class Player : MonoBehaviour {
     [SerializeField] private float jumpForce = 7f;
 
     [Header("General Refs")]
-    [SerializeField] private PlayingInput playerInput;
     [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
+    [SerializeField] private UIInput uiInput;
 
     [Header("UI Refs")]
     [SerializeField] private TextMeshProUGUI speedMultDisplay;
@@ -33,8 +33,6 @@ public class Player : MonoBehaviour {
     [SerializeField] private float wallCheckRadius = 0.2f;
 
     private GrappleMechanic grappleMech;
-
-    
 
     private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
@@ -124,10 +122,6 @@ public class Player : MonoBehaviour {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
         isWallRunning = !isGrounded && Physics.CheckSphere(wallCheck.position, wallCheckRadius, wallLayer);
     }
-
-
-    
-
 
     private void UpdateSpeedMult() {
 
@@ -254,6 +248,18 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
+    /// Called at the last frame of the death animation.
+    /// </summary>
+    public void Died() {
+        anim.SetBool("Died", false);    // Keep the player in the Dead animation
+        uiInput.SetGameState(UIInput.GameState.Death);
+    }
+
+    public void Die() {
+        anim.SetBool("Died", true);
+    }
+
+    /// <summary>
     /// Add/subtract to/from currentSpeed (speed AV)
     /// </summary>
     /// <param name="speed"></param>
@@ -272,5 +278,9 @@ public class Player : MonoBehaviour {
 
     public void SetOnSlope(bool onSlope) {
         isOnSlope = onSlope;
+    }
+
+    public bool PlayerIsGrappling() {
+        return grappleMech.IsGrappling();
     }
 }

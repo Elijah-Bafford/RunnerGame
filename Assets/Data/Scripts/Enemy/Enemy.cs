@@ -13,11 +13,15 @@ public class Enemy : MonoBehaviour, IDamageable {
     [Tooltip("How close the enemy gets to the player.")]
     [SerializeField] private float stopDistance = 1.25f;
     [Header("Refs")]
-    [SerializeField] private Transform player;
+    [SerializeField] Player player;
+    private Transform playerTransform;
     [SerializeField] private Animator anim;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
+
+    // Stop all combat
+    public static bool StopCombat = false;
 
     private Rigidbody rb;
     private Vector3 startPosition;
@@ -33,6 +37,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     private State lastState;
 
     private void Awake() {
+        playerTransform = player.GetComponent<Transform>();
         rb = GetComponent<Rigidbody>();
         startPosition = rb.position;
         startRotation = rb.rotation;
@@ -65,6 +70,7 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void RunCurrentState() {
         if (disableStateChange) return;
+        if (StopCombat) currentState = State.Idle;
 
         if (lastState == currentState && currentState != State.Move) return;
 
@@ -114,14 +120,14 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void AttackPlayer() {
         // If the any can't deal damage on this call, return.
-        if (!canDealDamage) return;
+        if (!canDealDamage || player.PlayerIsGrappling()) return;
         canDealDamage = false;
-        print("Player has died!");
+        player.Die();
     }
 
     private void MoveTowardPlayer() {
         if (currentState == State.Dead || currentState == State.Attack) return;
-        Vector3 dir = player.position - transform.position;
+        Vector3 dir = playerTransform.position - transform.position;
         dir.y = 0f;
 
         float sqrDist = dir.sqrMagnitude;

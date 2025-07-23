@@ -26,6 +26,10 @@ public class GameTimer : MonoBehaviour {
         UITimer.text = "00:00:00";
     }
 
+    /// <summary>
+    /// Run the timer or stop the timer.
+    /// </summary>
+    /// <param name="isRunning"></param>
     public void RunTimer(bool isRunning) {
         this.isRunning = isRunning;
     }

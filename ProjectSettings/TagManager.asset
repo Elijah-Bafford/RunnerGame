@@ -7,6 +7,7 @@ TagManager:
   - Ground
   - SlopedGround
   - Enemy
+  - Wall
   layers:
   - Default
   - TransparentFX

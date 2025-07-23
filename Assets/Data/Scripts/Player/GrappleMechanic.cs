@@ -15,7 +15,7 @@ public class GrappleMechanic : MonoBehaviour {
     private Enemy lockOnTarget = null;
     private Enemy lastLockTarget = null;
     private RawImage reticle;
-    private Vector3 lockOnOffset = new Vector3(0, 0.2f, 0);
+    private Vector3 lockOnOffset = new Vector3(0, 0.1f, 0);
     private Vector3 grappleDirection;
     private Vector3 grappleTarget;
     private float grappleArrivalDistance = 1.0f;

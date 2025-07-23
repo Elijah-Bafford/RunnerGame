@@ -11,5 +11,7 @@ public class AnimationEventHandler : MonoBehaviour {
     public void EnableWeapon() { attack.EnableWeapon(); }
     public void DisableWeapon() { attack.DisableWeapon(); }
     public void AllowAttack() { player.AllowAttack(); }
+    public void PlayerDied() { player.Died(); }
+    public void StopCombat() { Enemy.StopCombat = true; }
     
 }

@@ -4,11 +4,12 @@ using UnityEngine.InputSystem;
 public class UIInput : MonoBehaviour {
 
     [SerializeField] GameObject pauseOverlay;
+    [SerializeField] GameObject deathOverlay;
     [SerializeField] GameTimer gameTimer;
     [SerializeField] SceneHandler sceneHandler;
     [SerializeField] PlayerInput playerInput;
 
-    public enum GameState { MainMenu, Playing, Paused, LevelRestart }
+    public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death }
 
     private GameState state;
     private GameState lastState;
@@ -39,30 +40,51 @@ public class UIInput : MonoBehaviour {
                 break;
             case GameState.LevelRestart:
                 ShowPauseOverlay(false);
+                ShowDeathOverlay(false);
                 sceneHandler.InstantLoad(SceneHandler.currentLevel);
                 state = GameState.Playing;
                 break;
+            case GameState.Death:
+                ShowPauseOverlay(false);
+                ShowDeathOverlay(true);
+                break;
         }
     }
+    /// <summary>
+    /// Set in menu mode. Switches control scheme, shows/hides cursor, and pauses the game timer.
+    /// </summary>
+    /// <param name="inMenuMode"></param>
+    private void ToggleMenuMode(bool inMenuMode) {
+        Cursor.lockState = inMenuMode ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = inMenuMode;
 
-    private void ShowPauseOverlay(bool paused) {
-        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = paused;
-
-        pauseOverlay.SetActive(paused);
-        gameTimer.RunTimer(!paused);
-
-        string input = paused ? "UI" : "Player";
-        int newTime = paused ? 0 : 1;
+        string input = inMenuMode ? "UI" : "Player";
+        int newTime = inMenuMode ? 0 : 1;
 
         playerInput.SwitchCurrentActionMap(input);
         Time.timeScale = newTime;
+        gameTimer.RunTimer(!inMenuMode);
+    }
+
+    private void ShowDeathOverlay(bool active) {
+        ToggleMenuMode(active);
+        deathOverlay.SetActive(active);
+    }
+
+    private void ShowPauseOverlay(bool active) {
+        ToggleMenuMode(active);
+        pauseOverlay.SetActive(active);
     }
 
     public GameState GetGameState() { return state; }
+    public void SetGameState(GameState gameState) { state = gameState; }
 
+    /*=====================================================================================
+     *                                  Input events
+     =====================================================================================*/
     public void OnPauseKeyPressed(InputAction.CallbackContext context) {
         if (context.performed) {
+            if (state == GameState.Death) return;
             if (state == GameState.Playing) state = GameState.Paused;
             else state = GameState.Playing;
         }
