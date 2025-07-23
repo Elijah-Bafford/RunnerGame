@@ -34,7 +34,6 @@ public class UIInput : MonoBehaviour {
                 break;
             case GameState.Playing:
                 ShowPauseOverlay(false);
-                Enemy.StopCombat = false;
                 break;
             case GameState.Paused:
                 ShowPauseOverlay(true);

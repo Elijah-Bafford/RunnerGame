@@ -21,7 +21,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     // Stop all combat
-    public static bool StopCombat = false;
+    public bool stopCombat = false;
 
     private Rigidbody rb;
     private Vector3 startPosition;
@@ -54,6 +54,8 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void OnEnable() {
         currentState = State.Idle;
+
+        stopCombat = false;
         isDead = false;
 
         // Reset physics state
@@ -70,7 +72,7 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void RunCurrentState() {
         if (disableStateChange) return;
-        if (StopCombat) currentState = State.Idle;
+        if (stopCombat) currentState = State.Idle;
 
         if (lastState == currentState && currentState != State.Move) return;
 

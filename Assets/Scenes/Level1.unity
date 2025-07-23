@@ -8524,7 +8524,6 @@ MonoBehaviour:
   anim: {fileID: 1889383181}
   cameraTransform: {fileID: 330585546}
   fstPersonCamera: {fileID: 483356700}
-  uiInput: {fileID: 479569804}
   speedMultDisplay: {fileID: 1302717824}
   speedBar: {fileID: 726798638}
   groundCheck: {fileID: 1819965874}
@@ -9228,6 +9227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attack: {fileID: 718653201}
   player: {fileID: 1785767171}
+  uiInput: {fileID: 479569804}
 --- !u!43 &1894154166
 Mesh:
   m_ObjectHideFlags: 0

@@ -42,7 +42,9 @@ public class Player : MonoBehaviour {
     private bool wasGroundedLastFrame = false;
     private bool isWallRunning = false;
     private bool isOnSlope = false;
-    private bool isAttacking = false;
+
+    // Attacking variables
+    private bool isInAttack = false;
 
     private float leanAmount = 0.0f;
 
@@ -192,8 +194,8 @@ public class Player : MonoBehaviour {
     }
 
     private void Attack() {
-        if (isAttacking) return;
-        isAttacking = true;
+        if (isInAttack) return;
+        isInAttack = true;
         anim.SetTrigger("Attack");
     }
 
@@ -242,8 +244,8 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// Animation Event Handler - allow for an attack, the player can't attack if they are already attacking.
     /// </summary>
-    public void AllowAttack() {
-        isAttacking = false;
+    public void IsInAttack() {
+        isInAttack = false;
     }
 
     /// <summary>
