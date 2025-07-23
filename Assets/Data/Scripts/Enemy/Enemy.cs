@@ -22,6 +22,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
+    private bool isDead = false;
 
     private bool canDealDamage = false;
     private bool isGrounded = false;
@@ -48,6 +49,7 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     private void OnEnable() {
         currentState = State.Idle;
+        isDead = false;
 
         // Reset physics state
         rb.linearVelocity = Vector3.zero;
@@ -86,6 +88,7 @@ public class Enemy : MonoBehaviour, IDamageable {
                 break;
             case State.Dead:
                 anim.SetBool("Dead", true);
+                isDead = true;
                 StartCoroutine(DisableAfter(3f));
                 disableStateChange = true;
                 break;
@@ -161,9 +164,9 @@ public class Enemy : MonoBehaviour, IDamageable {
         gameObject.SetActive(false);
     }
 
-    public void SetState(State state) {
-        currentState = state;
-    }
+    public bool IsDead() { return isDead; }
+
+    public void SetState(State state) { currentState = state; }
 
     // Animation event, called at a specific animation frame during an attack by AllowHitEvent script
     public void AllowHit() { canDealDamage = true; }

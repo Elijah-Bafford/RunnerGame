@@ -156,6 +156,7 @@ public class Player : MonoBehaviour {
 
         // Decide the target to show the reticle on
         if (lockOnTarget != null) {
+            if (lockOnTarget.IsDead()) return;
             lastLockTarget = lockOnTarget;   // keep it
         } else if (lastLockTarget != null) {
             // Keep showing the old one only while still on screen & inside detectRange
