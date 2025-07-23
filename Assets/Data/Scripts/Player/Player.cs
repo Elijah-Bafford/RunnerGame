@@ -16,7 +16,6 @@ public class Player : MonoBehaviour {
     [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
-    [SerializeField] private UIInput uiInput;
 
     [Header("UI Refs")]
     [SerializeField] private TextMeshProUGUI speedMultDisplay;
@@ -252,7 +251,6 @@ public class Player : MonoBehaviour {
     /// </summary>
     public void Died() {
         anim.SetBool("Died", false);    // Keep the player in the Dead animation
-        uiInput.SetGameState(UIInput.GameState.Death);
     }
 
     public void Die() {
