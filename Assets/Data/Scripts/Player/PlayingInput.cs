@@ -12,4 +12,6 @@ public class PlayingInput : MonoBehaviour {
     }
     public void OnAttack(InputAction.CallbackContext context) { if (context.performed) player.Perform(Player.Act.Attack); }
     public void OnSlide(InputAction.CallbackContext context) { if (context.performed || context.canceled) player.Perform(Player.Act.Slide); }
+
+    public void OnGrapple(InputAction.CallbackContext context) { if (context.performed) player.Perform(Player.Act.Grapple); }
 }

@@ -2768,7 +2768,7 @@ GameObject:
   - component: {fileID: 678381210}
   m_Layer: 8
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2852,11 +2852,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitForceMultiplier: 3
   torqueMultiplier: 0.1
-  moveSpeed: 3
+  moveSpeed: 5
   turnSpeed: 360
   stopDistance: 0.5
   player: {fileID: 1785767172}
   anim: {fileID: 227081471}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheck: {fileID: 950334739}
+  groundCheckRadius: 0.5
 --- !u!43 &681055271
 Mesh:
   m_ObjectHideFlags: 0
@@ -5525,6 +5530,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &950334738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950334739}
+  m_Layer: 8
+  m_Name: Ground Check
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &950334739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950334738}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.96, z: 0.88}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1147720833}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &952587929
 GameObject:
   m_ObjectHideFlags: 0
@@ -6016,7 +6052,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1147720833}
   m_Layer: 8
-  m_Name: Colliders
+  m_Name: Triggers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6037,6 +6073,7 @@ Transform:
   m_Children:
   - {fileID: 952587931}
   - {fileID: 1307462139}
+  - {fileID: 950334739}
   m_Father: {fileID: 678381208}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1236850942
@@ -7590,6 +7627,11 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
+--- !u!224 &1534629258 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6156022592797577299, guid: d2269274f3b6c994d9f12e5ea2457267, type: 3}
+  m_PrefabInstance: {fileID: 5604766983878750017}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1540071066
 GameObject:
   m_ObjectHideFlags: 0
@@ -8213,10 +8255,6 @@ MonoBehaviour:
     m_ActionId: 6c2ab1b8-8984-453a-af3d-a3c78ae1679a
     m_ActionName: 'Player/Attack[/Mouse/leftButton,/Keyboard/enter]'
   - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 852140f2-7766-474d-8707-702459ba45f3
-    m_ActionName: 'Player/Interact[/Keyboard/e]'
-  - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 479569802}
         m_TargetAssemblyTypeName: GameInput, Assembly-CSharp
@@ -8256,10 +8294,6 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: b7230bb6-fc9b-4f52-8b25-f5e19cb2c2ba
     m_ActionName: 'Player/Next[/Keyboard/2]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 641cd816-40e6-41b4-8c3d-04687c349290
-    m_ActionName: 'Player/Sprint[/Keyboard/leftShift]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: c95b2375-e6d9-4b88-9c4c-c5e76515df4b
@@ -8332,6 +8366,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 433f1e6c-d338-49d1-b2e3-7e67a5852dea
     m_ActionName: 'Player/Pause[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 479569802}
+        m_TargetAssemblyTypeName: PlayingInput, Assembly-CSharp
+        m_MethodName: OnGrapple
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 10b4632c-6244-45ec-b4be-c01068739466
+    m_ActionName: 'Player/Grapple[/Mouse/rightButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player
@@ -8360,15 +8410,21 @@ MonoBehaviour:
   speedMultDisplay: {fileID: 1302717824}
   speedBar: {fileID: 726798638}
   groundCheck: {fileID: 1819965874}
-  wallCheck: {fileID: 1135715543}
-  groundCheckRadius: 0.2
-  wallCheckRadius: 0.6
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+  groundCheckRadius: 0.2
+  wallCheck: {fileID: 1135715543}
   wallLayer:
     serializedVersion: 2
     m_Bits: 1024
+  wallCheckRadius: 0.6
+  mainCamera: {fileID: 330585545}
+  lockOnReticle: {fileID: 1534629258}
+  detectRange: 20
+  grappleRange: 10
+  lockOnRadius: 2
+  grappleSpeed: 30
 --- !u!4 &1785767172
 Transform:
   m_ObjectHideFlags: 0
@@ -10555,10 +10611,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 479569804}
-    - target: {fileID: 3358396037795195351, guid: d2269274f3b6c994d9f12e5ea2457267, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4938512669900191111, guid: d2269274f3b6c994d9f12e5ea2457267, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 

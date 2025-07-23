@@ -1,6 +1,6 @@
+using System;
 using TMPro;
 using Unity.Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,21 +11,43 @@ public class Player : MonoBehaviour {
     [SerializeField] private float speedStat = 0;
     [SerializeField] private float speedLossMult = 1f;
     [SerializeField] private float jumpForce = 7f;
-    [Header("Refs")]
+
+    [Header("General Refs")]
     [SerializeField] private PlayingInput playerInput;
     [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
+
     [Header("UI Refs")]
     [SerializeField] private TextMeshProUGUI speedMultDisplay;
     [SerializeField] private Slider speedBar;
+
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
-    [SerializeField] private Transform wallCheck;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    [SerializeField] private float wallCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+
+    [Header("Wall Check and Wall climb Mechanics")]
+    [SerializeField] private Transform wallCheck;
     [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private float wallCheckRadius = 0.2f;
+
+    [Header("Lock-on/Grapple Mechanics")]
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private RectTransform lockOnReticle;
+    [SerializeField] private float detectRange = 20f;
+    [SerializeField] private float grappleRange = 10f;
+    [SerializeField] private float lockOnRadius = 0.5f;
+    [SerializeField] private float grappleSpeed = 30f;
+    private Enemy lockOnTarget = null;
+    private Enemy lastLockTarget = null;
+    private RawImage reticle;
+    private Vector3 lockOnOffset = new Vector3(0, 0.2f, 0);
+    private bool inGrappleRange = false;
+    private bool isGrappling = false;
+    private Vector3 grappleDirection;
+    private Vector3 grappleTarget;
+    private float grappleArrivalDistance = 1.0f;
 
     private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
@@ -42,23 +64,49 @@ public class Player : MonoBehaviour {
 
     private float speedMult = 1f;
 
-    public enum Act { Attack, Slide, Jump, Move }
+    public enum Act { Attack, Slide, Jump, Move, Grapple }
     private enum Direction { Forward, Backward, Left, Right, Other, None }
 
     private Direction currentDir;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
+        reticle = lockOnReticle.GetComponent<RawImage>();
         rb.freezeRotation = true;
         currentDir = Direction.None;
     }
 
     private void FixedUpdate() {
+        if (UpdateGrapple()) return;
         UpdatePhysics();
         UpdateDirection();
         UpdateSpeedMult();
         UpdateCamera();
         Move();
+    }
+
+    private bool UpdateGrapple() {
+        if (isGrappling) {
+            speedMult += 0.1f * Time.deltaTime;
+            Vector3 toTarget = grappleTarget - transform.position;
+            float dist = toTarget.magnitude;
+
+            // Move directly toward the enemy
+            rb.linearVelocity = grappleDirection * grappleSpeed;
+
+            // Stop when close enough
+            if (dist < grappleArrivalDistance) {
+                rb.linearVelocity = Vector3.zero;
+                isGrappling = false;
+                Attack();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void LateUpdate() {
+        UpdateLockOnReticle();
         wasGroundedLastFrame = isGrounded;
     }
 
@@ -89,6 +137,54 @@ public class Player : MonoBehaviour {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
         isWallRunning = !isGrounded && Physics.CheckSphere(wallCheck.position, wallCheckRadius, wallLayer);
     }
+
+    private void UpdateLockOnReticle() {
+        // Always hide when grounded
+        if (isGrounded) {
+            lockOnTarget = null;
+            lastLockTarget = null;
+            lockOnReticle.gameObject.SetActive(false);
+            return;
+        }
+        // See if there is a target
+        lockOnTarget = null;
+        Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+
+        if (Physics.SphereCast(ray, lockOnRadius, out RaycastHit hit, detectRange)) {
+            lockOnTarget = hit.collider.GetComponentInParent<Enemy>();
+        }
+
+        // Decide the target to show the reticle on
+        if (lockOnTarget != null) {
+            lastLockTarget = lockOnTarget;   // keep it
+        } else if (lastLockTarget != null) {
+            // Keep showing the old one only while still on screen & inside detectRange
+            bool stillVisible = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= detectRange;
+            if (!stillVisible) lastLockTarget = null;
+        }
+
+        // Update UI
+        if (lastLockTarget == null) {
+            lockOnReticle.gameObject.SetActive(false);
+            return;
+        }
+
+        Vector3 targetWorld = lastLockTarget.transform.position + lockOnOffset;
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(targetWorld);
+
+        if (screenPos.z <= 0f) {
+            lockOnReticle.gameObject.SetActive(false);
+            return;
+        }
+
+        lockOnReticle.gameObject.SetActive(true);
+        lockOnReticle.position = screenPos;
+
+        inGrappleRange = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= grappleRange;
+
+        reticle.color = inGrappleRange ? Color.red : Color.white;
+    }
+
 
     private void UpdateSpeedMult() {
 
@@ -128,7 +224,7 @@ public class Player : MonoBehaviour {
         targetMult *= basis;
 
         // Only update speedMult when grounded or just landed (so landing penalty applies)
-        
+
         if (isGrounded || (!wasGroundedLastFrame && isGrounded)) {
             speedMult = Mathf.Lerp(speedMult, targetMult, Time.deltaTime);
         } else {
@@ -180,6 +276,18 @@ public class Player : MonoBehaviour {
         }
     }
 
+    private void Grapple() {
+        if (isGrounded || !inGrappleRange || lastLockTarget == null) return;
+
+        // Set up the grapple state
+        isGrappling = true;
+        grappleTarget = lastLockTarget.transform.position + lockOnOffset;
+        grappleDirection = (grappleTarget - transform.position).normalized;
+
+        rb.linearVelocity = Vector3.zero;
+    }
+
+
     public void Perform(Act action, Vector2 actionVector = default, bool keyReleased = default) {
         switch (action) {
             case Act.Attack:
@@ -193,6 +301,9 @@ public class Player : MonoBehaviour {
                 break;
             case Act.Move:
                 moveVector = actionVector;
+                break;
+            case Act.Grapple:
+                Grapple();
                 break;
         }
     }
