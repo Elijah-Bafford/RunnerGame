@@ -60,7 +60,7 @@ public class Player : MonoBehaviour {
         rb = GetComponent<Rigidbody>();
         grappleMech = GetComponent<GrappleMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
-        print (playerAttack.name);
+        print(playerAttack.name);
     }
 
     private void OnEnable() {
@@ -73,10 +73,10 @@ public class Player : MonoBehaviour {
 
 
     private void FixedUpdate() {
+        UpdateSpeedMult();
         if (UpdateGrapple()) return;
         UpdatePhysics();
         UpdateDirection();
-        UpdateSpeedMult();
         UpdateCamera();
         Move();
     }
@@ -135,52 +135,63 @@ public class Player : MonoBehaviour {
     }
 
     private void UpdateSpeedMult() {
-
-        // This function still needs a lot of tweaking. For instance the player simply running cannot really gain speed, and speed mults aren't high enough
-        bool hasSpeedStat = speedStat > 0f;
-        float basis = 1f;
-        float targetMult = 1f;
         // Always drain speed stat, this value is clamped.
         ChangeSpeedStat(-speedLossMult * Time.deltaTime);
 
-        // Decided the basic movement speed
+        /* How it works:
+         * 
+         * Directions have a basis, forward is faster than left and right, and backwards is slower than them.
+         * 
+         * Basis with no speedMult: Forward: 1.0, Left/Right 0.8, Backwards 0.6, sliding 0.5
+         * Basis with speedMult: Forward 1.2, Left/Right 1.0, Backward 0.8, sliding 1.4 (sliding requires speedStat so it's much higher)
+         * 
+         * 
+         * Certain actions will require speedStat: sliding, wall running, and grappling
+         * When the player changes direction, speedMult will be reduced.
+         * 
+         * I think having a continous "fight" between losing and gaining speedMult would make this work.
+         * By trying to bring the speedMult continuously down to the basis, and stopping it from reaching 2x (although possible to momentarily bring it above that)
+         * 
+         * 
+         * Without Speed Stat:
+         * The player will begin to slowly lose their momentum, all the way down to the basis
+         * 
+         * With Speed Stat:
+         * When Sliding, grappling, and on slopes the player will gain speedMult
+         * 
+         * When the player jumps, if they land while sliding they will maintain their momentum otherwise they will lose most of it
+         */
+
+        bool hasSpeedStat = speedStat > 0f;
+        float basis = 1f;
+        float targetMult = basis;
+
         switch (currentDir) {
             case Direction.Forward: basis = hasSpeedStat ? 1.2f : 1.0f; break;
-            case Direction.Backward: basis = hasSpeedStat ? 0.8f : 0.6f; break;
             case Direction.Left:
             case Direction.Right: basis = hasSpeedStat ? 1.0f : 0.8f; break;
-            default: break;
+            case Direction.Backward: basis = hasSpeedStat ? 0.8f : 0.6f; break;
+            default: basis = 1.0f; break;
         }
+        if (isSliding) basis = hasSpeedStat ? 1.4f : 0.5f;
 
-        // Slope bonus
-        if (isOnSlope) targetMult += 0.2f;
+        if (hasSpeedStat) {
+            if (isSliding && isGrounded) targetMult += 0.2f;
+            if (isOnSlope) targetMult += 0.23f;
+            if (isGrounded && !wasGroundedLastFrame && isSliding) targetMult += 0.23f;
 
-        // Sliding bonus
-        if (hasSpeedStat && isGrounded && isSliding) {
-            targetMult += 0.12f;
-            if (!wasGroundedLastFrame) targetMult += 0.15f; // Landed while sliding
-        }
-
-        // If just landed (grounded this frame, but NOT last frame) and NOT sliding, reset to 1× basis
-        if (hasSpeedStat && isGrounded && !wasGroundedLastFrame && !isSliding) {
-            targetMult = 1.2f; // No sliding, lose speed
-        }
-
-        // Clamp to 0.5 if sliding with no speed stat
-        if (!hasSpeedStat && isSliding) targetMult = Mathf.Min(targetMult, 0.7f);
-
-        targetMult *= basis;
-
-        // Only update speedMult when grounded or just landed (so landing penalty applies)
-
-        if (isGrounded || (!wasGroundedLastFrame && isGrounded)) {
-            speedMult = Mathf.Lerp(speedMult, targetMult, Time.deltaTime);
+            targetMult = Mathf.Clamp(targetMult, basis, 2.5f);
+            speedMult = Mathf.Lerp(speedMult, targetMult, 8f * Time.deltaTime);
         } else {
-            speedMult += 0.05f * Time.deltaTime;
+            speedMult = Mathf.Lerp(speedMult, basis, 0.5f * Time.deltaTime);
         }
 
-        speedMultDisplay.text = "Speed Mult: " + speedMult;
-        speedBar.value = Mathf.Lerp(speedBar.value, speedStat, Time.deltaTime);
+        if ((currentDir == Direction.None) || (isGrounded && !wasGroundedLastFrame && !isSliding)) {
+            speedMult = basis;
+        }
+
+        speedMultDisplay.text = "Speed Mult: " + speedMult.ToString("F3");
+        speedBar.value = Mathf.Lerp(speedBar.value, speedStat, Time.deltaTime * 4);
     }
 
     private void Move() {
@@ -227,7 +238,7 @@ public class Player : MonoBehaviour {
 
     private void Grapple() {
         grappleMech.Grapple(isGrounded, transform.position);
-
+        ChangeSpeedStat(-5);
         rb.linearVelocity = Vector3.zero;
     }
 
@@ -262,21 +273,15 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// Called at the last frame of the death animation.
     /// </summary>
-    public void Died() {
-        anim.SetBool("Died", false);    // Keep the player in the Dead animation
-    }
+    public void Died() { anim.SetBool("Died", false); }
 
-    public void Die() {
-        anim.SetBool("Died", true);
-    }
+    public void Die() { anim.SetBool("Died", true); }
 
     /// <summary>
     /// Add/subtract to/from currentSpeed (speed AV)
     /// </summary>
     /// <param name="speed"></param>
-    public void ChangeSpeedStat(float speed) {
-        speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
-    }
+    public void ChangeSpeedStat(float speed) { speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f); }
 
     /// <summary>
     /// Add/subtract to/from speed multiplier
@@ -287,11 +292,7 @@ public class Player : MonoBehaviour {
         if (speedMult < limit) speedMult = limit;
     }
 
-    public void SetOnSlope(bool onSlope) {
-        isOnSlope = onSlope;
-    }
+    public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
 
-    public bool PlayerIsGrappling() {
-        return grappleMech.IsGrappling();
-    }
+    public bool PlayerIsGrappling() { return grappleMech.IsGrappling(); }
 }
