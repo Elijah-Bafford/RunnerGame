@@ -21,7 +21,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     // Stop all combat
-    public bool stopCombat = false;
+    public static bool stopCombat = false;
 
     private Rigidbody rb;
     private Vector3 startPosition;

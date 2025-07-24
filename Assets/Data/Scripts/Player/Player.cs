@@ -32,6 +32,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float wallCheckRadius = 0.2f;
 
     private GrappleMechanic grappleMech;
+    private PlayerAttack playerAttack;
 
     private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
@@ -58,9 +59,18 @@ public class Player : MonoBehaviour {
     private void Awake() {
         rb = GetComponent<Rigidbody>();
         grappleMech = GetComponent<GrappleMechanic>();
+        playerAttack = GetComponentInChildren<PlayerAttack>();
+        print (playerAttack.name);
+    }
+
+    private void OnEnable() {
+        playerAttack.HasAttacked(false);
+        isInAttack = false;
+        speedBar.value = speedStat;
         rb.freezeRotation = true;
         currentDir = Direction.None;
     }
+
 
     private void FixedUpdate() {
         if (UpdateGrapple()) return;
@@ -195,6 +205,7 @@ public class Player : MonoBehaviour {
 
     private void Attack() {
         if (isInAttack) return;
+        playerAttack.HasAttacked(true);
         isInAttack = true;
         anim.SetTrigger("Attack");
     }
