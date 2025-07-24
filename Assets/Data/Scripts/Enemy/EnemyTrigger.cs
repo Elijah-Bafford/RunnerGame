@@ -13,14 +13,19 @@ public class EnemyTrigger : MonoBehaviour {
 
     private void OnTriggerEnter(Collider collision) {
         if (((1 << collision.gameObject.layer) & playerLayer) != 0) {
-            if (triggerType == TriggerType.Attack) enemy.SetState(Enemy.State.Attack);
-            else if (triggerType == TriggerType.Aggro) enemy.SetState(Enemy.State.Move);
+            if (triggerType == TriggerType.Attack) {
+                enemy.SetState(Enemy.State.Attack);
+                enemy.SetInRangeForAttack(true);
+            } else if (triggerType == TriggerType.Aggro) { enemy.SetState(Enemy.State.Move); }
         }
     }
 
     private void OnTriggerExit(Collider collision) {
         if (((1 << collision.gameObject.layer) & playerLayer) != 0) {
-            if (triggerType == TriggerType.Attack) enemy.SetState(Enemy.State.Move);
+            if (triggerType == TriggerType.Attack) {
+                enemy.SetState(Enemy.State.Move);
+                enemy.SetInRangeForAttack(false);
+            }
         }
     }
 }

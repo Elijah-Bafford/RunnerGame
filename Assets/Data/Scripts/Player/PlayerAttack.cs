@@ -15,13 +15,7 @@ public class PlayerAttack : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        bool isN = target == null;
-        print("Can hit: " + canHit.ToString());
-        print("hasAttacked: " + hasAttacked.ToString());
-        print("target is null: " + isN.ToString());
         if (!canHit || !hasAttacked || target == null) return;
-        bool isNN = target.IsDead();
-        Debug.Log("Target is dead: " + isNN.ToString());
         if (target.IsDead()) return;
 
         Vector3 hitDirection = transform.forward + Vector3.up * 0.5f;

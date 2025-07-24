@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable {
@@ -28,7 +27,11 @@ public class Enemy : MonoBehaviour, IDamageable {
     private Quaternion startRotation;
     private bool isDead = false;
 
-    private bool canDealDamage = false;
+    // Attacking
+    private bool inDamageDealingFrames = false;
+    private bool inRangeForAttack = false;
+    private bool isInAttackAnimation = false;
+
     private bool isGrounded = false;
     private bool disableStateChange = false;
 
@@ -74,11 +77,12 @@ public class Enemy : MonoBehaviour, IDamageable {
         if (disableStateChange) return;
         if (stopCombat) currentState = State.Idle;
 
+        // If the state hasn't changed AND the current state isn't move THEN return
         if (lastState == currentState && currentState != State.Move) return;
 
         bool isMoveState = currentState == State.Move;
         bool animIsMove = anim.GetBool("Move");
-       
+
         if (!isMoveState && animIsMove) anim.SetBool("Move", false);
 
         lastState = currentState;
@@ -91,7 +95,6 @@ public class Enemy : MonoBehaviour, IDamageable {
                 MoveTowardPlayer();
                 break;
             case State.Attack:
-                anim.SetTrigger("Attack");
                 AttackPlayer();
                 break;
             case State.Dead:
@@ -103,8 +106,20 @@ public class Enemy : MonoBehaviour, IDamageable {
         }
     }
 
+    private void AttackPlayer() {
+        if (!inRangeForAttack) {
+            currentState = State.Move;
+            return;
+        }
+
+        if (!isInAttackAnimation) anim.SetTrigger("Attack");
+        if (inDamageDealingFrames) {
+            player.Die();
+        }
+    }
+
     public void Hit(Vector3 hitForce) {
-        if (currentState == State.Dead) return;
+        if (isDead) return;
 
         rb.freezeRotation = false;
         rb.AddForce(hitForce * hitForceMultiplier, ForceMode.Impulse);
@@ -120,15 +135,8 @@ public class Enemy : MonoBehaviour, IDamageable {
         SetState(State.Dead);
     }
 
-    private void AttackPlayer() {
-        // If the any can't deal damage on this call, return.
-        if (!canDealDamage || player.PlayerIsGrappling()) return;
-        canDealDamage = false;
-        player.Die();
-    }
-
     private void MoveTowardPlayer() {
-        if (currentState == State.Dead || currentState == State.Attack) return;
+        if (isDead || currentState == State.Attack) return;
         Vector3 dir = playerTransform.position - transform.position;
         dir.y = 0f;
 
@@ -138,23 +146,20 @@ public class Enemy : MonoBehaviour, IDamageable {
         if (sqrDist < 0.001f) return;
 
         FacePlayer(dir);
+        if (inRangeForAttack) currentState = State.Attack;
         if (sqrDist > stopDistance * stopDistance && isGrounded) Move(dir);
         else rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-    }
-
-    private void FacePlayer(Vector3 direction) {
-        Quaternion targetRot = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.RotateTowards(
-            transform.rotation,
-            targetRot,
-            turnSpeed * Time.deltaTime
-        );
     }
 
     private void Move(Vector3 direction) {
         Vector3 targetVelocity = direction * moveSpeed;
         targetVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = targetVelocity;
+    }
+
+    private void FacePlayer(Vector3 direction) {
+        Quaternion targetRot = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, turnSpeed * Time.deltaTime);
     }
 
     /// <summary>
@@ -172,10 +177,25 @@ public class Enemy : MonoBehaviour, IDamageable {
         gameObject.SetActive(false);
     }
 
-    public bool IsDead() { return isDead; }
+    internal bool IsDead() { return isDead; }
 
-    public void SetState(State state) { currentState = state; }
+    internal void SetState(State state) { currentState = state; }
 
-    // Animation event, called at a specific animation frame during an attack by AllowHitEvent script
-    public void AllowHit() { canDealDamage = true; }
+    /// <summary>
+    /// In specific Attack animation frames, this is true so that the enemy weapon can actually only deal damage in those frames.
+    /// </summary>
+    /// <param name="allow"></param>
+    internal void AllowHit(bool allow) { inDamageDealingFrames = allow; }
+
+    /// <summary>
+    /// Called in EnemyTrigger. When the player is within the attack range of the enemy, start attacking.
+    /// </summary>
+    /// <param name="attacking"></param>
+    internal void SetInRangeForAttack(bool attacking) { inRangeForAttack = attacking; }
+
+    /// <summary>
+    /// Called in AllowHitEvent. This remains true from the beginning of an attack to the end of the AttackWait animation. This prevents continous attacks
+    /// </summary>
+    /// <param name="isInAttack"></param>
+    internal void SetIsInAttackAnimation(bool isInAttack) { isInAttackAnimation = isInAttack; }
 }
