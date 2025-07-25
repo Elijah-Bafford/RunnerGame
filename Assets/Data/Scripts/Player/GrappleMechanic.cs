@@ -14,6 +14,8 @@ public class GrappleMechanic : MonoBehaviour {
 
     private Enemy lockOnTarget = null;
     private Enemy lastLockTarget = null;
+
+    private Player player;
     private RawImage reticle;
     private Vector3 lockOnOffset = new Vector3(0, 0.1f, 0);
     private Vector3 grappleDirection;
@@ -22,7 +24,29 @@ public class GrappleMechanic : MonoBehaviour {
     private bool inGrappleRange = false;
     private bool isGrappling = false;
 
-    private void Awake() { reticle = lockOnReticle.GetComponent<RawImage>(); }
+    private void Awake() { 
+        reticle = lockOnReticle.GetComponent<RawImage>();
+        player = GetComponent<Player>();
+    }
+
+    public bool UpdateGrapple() {
+        if (!IsGrappling()) return false;
+
+        Vector3 toTarget = GetGrappleTarget() - transform.position;
+        float dist = toTarget.magnitude;
+
+        // Move directly toward the enemy
+
+        player.SetLinearVelocity(GetGrappleDirection() * GetGrappleSpeed());
+
+        // Stop when close enough
+        if (dist < GetGrappleArrivalDistance()) {
+            player.SetLinearVelocity(Vector3.zero);
+            SetIsGrappling(false);
+            player.Attack();
+        }
+        return true;
+    }
 
     public void Grapple(bool isGrounded, Vector3 position) {
         if (isGrounded || !inGrappleRange || lastLockTarget == null) return;

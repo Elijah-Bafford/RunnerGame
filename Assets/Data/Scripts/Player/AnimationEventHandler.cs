@@ -11,7 +11,7 @@ public class AnimationEventHandler : MonoBehaviour {
     [SerializeField] private UIInput uiInput;
 
     public void DisableWeapon() { attack.HasAttacked(false); }
-    public void AllowAttack() { player.IsInAttack(); }
+    public void AllowAttack() { player.ResetIsInAttack(); }
     public void PlayerDied() { player.Died(); }
     public void StopCombat() { uiInput.SetGameState(UIInput.GameState.Death); }
 

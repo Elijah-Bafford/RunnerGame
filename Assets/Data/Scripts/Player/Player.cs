@@ -2,7 +2,6 @@ using System;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
@@ -17,10 +16,6 @@ public class Player : MonoBehaviour {
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
 
-    [Header("UI Refs")]
-    [SerializeField] private TextMeshProUGUI speedMultDisplay;
-    [SerializeField] private Slider speedBar;
-
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
@@ -32,6 +27,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float wallCheckRadius = 0.2f;
 
     private GrappleMechanic grappleMech;
+    private MomentumMechanic momentumMech;
     private PlayerAttack playerAttack;
 
     private Rigidbody rb;
@@ -40,7 +36,6 @@ public class Player : MonoBehaviour {
 
     private bool isSliding = false;
     private bool isGrounded = false;
-    private bool wasGroundedLastFrame = false;
     private bool isWallRunning = false;
     private bool isOnSlope = false;
 
@@ -49,64 +44,46 @@ public class Player : MonoBehaviour {
 
     private float leanAmount = 0.0f;
 
-    private float speedMult = 1f;
-
     public enum Act { Attack, Slide, Jump, Move, Grapple }
-    private enum Direction { Forward, Backward, Left, Right, Other, None }
+    public enum Direction { Forward, Backward, Left, Right, Other, None }
 
     private Direction currentDir;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
         grappleMech = GetComponent<GrappleMechanic>();
+        momentumMech = GetComponent<MomentumMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
-        print(playerAttack.name);
+        momentumMech.OnInit(speedStat, this);
     }
 
     private void OnEnable() {
-        playerAttack.HasAttacked(false);
+        if (momentumMech) momentumMech.OnInit(speedStat, this);
+        if(playerAttack) playerAttack.HasAttacked(false);
         isInAttack = false;
-        speedBar.value = speedStat;
         rb.freezeRotation = true;
         currentDir = Direction.None;
     }
 
 
     private void FixedUpdate() {
-        UpdateSpeedMult();
-        if (UpdateGrapple()) return;
+        momentumMech.UpdateMomentum(speedStat, currentDir);
+        if (grappleMech.UpdateGrapple()) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
         UpdateDirection();
-        UpdateCamera();
         Move();
-    }
-
-    private bool UpdateGrapple() {
-        if (grappleMech.IsGrappling()) {
-            speedMult += 0.1f * Time.deltaTime;
-            Vector3 toTarget = grappleMech.GetGrappleTarget() - transform.position;
-            float dist = toTarget.magnitude;
-
-            // Move directly toward the enemy
-            rb.linearVelocity = grappleMech.GetGrappleDirection() * grappleMech.GetGrappleSpeed();
-
-            // Stop when close enough
-            if (dist < grappleMech.GetGrappleArrivalDistance()) {
-                rb.linearVelocity = Vector3.zero;
-                grappleMech.SetIsGrappling(false);
-                Attack();
-            }
-            return true;
-        }
-        return false;
     }
 
     private void LateUpdate() {
         grappleMech.UpdateLockOnReticle(isGrounded, cameraTransform);
-        wasGroundedLastFrame = isGrounded;
     }
 
     private void UpdateDirection() {
+        if (currentDir == Direction.Right) leanAmount = -4f;
+        else if (currentDir == Direction.Left) leanAmount = 4f;
+        else leanAmount = 0.0f;
+        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
+
         if (moveVector == lastMoveVector) return;
         lastMoveVector = moveVector;
         if (moveVector == Vector2.up) {
@@ -122,80 +99,13 @@ public class Player : MonoBehaviour {
         } else { currentDir = Direction.Other; }
     }
 
-    private void UpdateCamera() {
-        if (currentDir == Direction.Right) leanAmount = -4f;
-        else if (currentDir == Direction.Left) leanAmount = 4f;
-        else leanAmount = 0.0f;
-        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
-    }
-
     private void UpdatePhysics() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
         isWallRunning = !isGrounded && Physics.CheckSphere(wallCheck.position, wallCheckRadius, wallLayer);
     }
 
-    private void UpdateSpeedMult() {
-        // Always drain speed stat, this value is clamped.
-        ChangeSpeedStat(-speedLossMult * Time.deltaTime);
-
-        /* How it works:
-         * 
-         * Directions have a basis, forward is faster than left and right, and backwards is slower than them.
-         * 
-         * Basis with no speedMult: Forward: 1.0, Left/Right 0.8, Backwards 0.6, sliding 0.5
-         * Basis with speedMult: Forward 1.2, Left/Right 1.0, Backward 0.8, sliding 1.4 (sliding requires speedStat so it's much higher)
-         * 
-         * 
-         * Certain actions will require speedStat: sliding, wall running, and grappling
-         * When the player changes direction, speedMult will be reduced.
-         * 
-         * I think having a continous "fight" between losing and gaining speedMult would make this work.
-         * By trying to bring the speedMult continuously down to the basis, and stopping it from reaching 2x (although possible to momentarily bring it above that)
-         * 
-         * 
-         * Without Speed Stat:
-         * The player will begin to slowly lose their momentum, all the way down to the basis
-         * 
-         * With Speed Stat:
-         * When Sliding, grappling, and on slopes the player will gain speedMult
-         * 
-         * When the player jumps, if they land while sliding they will maintain their momentum otherwise they will lose most of it
-         */
-
-        bool hasSpeedStat = speedStat > 0f;
-        float basis = 1f;
-        float targetMult = basis;
-
-        switch (currentDir) {
-            case Direction.Forward: basis = hasSpeedStat ? 1.2f : 1.0f; break;
-            case Direction.Left:
-            case Direction.Right: basis = hasSpeedStat ? 1.0f : 0.8f; break;
-            case Direction.Backward: basis = hasSpeedStat ? 0.8f : 0.6f; break;
-            default: basis = 1.0f; break;
-        }
-        if (isSliding) basis = hasSpeedStat ? 1.4f : 0.5f;
-
-        if (hasSpeedStat) {
-            if (isSliding && isGrounded) targetMult += 0.2f;
-            if (isOnSlope) targetMult += 0.23f;
-            if (isGrounded && !wasGroundedLastFrame && isSliding) targetMult += 0.23f;
-
-            targetMult = Mathf.Clamp(targetMult, basis, 2.5f);
-            speedMult = Mathf.Lerp(speedMult, targetMult, 8f * Time.deltaTime);
-        } else {
-            speedMult = Mathf.Lerp(speedMult, basis, 0.5f * Time.deltaTime);
-        }
-
-        if ((currentDir == Direction.None) || (isGrounded && !wasGroundedLastFrame && !isSliding)) {
-            speedMult = basis;
-        }
-
-        speedMultDisplay.text = "Speed Mult: " + speedMult.ToString("F3");
-        speedBar.value = Mathf.Lerp(speedBar.value, speedStat, Time.deltaTime * 4);
-    }
-
     private void Move() {
-        float speed = moveSpeed * speedMult;
+        float speed = moveSpeed * momentumMech.GetSpeedMult();
 
         // Camera-relative movement
         Vector3 camForward = cameraTransform.forward;
@@ -214,7 +124,7 @@ public class Player : MonoBehaviour {
         rb.linearVelocity = targetVelocity;
     }
 
-    private void Attack() {
+    public void Attack() {
         if (isInAttack) return;
         playerAttack.HasAttacked(true);
         isInAttack = true;
@@ -229,7 +139,7 @@ public class Player : MonoBehaviour {
 
     private void Jump(bool keyReleased) {
         if (!keyReleased && (isGrounded || isWallRunning)) {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x * speedMult, jumpForce, rb.linearVelocity.z);
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
 
         } else if (keyReleased && rb.linearVelocity.y > 0f) {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -239,7 +149,7 @@ public class Player : MonoBehaviour {
     private void Grapple() {
         grappleMech.Grapple(isGrounded, transform.position);
         ChangeSpeedStat(-5);
-        rb.linearVelocity = Vector3.zero;
+        SetLinearVelocity(Vector3.zero);
     }
 
 
@@ -264,17 +174,13 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
-    /// Animation Event Handler - allow for an attack, the player can't attack if they are already attacking.
-    /// </summary>
-    public void IsInAttack() {
-        isInAttack = false;
-    }
-
-    /// <summary>
     /// Called at the last frame of the death animation.
     /// </summary>
     public void Died() { anim.SetBool("Died", false); }
 
+    /// <summary>
+    /// Called at the first frame the player is hit.
+    /// </summary>
     public void Die() { anim.SetBool("Died", true); }
 
     /// <summary>
@@ -282,17 +188,11 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="speed"></param>
     public void ChangeSpeedStat(float speed) { speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f); }
-
-    /// <summary>
-    /// Add/subtract to/from speed multiplier
-    /// </summary>
-    /// <param name="speed"></param>
-    public void ChangeSpeedMult(float speed, float limit = 1.0f) {
-        speedMult += speed;
-        if (speedMult < limit) speedMult = limit;
-    }
-
+    public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
-
-    public bool PlayerIsGrappling() { return grappleMech.IsGrappling(); }
+    public void ResetIsInAttack() { isInAttack = false; }
+    public bool IsOnSlope() { return isOnSlope; }
+    public bool IsSliding() { return isSliding; }
+    public bool IsGrounded() { return isGrounded; }
+    public bool IsGrappling() { return grappleMech.IsGrappling(); }
 }

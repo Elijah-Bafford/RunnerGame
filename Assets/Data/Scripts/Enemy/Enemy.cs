@@ -13,7 +13,6 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float stopDistance = 1.25f;
     [Header("Refs")]
     [SerializeField] Player player;
-    private Transform playerTransform;
     [SerializeField] private Animator anim;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
@@ -22,6 +21,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     // Stop all combat
     public static bool stopCombat = false;
 
+    private Transform playerTransform;
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
