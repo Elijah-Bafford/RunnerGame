@@ -23,7 +23,8 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     [Header("Wall Check and Wall climb Mechanics")]
-    [SerializeField] private Transform wallCheck;
+    [SerializeField] private Transform wallCheckLeft;
+    [SerializeField] private Transform wallCheckRight;
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private float wallCheckRadius = 0.2f;
 
@@ -37,7 +38,8 @@ public class Player : MonoBehaviour {
 
     private bool isSliding = false;
     private bool isGrounded = false;
-    private bool isWallRunning = false;
+    private bool isOnWallLeft = false;
+    private bool isOnWallRight = false;
     private bool isOnSlope = false;
 
     // Attacking variables
@@ -73,6 +75,7 @@ public class Player : MonoBehaviour {
         UpdatePhysics();
         UpdateDirection();
         Move();
+        UpdateLean();
     }
 
     private void LateUpdate() {
@@ -80,11 +83,6 @@ public class Player : MonoBehaviour {
     }
 
     private void UpdateDirection() {
-        if (currentDir == Direction.Right) leanAmount = -4f;
-        else if (currentDir == Direction.Left) leanAmount = 4f;
-        else leanAmount = 0.0f;
-        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
-
         if (moveVector == lastMoveVector) return;
         lastMoveVector = moveVector;
         if (moveVector == Vector2.up) {
@@ -100,9 +98,31 @@ public class Player : MonoBehaviour {
         } else { currentDir = Direction.Other; }
     }
 
+    private void UpdateLean() {
+        if (!isOnWallLeft && !isOnWallRight) {
+            if (currentDir == Direction.Right) leanAmount = -4f;
+            else if (currentDir == Direction.Left) leanAmount = 4f;
+            else leanAmount = 0.0f;
+        } else {
+            if (isOnWallRight) leanAmount = 6f;
+            else leanAmount = -6f;
+        }
+        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
+    }
+
     private void UpdatePhysics() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-        isWallRunning = !isGrounded && Physics.CheckSphere(wallCheck.position, wallCheckRadius, wallLayer);
+        isOnWallLeft = !isGrounded && Physics.CheckSphere(wallCheckLeft.position, wallCheckRadius, wallLayer);
+        isOnWallRight = !isGrounded && Physics.CheckSphere(wallCheckRight.position, wallCheckRadius, wallLayer);
+    }
+
+    private void OnDrawGizmos() {
+        /*
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(wallCheckLeft.position, wallCheckRadius);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(wallCheckRight.position, wallCheckRadius);
+        */
     }
 
     private void Move() {
@@ -139,7 +159,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Jump(bool keyReleased) {
-        if (!keyReleased && (isGrounded || isWallRunning)) {
+        if (!keyReleased && (isGrounded || (isOnWallLeft || isOnWallRight))) {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
 
         } else if (keyReleased && rb.linearVelocity.y > 0f) {
