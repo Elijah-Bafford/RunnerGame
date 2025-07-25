@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class MomentumMechanic : MonoBehaviour {
     [Header("UI Refs")]
     [SerializeField] private TextMeshProUGUI speedMultDisplay;
-    [SerializeField] private Slider speedBar;
     [Header("Momentum Settings")]
     [Tooltip("How Fast the player loses SpeedStat")]
     [SerializeField] private float speedLossMult = 2f;
@@ -32,8 +31,7 @@ public class MomentumMechanic : MonoBehaviour {
     /// Call when the player script starts.
     /// </summary>
     /// <param name="speedStat"></param>
-    internal void OnInit(float speedStat, Player player) {
-        speedBar.value = speedStat;
+    internal void SetPlayerRef(Player player) {
         this.player = player;
     }
 
@@ -114,7 +112,7 @@ public class MomentumMechanic : MonoBehaviour {
 
     private void UpdateUI(float speedStat) {
         speedMultDisplay.text = "Momentum: " + GetSpeedMult().ToString("F3");
-        speedBar.value = Mathf.Lerp(speedBar.value, speedStat, Time.deltaTime * 4);
+        player.UpdateSpeedBar(speedStat);
     }
 
     private void UpdateStates() {

@@ -1,7 +1,6 @@
-using System;
-using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
@@ -15,6 +14,8 @@ public class Player : MonoBehaviour {
     [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
+    [SerializeField] private Slider speedBar;
+    private Animator speedBarAnimator;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -51,15 +52,15 @@ public class Player : MonoBehaviour {
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
+        speedBarAnimator = speedBar.GetComponent<Animator>();
         grappleMech = GetComponent<GrappleMechanic>();
         momentumMech = GetComponent<MomentumMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
-        momentumMech.OnInit(speedStat, this);
+        momentumMech.SetPlayerRef(this);
     }
 
     private void OnEnable() {
-        if (momentumMech) momentumMech.OnInit(speedStat, this);
-        if(playerAttack) playerAttack.HasAttacked(false);
+        if (playerAttack) playerAttack.HasAttacked(false);
         isInAttack = false;
         rb.freezeRotation = true;
         currentDir = Direction.None;
@@ -68,7 +69,7 @@ public class Player : MonoBehaviour {
 
     private void FixedUpdate() {
         momentumMech.UpdateMomentum(speedStat, currentDir);
-        if (grappleMech.UpdateGrapple()) return;    // The player is grappling, don't update the rest.
+        if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
         UpdateDirection();
         Move();
@@ -147,8 +148,8 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
+        if (!TryAction(-5)) return;
         grappleMech.Grapple(isGrounded, transform.position);
-        ChangeSpeedStat(-5);
         SetLinearVelocity(Vector3.zero);
     }
 
@@ -187,7 +188,31 @@ public class Player : MonoBehaviour {
     /// Add/subtract to/from currentSpeed (speed AV)
     /// </summary>
     /// <param name="speed"></param>
-    public void ChangeSpeedStat(float speed) { speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f); }
+    public void ChangeSpeedStat(float speed) {
+        speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
+    }
+
+    /// <summary>
+    /// Decide if the player can perform an action that costs SpeedStat.
+    /// Return true if can perform action, return false and flash SpeedBar otherwise.
+    /// </summary>
+    /// <param name="cost"></param>
+    /// <returns></returns>
+    public bool TryAction(float cost) {
+        if (speedStat > 0f) {
+            ChangeSpeedStat(cost);
+        } else {
+            speedBarAnimator.SetTrigger("Flash");
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Update the speed bar. Lerp the value.
+    /// </summary>
+    /// <param name="value"></param>
+    public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.deltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
     public void ResetIsInAttack() { isInAttack = false; }
