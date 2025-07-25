@@ -22,13 +22,8 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckRadius = 0.2f;
 
-    [Header("Wall Check and Wall climb Mechanics")]
-    [SerializeField] private Transform wallCheckLeft;
-    [SerializeField] private Transform wallCheckRight;
-    [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private float wallCheckRadius = 0.2f;
-
     private GrappleMechanic grappleMech;
+    private WallRunMechanic wallRunMech;
     private MomentumMechanic momentumMech;
     private PlayerAttack playerAttack;
 
@@ -38,11 +33,8 @@ public class Player : MonoBehaviour {
 
     private bool isSliding = false;
     private bool isGrounded = false;
-    private bool isOnWallLeft = false;
-    private bool isOnWallRight = false;
     private bool isOnSlope = false;
 
-    // Attacking variables
     private bool isInAttack = false;
 
     private float leanAmount = 0.0f;
@@ -57,6 +49,7 @@ public class Player : MonoBehaviour {
         speedBarAnimator = speedBar.GetComponent<Animator>();
         grappleMech = GetComponent<GrappleMechanic>();
         momentumMech = GetComponent<MomentumMechanic>();
+        wallRunMech = GetComponent<WallRunMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
         momentumMech.SetPlayerRef(this);
     }
@@ -99,12 +92,12 @@ public class Player : MonoBehaviour {
     }
 
     private void UpdateLean() {
-        if (!isOnWallLeft && !isOnWallRight) {
+        if (wallRunMech.IsOnWall()) {
             if (currentDir == Direction.Right) leanAmount = -4f;
             else if (currentDir == Direction.Left) leanAmount = 4f;
             else leanAmount = 0.0f;
         } else {
-            if (isOnWallRight) leanAmount = 6f;
+            if (wallRunMech.IsOnWall(direction: "right")) leanAmount = 6f;
             else leanAmount = -6f;
         }
         fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
@@ -112,17 +105,7 @@ public class Player : MonoBehaviour {
 
     private void UpdatePhysics() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
-        isOnWallLeft = !isGrounded && Physics.CheckSphere(wallCheckLeft.position, wallCheckRadius, wallLayer);
-        isOnWallRight = !isGrounded && Physics.CheckSphere(wallCheckRight.position, wallCheckRadius, wallLayer);
-    }
-
-    private void OnDrawGizmos() {
-        /*
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(wallCheckLeft.position, wallCheckRadius);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(wallCheckRight.position, wallCheckRadius);
-        */
+        wallRunMech.UpdatePhysics(isGrounded);
     }
 
     private void Move() {
@@ -159,11 +142,15 @@ public class Player : MonoBehaviour {
     }
 
     private void Jump(bool keyReleased) {
-        if (!keyReleased && (isGrounded || (isOnWallLeft || isOnWallRight))) {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+        if (wallRunMech.IsOnWall()) {
+            wallRunMech.Jump(keyReleased);
+        } else {
+            if (!keyReleased && isGrounded) {
+                rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
 
-        } else if (keyReleased && rb.linearVelocity.y > 0f) {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            } else if (keyReleased && rb.linearVelocity.y > 0f) {
+                rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            }
         }
     }
 
