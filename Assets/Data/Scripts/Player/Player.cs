@@ -66,6 +66,7 @@ public class Player : MonoBehaviour {
         momentumMech.UpdateMomentum(speedStat, currentDir);
         if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
+        wallRunMech.UpdateWallRun(currentDir);
         UpdateDirection();
         Move();
         UpdateLean();
@@ -92,7 +93,7 @@ public class Player : MonoBehaviour {
     }
 
     private void UpdateLean() {
-        if (wallRunMech.IsOnWall()) {
+        if (!wallRunMech.IsOnWall()) {
             if (currentDir == Direction.Right) leanAmount = -4f;
             else if (currentDir == Direction.Left) leanAmount = 4f;
             else leanAmount = 0.0f;
@@ -100,7 +101,7 @@ public class Player : MonoBehaviour {
             if (wallRunMech.IsOnWall(direction: "right")) leanAmount = 6f;
             else leanAmount = -6f;
         }
-        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.deltaTime * 3);
+        fstPersonCamera.Lens.Dutch = Mathf.Lerp(fstPersonCamera.Lens.Dutch, leanAmount, Time.fixedDeltaTime * 3);
     }
 
     private void UpdatePhysics() {
@@ -142,16 +143,16 @@ public class Player : MonoBehaviour {
     }
 
     private void Jump(bool keyReleased) {
-        if (wallRunMech.IsOnWall()) {
-            wallRunMech.Jump(keyReleased);
-        } else {
-            if (!keyReleased && isGrounded) {
-                rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+        wallRunMech.JumpKeyReleased(keyReleased);
 
-            } else if (keyReleased && rb.linearVelocity.y > 0f) {
-                rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-            }
+        // Return from the function if should jump while on wall, preventing normal jump mechanics
+        if (wallRunMech.Jump(keyReleased, cameraTransform)) return;
+        if (!keyReleased && isGrounded) {
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetSpeedMult()), rb.linearVelocity.z);
+        } else if (keyReleased && rb.linearVelocity.y > 0f) {
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         }
+
     }
 
     private void Grapple() {
@@ -219,7 +220,7 @@ public class Player : MonoBehaviour {
     /// Update the speed bar. Lerp the value.
     /// </summary>
     /// <param name="value"></param>
-    public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.deltaTime * 4); }
+    public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
     public void ResetIsInAttack() { isInAttack = false; }
@@ -227,4 +228,8 @@ public class Player : MonoBehaviour {
     public bool IsSliding() { return isSliding; }
     public bool IsGrounded() { return isGrounded; }
     public bool IsGrappling() { return grappleMech.IsGrappling(); }
+    public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
+    public float GetJumpForce() { return jumpForce; }
+
+    public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
 }

@@ -24,7 +24,9 @@ public class MomentumMechanic : MonoBehaviour {
     private bool isGrounded = false;
     private bool isGrappling = false;
     private bool justGrappled = false;
+    private bool justWallRan = false;
     private bool isOnSlope = false;
+    private bool isWallRunning;
 
 
     /// <summary>
@@ -60,7 +62,7 @@ public class MomentumMechanic : MonoBehaviour {
     */
     internal void UpdateMomentum(float speedStat, Player.Direction currentDir) {
         // Always drain speed stat, this value is clamped.
-        player.ChangeSpeedStat(-speedLossMult * Time.deltaTime);
+        player.ChangeSpeedStat(-speedLossMult * Time.fixedDeltaTime);
 
         bool hasSpeedStat = speedStat > 0f;
 
@@ -83,12 +85,12 @@ public class MomentumMechanic : MonoBehaviour {
 
             // Maintain momentum if sliding when landing a jump, otherwise lose momentum
             if (isGrounded && !wasGroundedLastFrame) {
-                if (!isSliding && !isGrappling) {
-                    if (!justGrappled) {
+                if (!isSliding && !isGrappling && !isWallRunning) {
+                    if (!justGrappled && !justWallRan) {
                         momentum -= 0.3f;
-                        print("Momentum Lost!");
                     } else {
                         justGrappled = false;
+                        justWallRan = false;
                     }
                 }
             }
@@ -108,6 +110,7 @@ public class MomentumMechanic : MonoBehaviour {
             default: speedBasis = 1.0f; break;
         }
         if (player.IsSliding()) speedBasis = hasSpeedStat ? 1.4f : 0.5f;
+        if (player.IsWallRunning()) speedBasis = 1.5f;
     }
 
     private void UpdateUI(float speedStat) {
@@ -118,6 +121,8 @@ public class MomentumMechanic : MonoBehaviour {
     private void UpdateStates() {
         isGrappling = player.IsGrappling();
         if (isGrappling) justGrappled = true;
+        isWallRunning = player.IsWallRunning();
+        if (isWallRunning) justWallRan = true;
         wasGroundedLastFrame = isGrounded;
         isSliding = player.IsSliding();
         isGrounded = player.IsGrounded();
@@ -125,7 +130,7 @@ public class MomentumMechanic : MonoBehaviour {
     }
 
     public void EditSpeedMult(float speed, bool condition = true) {
-        if (condition) speedMult += speed * Time.deltaTime * timeScale;
+        if (condition) speedMult += speed * Time.fixedDeltaTime * timeScale;
         if (speedMult < 1.0f) { speedMult = 1.0f; }
     }
 

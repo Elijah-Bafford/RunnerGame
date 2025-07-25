@@ -9,8 +9,8 @@ public class NotificationHandler : MonoBehaviour {
     [SerializeField] private string message;
     [Tooltip("How long to display the notification after leaving collider.")]
     [SerializeField] private float displayTime;
-
     [SerializeField] private GameObject notificationBox;
+
     private TextMeshProUGUI messageTMP;
 
     private void Start() {
