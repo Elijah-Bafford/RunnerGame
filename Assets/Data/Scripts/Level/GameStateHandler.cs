@@ -1,15 +1,16 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class UIInput : MonoBehaviour {
+public class GameStateHandler : MonoBehaviour {
 
     [SerializeField] GameObject pauseOverlay;
     [SerializeField] GameObject deathOverlay;
+    [SerializeField] GameObject levelCompleteOverlay;
     [SerializeField] GameTimer gameTimer;
     [SerializeField] SceneHandler sceneHandler;
     [SerializeField] PlayerInput playerInput;
 
-    public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death }
+    public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
 
     private GameState state;
     private GameState lastState;
@@ -48,6 +49,17 @@ public class UIInput : MonoBehaviour {
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(true);
                 break;
+            case GameState.LevelComplete:
+                ShowPauseOverlay(false);
+                ShowDeathOverlay(false);
+                ShowLevelCompleteOverlay(true);
+                break;
+            case GameState.NextLevel:
+                ShowLevelCompleteOverlay(false);
+                ShowPauseOverlay(false);
+                ShowDeathOverlay(false);
+                sceneHandler.LoadLevel(SceneHandler.currentLevel + 1);
+                break;
         }
     }
     /// <summary>
@@ -80,6 +92,11 @@ public class UIInput : MonoBehaviour {
         pauseOverlay.SetActive(active);
     }
 
+    private void ShowLevelCompleteOverlay(bool active) {
+        ToggleMenuMode(active);
+        levelCompleteOverlay.SetActive(active);
+    }
+
     public GameState GetGameState() { return state; }
     public void SetGameState(GameState gameState) { state = gameState; }
 
@@ -88,7 +105,7 @@ public class UIInput : MonoBehaviour {
      =====================================================================================*/
     public void OnPauseKeyPressed(InputAction.CallbackContext context) {
         if (context.performed) {
-            if (state == GameState.Death) return;
+            if (state == GameState.Death || state == GameState.LevelComplete) return;
             if (state == GameState.Playing) state = GameState.Paused;
             else state = GameState.Playing;
         }
@@ -97,4 +114,6 @@ public class UIInput : MonoBehaviour {
     public void ButtonUnpause() { state = GameState.Playing; }
     public void ButtonQuit() { state = GameState.MainMenu; }
     public void ButtonRestart() { state = GameState.LevelRestart; }
+    public void ButtonContinue() { state = GameState.NextLevel; }
+    public void TriggerLevelComplete() { state = GameState.LevelComplete; }
 }

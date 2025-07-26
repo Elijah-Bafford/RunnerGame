@@ -8,11 +8,11 @@ public class AnimationEventHandler : MonoBehaviour {
     [Tooltip("Player Script")]
     [SerializeField] Player player;
     [Tooltip("UI Input Script")]
-    [SerializeField] private UIInput uiInput;
+    [SerializeField] private GameStateHandler uiInput;
 
     public void DisableWeapon() { attack.HasAttacked(false); }
     public void AllowAttack() { player.ResetIsInAttack(); }
     public void PlayerDied() { player.Died(); }
-    public void StopCombat() { uiInput.SetGameState(UIInput.GameState.Death); }
+    public void StopCombat() { uiInput.SetGameState(GameStateHandler.GameState.Death); }
 
 }
