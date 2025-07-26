@@ -12,13 +12,21 @@ public class NotificationHandler : MonoBehaviour {
     [SerializeField] private float displayTime;
     [Tooltip("Slow time on entering the collider.")]
     [SerializeField] private bool slowTime;
+    [Tooltip("This notification is a tutorial?")]
+    [SerializeField] private bool isTutorial = true;
     [Tooltip("Parent UI object for the TMP")]
     [SerializeField] private GameObject notificationBox;
 
+    public static bool disableTutorials = false;
+
     private Coroutine onExit = null;
     private TextMeshProUGUI messageTMP;
-
     private static GameObject lastNode;
+
+    /// <summary>
+    /// The value that timeScale is set to due to Notifications.
+    /// </summary>
+    public static float timeSlowValue = 1f;
 
     private void Start() {
         messageTMP = notificationBox.GetComponentInChildren<TextMeshProUGUI>();
@@ -29,10 +37,14 @@ public class NotificationHandler : MonoBehaviour {
             if (lastNode != null) {
                 if (!lastNode.IsDestroyed()) Destroy(lastNode);
             }
+            if (disableTutorials && isTutorial) return;
             messageTMP.text = message;
             notificationBox.SetActive(true);
 
-            if (slowTime) Time.timeScale = 0.5f;
+            if (slowTime) {
+                Time.timeScale = 0.5f;
+                timeSlowValue = Time.timeScale;
+            }
         }
     }
 
@@ -43,7 +55,12 @@ public class NotificationHandler : MonoBehaviour {
                 StopCoroutine(onExit);
                 onExit = null;
             }
-            if (slowTime) Time.timeScale = 1.0f;
+            if (!(disableTutorials && isTutorial)) {
+                if (slowTime) {
+                    Time.timeScale = 1.0f;
+                    timeSlowValue = Time.timeScale;
+                }
+            }
             onExit = StartCoroutine(OnExit());
         }
     }

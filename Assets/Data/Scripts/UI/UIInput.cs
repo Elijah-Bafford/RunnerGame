@@ -59,7 +59,11 @@ public class UIInput : MonoBehaviour {
         Cursor.visible = inMenuMode;
 
         string input = inMenuMode ? "UI" : "Player";
-        int newTime = inMenuMode ? 0 : 1;
+        float newTime = inMenuMode ? 0 : 1;
+
+        if (newTime == 1 && NotificationHandler.timeSlowValue != 1) {
+            newTime = NotificationHandler.timeSlowValue;
+        }
 
         playerInput.SwitchCurrentActionMap(input);
         Time.timeScale = newTime;
