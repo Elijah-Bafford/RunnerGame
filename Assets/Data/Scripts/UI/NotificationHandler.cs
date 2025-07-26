@@ -21,7 +21,10 @@ public class NotificationHandler : MonoBehaviour {
 
     private Coroutine onExit = null;
     private TextMeshProUGUI messageTMP;
+
     private static GameObject lastNode;
+    private bool playerHasEntered = false;
+    private bool playerHasExited = false;
 
     /// <summary>
     /// The value that timeScale is set to due to Notifications.
@@ -33,7 +36,9 @@ public class NotificationHandler : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider collision) {
+        if (playerHasEntered) return;
         if (collision.CompareTag("Player")) {
+            playerHasEntered = true;
             if (lastNode != null) {
                 if (!lastNode.IsDestroyed()) Destroy(lastNode);
             }
@@ -49,7 +54,9 @@ public class NotificationHandler : MonoBehaviour {
     }
 
     private void OnTriggerExit(Collider collision) {
+        if (playerHasExited) return;
         if (collision.CompareTag("Player")) {
+            playerHasExited = true;
             lastNode = gameObject;
             if (onExit != null) {
                 StopCoroutine(onExit);
