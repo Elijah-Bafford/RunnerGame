@@ -10,6 +10,9 @@ public class NotificationHandler : MonoBehaviour {
     [SerializeField] private string message;
     [Tooltip("How long to display the notification after leaving collider.")]
     [SerializeField] private float displayTime;
+    [Tooltip("Slow time on entering the collider.")]
+    [SerializeField] private bool slowTime;
+    [Tooltip("Parent UI object for the TMP")]
     [SerializeField] private GameObject notificationBox;
 
     private Coroutine onExit = null;
@@ -28,6 +31,8 @@ public class NotificationHandler : MonoBehaviour {
             }
             messageTMP.text = message;
             notificationBox.SetActive(true);
+
+            if (slowTime) Time.timeScale = 0.5f;
         }
     }
 
@@ -38,6 +43,7 @@ public class NotificationHandler : MonoBehaviour {
                 StopCoroutine(onExit);
                 onExit = null;
             }
+            if (slowTime) Time.timeScale = 1.0f;
             onExit = StartCoroutine(OnExit());
         }
     }

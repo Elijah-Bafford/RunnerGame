@@ -3758,27 +3758,27 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Size.x
-      value: 16.47689
+      value: 11.28775
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Size.y
-      value: 4.798096
+      value: 6.847267
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Size.z
-      value: 11.383516
+      value: 9.157118
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Center.x
-      value: 4.7384453
+      value: 4.189705
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Center.y
-      value: -1.1009519
+      value: 3.2831326
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Center.z
-      value: -2.1917582
+      value: -0.08137417
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_LayerOverridePriority
@@ -3789,12 +3789,16 @@ PrefabInstance:
       value: While in air, you can grapple to enemies. Indicated by the RED reticle
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
+      propertyPath: slowTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: messageTMP
       value: 
       objectReference: {fileID: 284329572}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: displayTime
-      value: 6
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: notificationBox
@@ -4218,15 +4222,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 96.79
+      value: 89.96
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -13.04
+      value: -11.02
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 27.42
+      value: 28.68
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7003,7 +7007,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Size.x
-      value: 17.982193
+      value: 7.8907375
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Size.y
@@ -7015,7 +7019,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Center.x
-      value: 8.459032
+      value: 3.4133043
       objectReference: {fileID: 0}
     - target: {fileID: 1579139954507163355, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_Center.y
@@ -7032,6 +7036,10 @@ PrefabInstance:
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: message
       value: Slide on landing a jump to maintain momentum
+      objectReference: {fileID: 0}
+    - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
+      propertyPath: slowTime
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: messageTMP
@@ -7055,7 +7063,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8817131383092750843, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.411469
+      value: 23.42
       objectReference: {fileID: 0}
     - target: {fileID: 8817131383092750843, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9485,19 +9493,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 88.24
+      value: 78.3
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.73
+      value: -8.72
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 32.97
+      value: 31.91
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.83849305
+      value: 0.7095576
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalRotation.x
@@ -9505,7 +9513,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.5449123
+      value: 0.7046474
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalRotation.z
@@ -9517,7 +9525,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -66.037
+      value: 89.602
       objectReference: {fileID: 0}
     - target: {fileID: 4024724387233819298, guid: e3604ec287aeff74faeeb106cee6b7c2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
