@@ -4,6 +4,7 @@ using UnityEngine;
 public class GameTimer : MonoBehaviour {
 
     [SerializeField] TextMeshProUGUI UITimer;
+    [SerializeField] TextMeshProUGUI LevelCompleteTime;
 
     private float currentTime;
     private bool isRunning = true;
@@ -17,6 +18,7 @@ public class GameTimer : MonoBehaviour {
             int milliseconds = Mathf.FloorToInt((currentTime * 1000f) % 1000f / 10f);
 
             UITimer.text = $"{minutes:00}:{seconds:00}:{milliseconds:00}";
+            LevelCompleteTime.text = $"{minutes:00}:{seconds:00}:{milliseconds:00}";
         }
     }
 
