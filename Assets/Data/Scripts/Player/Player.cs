@@ -156,8 +156,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
-        if (!TryAction(-5)) return;
-        grappleMech.Grapple(isGrounded, transform.position);
+        if (!TryAction(-5, grappleMech.Grapple(isGrounded, transform.position))) return;
         SetLinearVelocity(Vector3.zero);
     }
 
@@ -206,8 +205,9 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="cost"></param>
     /// <returns></returns>
-    public bool TryAction(float cost) {
-        if (speedStat > 0f) {
+    public bool TryAction(float cost, bool canDoAction) {
+
+        if (speedStat > 0f && canDoAction) {
             ChangeSpeedStat(cost);
         } else {
             speedBarAnimator.SetTrigger("Flash");
@@ -232,4 +232,6 @@ public class Player : MonoBehaviour {
     public float GetJumpForce() { return jumpForce; }
 
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
+
+
 }

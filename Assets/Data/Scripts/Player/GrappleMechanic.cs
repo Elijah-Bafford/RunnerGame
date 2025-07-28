@@ -51,13 +51,14 @@ public class GrappleMechanic : MonoBehaviour {
         return true;
     }
 
-    public void Grapple(bool isGrounded, Vector3 position) {
-        if (isGrounded || !hasSpeedStat || !inGrappleRange || lastLockTarget == null) return;
+    public bool Grapple(bool isGrounded, Vector3 position) {
+        if (isGrounded || !hasSpeedStat || !inGrappleRange || lastLockTarget == null) return false;
 
         // Set up the grapple state
         isGrappling = true;
         grappleTarget = lastLockTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
+        return true;
     }
 
     public void UpdateLockOnReticle(bool isGrounded, Transform cameraTransform) {
