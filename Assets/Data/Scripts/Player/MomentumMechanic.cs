@@ -16,6 +16,7 @@ public class MomentumMechanic : MonoBehaviour {
 
     private float speedMult = 1.0f;
     private float speedBasis = 1.0f;
+    private float highestSpeed = 0f;
 
     //private bool wasSlidingLastFrame = false;
     private bool wasGroundedLastFrame = false;
@@ -99,6 +100,11 @@ public class MomentumMechanic : MonoBehaviour {
 
         EditSpeedMult(momentum);
         UpdateUI(speedStat);
+        UpdateHighestMomentum(speedMult, speedBasis);
+    }
+
+    private void UpdateHighestMomentum(float momentum, float basis) {
+        if (momentum * basis > highestSpeed) highestSpeed = momentum * speedBasis;
     }
 
     private void SetBasis(Player.Direction currentDir, bool hasSpeedStat) {
@@ -135,4 +141,6 @@ public class MomentumMechanic : MonoBehaviour {
     }
 
     public float GetSpeedMult() { return speedMult * speedBasis; }
+
+    public float GetHighestSpeed() { return highestSpeed; }
 }

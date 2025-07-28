@@ -1,3 +1,4 @@
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -156,10 +157,14 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
-        if (!TryAction(-5, grappleMech.Grapple(isGrounded, transform.position))) return;
-        SetLinearVelocity(Vector3.zero);
+        if (speedStat > 0f) {
+            if (grappleMech.Grapple(isGrounded, transform.position)) {
+                ChangeSpeedStat(-5f);
+            }
+        } else if (!isGrounded && !grappleMech.HasTarget()){
+            speedBarAnimator.SetTrigger("Flash");
+        }
     }
-
 
     public void Perform(Act action, Vector2 actionVector = default, bool keyReleased = default) {
         switch (action) {
@@ -197,23 +202,6 @@ public class Player : MonoBehaviour {
     /// <param name="speed"></param>
     public void ChangeSpeedStat(float speed) {
         speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
-    }
-
-    /// <summary>
-    /// Decide if the player can perform an action that costs SpeedStat.
-    /// Return true if can perform action, return false and flash SpeedBar otherwise.
-    /// </summary>
-    /// <param name="cost"></param>
-    /// <returns></returns>
-    public bool TryAction(float cost, bool canDoAction) {
-
-        if (speedStat > 0f && canDoAction) {
-            ChangeSpeedStat(cost);
-        } else {
-            speedBarAnimator.SetTrigger("Flash");
-            return false;
-        }
-        return true;
     }
 
     /// <summary>

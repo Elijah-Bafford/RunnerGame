@@ -26,7 +26,7 @@ public class GrappleMechanic : MonoBehaviour {
 
     private bool hasSpeedStat = false;
 
-    private void Awake() { 
+    private void Awake() {
         reticle = lockOnReticle.GetComponent<RawImage>();
         player = GetComponent<Player>();
     }
@@ -51,6 +51,12 @@ public class GrappleMechanic : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Return true when Grapple is performed. False otherwise.
+    /// </summary>
+    /// <param name="isGrounded"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
     public bool Grapple(bool isGrounded, Vector3 position) {
         if (isGrounded || !hasSpeedStat || !inGrappleRange || lastLockTarget == null) return false;
 
@@ -138,4 +144,5 @@ public class GrappleMechanic : MonoBehaviour {
     public Vector3 GetGrappleDirection() { return grappleDirection; }
     public float GetGrappleSpeed() { return grappleSpeed; }
     public float GetGrappleArrivalDistance() { return grappleArrivalDistance; }
+    public bool HasTarget() { return lockOnTarget == null || lastLockTarget == null; }
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 public class GameTimer : MonoBehaviour {
 
     [SerializeField] TextMeshProUGUI UITimer;
-    [SerializeField] TextMeshProUGUI LevelCompleteTime;
 
     private float currentTime;
     private bool isRunning = true;
@@ -13,13 +12,23 @@ public class GameTimer : MonoBehaviour {
         if (isRunning) {
             currentTime += Time.deltaTime;
 
-            int minutes = Mathf.FloorToInt(currentTime / 60);
-            int seconds = Mathf.FloorToInt(currentTime % 60);
-            int milliseconds = Mathf.FloorToInt((currentTime * 1000f) % 1000f / 10f);
-
-            UITimer.text = $"{minutes:00}:{seconds:00}:{milliseconds:00}";
-            LevelCompleteTime.text = $"{minutes:00}:{seconds:00}:{milliseconds:00}";
+            UITimer.text = GetTimeAsString();
         }
+    }
+
+    /// <summary>
+    /// Returns the time in "minutes", "seconds", or "milliseconds"
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    public int GetTimeAs(string unit) {
+        return unit switch {
+            "minutes" => Mathf.FloorToInt(currentTime / 60),
+            "seconds" => Mathf.FloorToInt(currentTime % 60),
+            "milliseconds" => Mathf.FloorToInt((currentTime * 1000f) % 1000f / 10f),
+            _ => throw new System.Exception("GetTimeAs in GameTimer called with invalid unit")
+        };
     }
 
     public void ResetTimer() {
@@ -36,4 +45,15 @@ public class GameTimer : MonoBehaviour {
         this.isRunning = isRunning;
     }
 
+    public float GetTime() {
+        return currentTime;
+    }
+
+    public string GetTimeAsString() {
+        int minutes = GetTimeAs("minutes");
+        int seconds = GetTimeAs("seconds");
+        int milliseconds = GetTimeAs("milliseconds");
+
+        return $"{minutes:00}:{seconds:00}:{milliseconds:00}";
+    }
 }
