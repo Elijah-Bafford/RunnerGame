@@ -10857,6 +10857,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameStateHandler: {fileID: 479569804}
+  timer: {fileID: 1980729243}
+  player: {fileID: 1785767171}
+  timeNum: {fileID: 292895731}
+  speedNum: {fileID: 1467391350}
 --- !u!65 &1234079744
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16381,7 +16385,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UITimer: {fileID: 1199802}
-  LevelCompleteTime: {fileID: 292895731}
 --- !u!4 &1980729244
 Transform:
   m_ObjectHideFlags: 0

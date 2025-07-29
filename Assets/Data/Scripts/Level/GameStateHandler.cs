@@ -42,7 +42,7 @@ public class GameStateHandler : MonoBehaviour {
             case GameState.LevelRestart:
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(false);
-                sceneHandler.InstantLoad(SceneHandler.currentLevel);
+                sceneHandler.LoadLevel(SceneHandler.currentLevel);
                 state = GameState.Playing;
                 break;
             case GameState.Death:

@@ -3,9 +3,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-1)]
 public class SceneHandler : MonoBehaviour {
     
     public static int currentLevel;
+    public static int numLevels;
 
     [Header("Loading UI")]
     [Tooltip("Set this index value of the scene this Handler is attached to")]
@@ -20,9 +22,9 @@ public class SceneHandler : MonoBehaviour {
 
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private Slider progressBar;
-
-    private void Start() {
+    private void Awake() {
         currentLevel = thisLevel;
+        numLevels = SceneManager.sceneCount + 1;
     }
 
     /// <summary>

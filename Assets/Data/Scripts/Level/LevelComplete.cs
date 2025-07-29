@@ -25,6 +25,8 @@ public class LevelComplete : MonoBehaviour {
         gameStateHandler.TriggerLevelComplete();
         speedNum.text = momentumMech.GetHighestSpeed().ToString("F3");
         timeNum.text = timer.GetTimeAsString();
+        RecordHandler.Instance.CreateRecord(SceneHandler.currentLevel, timer.GetTime(), momentumMech.GetHighestSpeed());
+        RecordHandler.Instance.SaveRecords();
     }
 
 }
