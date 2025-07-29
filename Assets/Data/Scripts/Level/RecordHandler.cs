@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ public class RecordHandler : MonoBehaviour {
     public static RecordHandler Instance { get; private set; }
 
     [SerializeField] private LevelRecord[] records;
+    public static event Action<int, LevelRecord, bool, bool> OnRecordUpdated;
 
     private string filePath;
 
@@ -39,10 +41,16 @@ public class RecordHandler : MonoBehaviour {
         }
     }
 
-    public void CreateRecord(int level, float fastestTime, float highestMomentum) {
-        float ft = Mathf.Min(records[level].fastestTime, fastestTime);
+    public void UpdateRecord(int level, float fastestTime, float highestMomentum) {
+        float ft = records[level].fastestTime;
+        if (ft == 0) ft = fastestTime; // by default, records start at 0 and 0 can't be beat so override it.
         float hm = Mathf.Max(records[level].highestMomentum, highestMomentum);
+        bool isTimeRecord = ft == fastestTime;
+        bool isMomentumRecord = hm == highestMomentum;
         records[level] = new LevelRecord(level, ft, hm);
+        SaveRecords();
+
+        OnRecordUpdated?.Invoke(level, records[level], isTimeRecord, isMomentumRecord);
     }
 
     public LevelRecord GetRecord(int level) {

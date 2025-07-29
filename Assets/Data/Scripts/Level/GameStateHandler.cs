@@ -1,14 +1,27 @@
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class GameStateHandler : MonoBehaviour {
 
+    [Header("Pause Overlay Refs")]
     [SerializeField] GameObject pauseOverlay;
-    [SerializeField] GameObject deathOverlay;
-    [SerializeField] GameObject levelCompleteOverlay;
+    [SerializeField] TextMeshProUGUI timeNum;
+    [SerializeField] TextMeshProUGUI speedNum;
+
+    [Header("General Refs")]
     [SerializeField] GameTimer gameTimer;
     [SerializeField] SceneHandler sceneHandler;
     [SerializeField] PlayerInput playerInput;
+
+    [Header("Other Overlay Refs")]
+    [SerializeField] GameObject deathOverlay;
+    [SerializeField] GameObject levelCompleteOverlay;
+
+    private string fastestTime;
+    private string highestMomentum;
+    
 
     public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
 
@@ -17,6 +30,29 @@ public class GameStateHandler : MonoBehaviour {
 
     private void Awake() {
         state = GameState.Playing;
+        UpdateLevelStats(SceneHandler.currentLevel);
+    }
+
+    private void Start() {
+        SceneHandler.OnLevelLoad += OnLevelLoad;
+    }
+
+    private void OnLevelLoad(int level) {
+        UpdateLevelStats(level);
+    }
+
+    private void UpdateLevelStats(int level) {
+        LevelRecord thisRecord = RecordHandler.Instance.GetRecord(level);
+        
+        if (thisRecord != null) {
+            if (thisRecord.fastestTime == 0) {
+                fastestTime = "None";
+                highestMomentum = "None";
+                return;
+            }
+            fastestTime = gameTimer.GetTimeAsString(false, thisRecord.fastestTime);
+            highestMomentum = thisRecord.highestMomentum.ToString();
+        }
     }
 
     private void Update() {
@@ -90,6 +126,10 @@ public class GameStateHandler : MonoBehaviour {
     private void ShowPauseOverlay(bool active) {
         ToggleMenuMode(active);
         pauseOverlay.SetActive(active);
+        if (active) {
+            speedNum.text = highestMomentum;
+            timeNum.text = fastestTime;
+        }
     }
 
     private void ShowLevelCompleteOverlay(bool active) {

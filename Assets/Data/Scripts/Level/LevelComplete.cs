@@ -8,11 +8,18 @@ public class LevelComplete : MonoBehaviour {
     [SerializeField] Player player;
     [SerializeField] TextMeshProUGUI timeNum;
     [SerializeField] TextMeshProUGUI speedNum;
+    [Header("The \"record\" text in the Level Complete Overlay")]
+    [SerializeField] GameObject ARecord;
+    [Header("Colors")]
+    [SerializeField] private Color gold;
+    [SerializeField] private Color blue;
+    [SerializeField] private Color red;
 
     private MomentumMechanic momentumMech;
 
     private void Start() {
         momentumMech = player.GetComponent<MomentumMechanic>();
+        RecordHandler.OnRecordUpdated += HandleRecordUpdated;
     }
 
     private void OnTriggerEnter(Collider other) {
@@ -23,10 +30,14 @@ public class LevelComplete : MonoBehaviour {
 
     private void OnLevelComplete() {
         gameStateHandler.TriggerLevelComplete();
-        speedNum.text = momentumMech.GetHighestSpeed().ToString("F3");
-        timeNum.text = timer.GetTimeAsString();
-        RecordHandler.Instance.CreateRecord(SceneHandler.currentLevel, timer.GetTime(), momentumMech.GetHighestSpeed());
-        RecordHandler.Instance.SaveRecords();
+        speedNum.text = momentumMech.GetHighestSpeed().ToString();
+        timeNum.text = timer.GetTimeAsString(true);
+        RecordHandler.Instance.UpdateRecord(SceneHandler.currentLevel, timer.GetCurrentTime(), momentumMech.GetHighestSpeed());
     }
 
+    private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {
+        if (ARecord != null) ARecord.SetActive(isTimeRecord || isMomentumRecord);
+        speedNum.color = isMomentumRecord ? gold : blue;
+        timeNum.color = isTimeRecord ? gold : red;
+    }
 }

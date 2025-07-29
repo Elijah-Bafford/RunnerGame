@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,12 +17,12 @@ public class SceneHandler : MonoBehaviour {
     [Tooltip("Disable an element when loading starts. Not required.")]
     [SerializeField] private GameObject ObjToDisable;
 
-    // If this is needed the logic is here
-    //[Tooltip("Enable an element when loading is finished. Not required.")]
-    //[SerializeField] private GameObject ObjToEnable;
+    public static event Action<int> OnLevelLoad;
+
 
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private Slider progressBar;
+
     private void Awake() {
         currentLevel = thisLevel;
         numLevels = SceneManager.sceneCount + 1;
@@ -31,10 +32,14 @@ public class SceneHandler : MonoBehaviour {
     /// Normally load a level.
     /// </summary>
     /// <param name="level"></param>
-    public void LoadLevel(int level) { 
+    public void LoadLevel(int level) {
         currentLevel = level;
         StartCoroutine(LoadSceneAsync(level));
+        print("OnLoad");
+        OnLevelLoad?.Invoke(level);
     }
+
+    /*
     /// <summary>
     /// Load a level with no loading screen.
     /// </summary>
@@ -43,6 +48,7 @@ public class SceneHandler : MonoBehaviour {
         currentLevel = level;
         SceneManager.LoadScene(currentLevel);
     }
+    */
 
     private IEnumerator LoadSceneAsync(int levelIndex) {
         if (ObjToDisable) ObjToDisable.SetActive(false);
@@ -62,7 +68,6 @@ public class SceneHandler : MonoBehaviour {
         progressBar.value = 1f;
 
         operation.allowSceneActivation = true;
-
         yield return null;
     }
 }
