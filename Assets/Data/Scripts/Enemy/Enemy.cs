@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable {
@@ -7,10 +8,8 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float hitForceMultiplier = 3f;
     [SerializeField] private float torqueMultiplier = 6f;
     [Header("Movement Settings")]
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float turnSpeed = 360f;
-    [Tooltip("How close the enemy gets to the player.")]
-    [SerializeField] private float stopDistance = 1.25f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float turnSpeed = 720f;
     [Header("Refs")]
     [SerializeField] Player player;
     [SerializeField] private Animator anim;
@@ -25,19 +24,18 @@ public class Enemy : MonoBehaviour, IDamageable {
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
-    private bool isDead = false;
 
     // Attacking
-    private bool inDamageDealingFrames = false;
+    private bool weaponCanHit = false;
     private bool inRangeForAttack = false;
-    private bool isInAttackAnimation = false;
+    private bool attackAnimPlaying = false;
 
     private bool isGrounded = false;
     private bool disableStateChange = false;
+    private bool isDead = false;
 
     public enum State { Idle, Move, Attack, Dead }
     private State currentState;
-    private State lastState;
 
     private void Awake() {
         playerTransform = player.GetComponent<Transform>();
@@ -77,45 +75,43 @@ public class Enemy : MonoBehaviour, IDamageable {
         if (disableStateChange) return;
         if (stopCombat) currentState = State.Idle;
 
-        // If the state hasn't changed AND the current state isn't move THEN return
-        if (lastState == currentState && currentState != State.Move) return;
+        if (currentState != State.Dead) {
+            attackAnimPlaying = anim.GetCurrentAnimatorStateInfo(0).IsName("Attack");
+            if (attackAnimPlaying) {
+                if (weaponCanHit && inRangeForAttack && !isDead) player.Die();
+                return;
+            } else {
+                if (inRangeForAttack) currentState = State.Attack;
+            }
+        }
 
-        bool isMoveState = currentState == State.Move;
         bool animIsMove = anim.GetBool("Move");
 
-        if (!isMoveState && animIsMove) anim.SetBool("Move", false);
-
-        lastState = currentState;
+        if (currentState != State.Move && animIsMove) anim.SetBool("Move", false);
 
         switch (currentState) {
             case State.Idle:
                 break;
             case State.Move:
                 if (!animIsMove) anim.SetBool("Move", true);
+                if (inRangeForAttack) SetState(State.Attack);
                 MoveTowardPlayer();
                 break;
             case State.Attack:
                 AttackPlayer();
                 break;
             case State.Dead:
-                anim.SetBool("Dead", true);
-                isDead = true;
-                StartCoroutine(DisableAfter(3f));
-                disableStateChange = true;
                 break;
         }
     }
 
     private void AttackPlayer() {
-        if (!inRangeForAttack) {
-            currentState = State.Move;
-            return;
-        }
+        if (!attackAnimPlaying) anim.SetTrigger("Attack");
+        else return;
+    }
 
-        if (!isInAttackAnimation) anim.SetTrigger("Attack");
-        if (inDamageDealingFrames) {
-            player.Die();
-        }
+    public void WeaponCanHit(bool canHit) {
+        weaponCanHit = canHit;
     }
 
     public void Hit(Vector3 hitForce) {
@@ -136,6 +132,12 @@ public class Enemy : MonoBehaviour, IDamageable {
         rb.AddTorque(randomTorque, ForceMode.Impulse);
 
         SetState(State.Dead);
+        print($"{gameObject.name}: Died.");
+        disableStateChange = true;
+        anim.ResetTrigger("Attack");
+        anim.SetBool("Move", false);
+        anim.SetBool("Dead", true);
+        StartCoroutine(DisableAfter(3f));
     }
 
     private void MoveTowardPlayer() {
@@ -149,12 +151,17 @@ public class Enemy : MonoBehaviour, IDamageable {
         if (sqrDist < 0.001f) return;
 
         FacePlayer(dir);
-        if (inRangeForAttack) currentState = State.Attack;
-        if (sqrDist > stopDistance * stopDistance && isGrounded) Move(dir);
-        else rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+
+        if (inRangeForAttack) {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            currentState = State.Attack;
+        } else if (isGrounded) {
+            Move(dir);
+        }
     }
 
     private void Move(Vector3 direction) {
+        if (inRangeForAttack || currentState == State.Attack || anim.GetBool("Attack")) return;
         Vector3 targetVelocity = direction * moveSpeed;
         targetVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = targetVelocity;
@@ -185,20 +192,8 @@ public class Enemy : MonoBehaviour, IDamageable {
     internal void SetState(State state) { currentState = state; }
 
     /// <summary>
-    /// In specific Attack animation frames, this is true so that the enemy weapon can actually only deal damage in those frames.
-    /// </summary>
-    /// <param name="allow"></param>
-    internal void AllowHit(bool allow) { inDamageDealingFrames = allow; }
-
-    /// <summary>
     /// Called in EnemyTrigger. When the player is within the attack range of the enemy, start attacking.
     /// </summary>
     /// <param name="attacking"></param>
     internal void SetInRangeForAttack(bool attacking) { inRangeForAttack = attacking; }
-
-    /// <summary>
-    /// Called in AllowHitEvent. This remains true from the beginning of an attack to the end of the AttackWait animation. This prevents continous attacks
-    /// </summary>
-    /// <param name="isInAttack"></param>
-    internal void SetIsInAttackAnimation(bool isInAttack) { isInAttackAnimation = isInAttack; }
 }
