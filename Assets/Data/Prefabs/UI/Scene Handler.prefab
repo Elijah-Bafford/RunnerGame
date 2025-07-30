@@ -464,6 +464,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7d5d47b649e2054aa51ad21d9ac6069, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thisLevel: 1
+  ObjToDisable: {fileID: 0}
   loadingScreen: {fileID: 98266157401963517}
   progressBar: {fileID: 4560523313955234128}
 --- !u!1 &4518714465926640220

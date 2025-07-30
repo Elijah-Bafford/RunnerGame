@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
+[DefaultExecutionOrder(-2)]
 public class RecordHandler : MonoBehaviour {
     public static RecordHandler Instance { get; private set; }
 
@@ -36,8 +37,10 @@ public class RecordHandler : MonoBehaviour {
         } else {
             records = new LevelRecord[SceneHandler.numLevels];
             for (int i = 0; i < records.Length; i++) {
+                print("test" + i);
                 records[i] = new LevelRecord(i, 0f, 0f);
             }
+            SaveRecords();
         }
     }
 

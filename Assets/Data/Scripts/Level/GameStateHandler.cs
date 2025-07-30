@@ -30,11 +30,11 @@ public class GameStateHandler : MonoBehaviour {
 
     private void Awake() {
         state = GameState.Playing;
-        UpdateLevelStats(SceneHandler.currentLevel);
     }
 
     private void Start() {
         SceneHandler.OnLevelLoad += OnLevelLoad;
+        UpdateLevelStats(SceneHandler.currentLevel);
     }
 
     private void OnLevelLoad(int level) {

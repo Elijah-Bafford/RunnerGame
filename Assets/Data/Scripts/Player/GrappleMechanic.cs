@@ -14,6 +14,7 @@ public class GrappleMechanic : MonoBehaviour {
 
     private Enemy lockOnTarget = null;
     private Enemy lastLockTarget = null;
+    private Enemy grappleTargetEnemy = null;
 
     private Player player;
     private RawImage reticle;
@@ -44,9 +45,10 @@ public class GrappleMechanic : MonoBehaviour {
 
         // Stop when close enough
         if (dist < GetGrappleArrivalDistance()) {
-            player.SetLinearVelocity(Vector3.zero);
+            player.ForceHitEnemy(grappleTargetEnemy);
             SetIsGrappling(false);
             player.Attack();
+            grappleTargetEnemy = null;
         }
         return true;
     }
@@ -60,12 +62,13 @@ public class GrappleMechanic : MonoBehaviour {
     public bool Grapple(bool isGrounded, Vector3 position) {
         if (isGrounded || !hasSpeedStat || !inGrappleRange || lastLockTarget == null) return false;
 
-        // Set up the grapple state
         isGrappling = true;
         grappleTarget = lastLockTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
+        grappleTargetEnemy = lastLockTarget;
         return true;
     }
+
 
     public void UpdateLockOnReticle(bool isGrounded, Transform cameraTransform) {
         if (isGrounded) {

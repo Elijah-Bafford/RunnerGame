@@ -120,8 +120,11 @@ public class Enemy : MonoBehaviour, IDamageable {
 
     public void Hit(Vector3 hitForce) {
         if (isDead) return;
+        isDead = true;
 
         rb.freezeRotation = false;
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
         rb.AddForce(hitForce * hitForceMultiplier, ForceMode.Impulse);
 
         Vector3 randomTorque = new Vector3(

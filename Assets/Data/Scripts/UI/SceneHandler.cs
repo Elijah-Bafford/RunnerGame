@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class SceneHandler : MonoBehaviour {
     
     public static int currentLevel;
-    public static int numLevels;
+    public static int numLevels = 3;
 
     [Header("Loading UI")]
     [Tooltip("Set this index value of the scene this Handler is attached to")]
@@ -25,7 +25,6 @@ public class SceneHandler : MonoBehaviour {
 
     private void Awake() {
         currentLevel = thisLevel;
-        numLevels = SceneManager.sceneCount + 1;
     }
 
     /// <summary>
