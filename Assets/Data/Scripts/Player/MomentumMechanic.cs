@@ -18,7 +18,6 @@ public class MomentumMechanic : MonoBehaviour {
     private float speedBasis = 1.0f;
     private float highestSpeed = 0f;
 
-    //private bool wasSlidingLastFrame = false;
     private bool wasGroundedLastFrame = false;
 
     private bool isSliding = false;
@@ -27,7 +26,8 @@ public class MomentumMechanic : MonoBehaviour {
     private bool justGrappled = false;
     private bool justWallRan = false;
     private bool isOnSlope = false;
-    private bool isWallRunning;
+    private bool isWallRunning = false;
+    private bool isWallJumping = false;
 
 
     /// <summary>
@@ -77,11 +77,15 @@ public class MomentumMechanic : MonoBehaviour {
         if (hasSpeedStat) {
 
             if (isSliding && isGrounded) {
-                momentum += 0.05f;
+                momentum += 0.04f;
             }
 
             if (isOnSlope || isGrappling) {
-                momentum += 0.05f;
+                momentum += 0.06f;
+            }
+
+            if (isWallJumping || isWallRunning) {
+                momentum += 0.02f;
             }
 
             // Maintain momentum if sliding when landing a jump, otherwise lose momentum
@@ -100,27 +104,33 @@ public class MomentumMechanic : MonoBehaviour {
 
         EditSpeedMult(momentum);
         UpdateUI(speedStat);
-        UpdateHighestMomentum(speedMult, speedBasis);
+        UpdateHighestSpeed();
     }
 
-    private void UpdateHighestMomentum(float momentum, float basis) {
-        if (momentum * basis > highestSpeed) highestSpeed = momentum * speedBasis;
+    private void UpdateHighestSpeed() {
+        if (speedMult > highestSpeed) highestSpeed = speedMult;
     }
 
     private void SetBasis(Player.Direction currentDir, bool hasSpeedStat) {
+        float currBasis = 1.0f;
         switch (currentDir) {
-            case Player.Direction.Forward: speedBasis = hasSpeedStat ? 1.2f : 1.0f; break;
+            case Player.Direction.Forward: currBasis = hasSpeedStat ? 1.2f : 1.0f; break;
             case Player.Direction.Left:
-            case Player.Direction.Right: speedBasis = hasSpeedStat ? 1.0f : 0.8f; break;
-            case Player.Direction.Backward: speedBasis = hasSpeedStat ? 0.8f : 0.6f; break;
-            default: speedBasis = 1.0f; break;
+            case Player.Direction.Right: currBasis = hasSpeedStat ? 1.0f : 0.8f; break;
+            case Player.Direction.Backward: currBasis = hasSpeedStat ? 0.8f : 0.6f; break;
+            default: currBasis = 1.0f; break;
         }
-        if (player.IsSliding()) speedBasis = hasSpeedStat ? 1.4f : 0.5f;
-        if (player.IsWallRunning()) speedBasis = 1.5f;
+        if (player.IsSliding()) currBasis = hasSpeedStat ? 1.4f : 0.5f;
+        if (player.IsWallRunning()) currBasis = 1.5f;
+
+        float timeMult = hasSpeedStat ? 15 : 5;
+
+        speedBasis = Mathf.Lerp(speedBasis, currBasis, Time.deltaTime * timeMult);
+
     }
 
     private void UpdateUI(float speedStat) {
-        speedMultDisplay.text = "Momentum: " + GetSpeedMult().ToString("F3");
+        speedMultDisplay.text = "Momentum: " + GetActualSpeedMult();
         player.UpdateSpeedBar(speedStat);
     }
 
@@ -133,6 +143,7 @@ public class MomentumMechanic : MonoBehaviour {
         isSliding = player.IsSliding();
         isGrounded = player.IsGrounded();
         isOnSlope = player.IsOnSlope();
+        isWallJumping = player.IsWallJumping();
     }
 
     public void EditSpeedMult(float speed, bool condition = true) {
@@ -140,7 +151,8 @@ public class MomentumMechanic : MonoBehaviour {
         if (speedMult < 1.0f) { speedMult = 1.0f; }
     }
 
-    public float GetSpeedMult() { return speedMult * speedBasis; }
+    public float GetTrueSpeedMult() { return speedMult * speedBasis; }
+    public float GetActualSpeedMult() { return speedMult; }
 
     public float GetHighestSpeed() { return highestSpeed; }
 }

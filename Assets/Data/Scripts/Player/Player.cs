@@ -111,7 +111,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Move() {
-        float speed = moveSpeed * momentumMech.GetSpeedMult();
+        float speed = moveSpeed * momentumMech.GetTrueSpeedMult();
 
         // Camera-relative movement
         Vector3 camForward = cameraTransform.forward;
@@ -154,10 +154,13 @@ public class Player : MonoBehaviour {
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
 
-        // Return from the function if should jump while on wall, preventing normal jump mechanics
-        if (wallRunMech.Jump(keyReleased, cameraTransform)) return;
+        if (wallRunMech.IsOnWall()) {
+            TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), -2.5f, wallRunMech.IsOnWall() && !keyReleased);
+            return;
+        }
+
         if (!keyReleased && isGrounded) {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetSpeedMult()), rb.linearVelocity.z);
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetTrueSpeedMult()), rb.linearVelocity.z);
         } else if (keyReleased && rb.linearVelocity.y > 0f) {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         }
@@ -165,11 +168,15 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
+        TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, failedCondition: (!isGrounded && !grappleMech.HasTarget()));
+    }
+
+    private void TryAction(Func<bool> action, float cost, bool failedCondition) {
         if (speedStat > 0f) {
-            if (grappleMech.Grapple(isGrounded, transform.position)) {
-                ChangeSpeedStat(-5f);
+            if (action()) {
+                ChangeSpeedStat(cost);
             }
-        } else if (!isGrounded && !grappleMech.HasTarget()) {
+        } else if (failedCondition) {
             speedBarAnimator.SetTrigger("Flash");
         }
     }
@@ -221,6 +228,7 @@ public class Player : MonoBehaviour {
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
     public void ResetIsInAttack() { isInAttack = false; }
     public bool IsOnSlope() { return isOnSlope; }
+    public bool IsWallJumping() { return wallRunMech.IsWallJumping(); }
     public bool IsSliding() { return isSliding; }
     public bool IsGrounded() { return isGrounded; }
     public bool IsGrappling() { return grappleMech.IsGrappling(); }
