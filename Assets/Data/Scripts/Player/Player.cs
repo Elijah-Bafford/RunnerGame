@@ -127,7 +127,15 @@ public class Player : MonoBehaviour {
 
         Vector3 targetVelocity = moveDir * speed;
         targetVelocity.y = rb.linearVelocity.y;
-        rb.linearVelocity = targetVelocity;
+        wallRunMech.UpdateWallJumpVelocity();
+        if (wallRunMech.IsWallJumping()) {
+            targetVelocity *= wallRunMech.InAirSpeedMultiplier();
+            rb.linearVelocity = targetVelocity + wallRunMech.GetJumpVelocity();
+        } else {
+            wallRunMech.SetJumpVelocity(Vector3.zero);
+            rb.linearVelocity = targetVelocity;
+        }
+
     }
 
     public void Attack() {
@@ -161,7 +169,7 @@ public class Player : MonoBehaviour {
             if (grappleMech.Grapple(isGrounded, transform.position)) {
                 ChangeSpeedStat(-5f);
             }
-        } else if (!isGrounded && !grappleMech.HasTarget()){
+        } else if (!isGrounded && !grappleMech.HasTarget()) {
             speedBarAnimator.SetTrigger("Flash");
         }
     }
@@ -218,8 +226,5 @@ public class Player : MonoBehaviour {
     public bool IsGrappling() { return grappleMech.IsGrappling(); }
     public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
     public float GetJumpForce() { return jumpForce; }
-
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
-
-
 }

@@ -18,12 +18,14 @@ public class WallRunMechanic : MonoBehaviour {
 
     private Rigidbody rb;
     private Player player;
+    private Vector3 jumpVelocity = Vector3.zero;
 
     private bool jumpKeyReleased = false;
     private bool allowWallRun = false;
     private bool isOnWallLeft = false;
     private bool isOnWallRight = false;
     private bool isWallRunning = false;
+    private bool isWallJumping = false;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
@@ -66,6 +68,17 @@ public class WallRunMechanic : MonoBehaviour {
         }
     }
 
+    internal void UpdateWallJumpVelocity() {
+        if (isWallJumping && player.IsGrounded()) {
+            isWallJumping = false;
+        }
+        float x = Mathf.Lerp(jumpVelocity.x, 0, Time.deltaTime);
+        float y = Mathf.Lerp(jumpVelocity.y, -3, Time.deltaTime * 1.4f);
+        float z = Mathf.Lerp(jumpVelocity.z, 0, Time.deltaTime * 2f);
+
+        jumpVelocity = new Vector3(x, y, z);
+    }
+
     /// <summary>
     /// Called on jump context if the player is on a wall, instead of the normal player jump.
     /// Returns true if the player should do a wall jump, i.e. isOnWall = true
@@ -74,13 +87,14 @@ public class WallRunMechanic : MonoBehaviour {
     /// <returns></returns>
     internal bool Jump(bool keyReleased, Transform cameraTransform) {
         if (!IsOnWall() || player.IsGrounded()) return false;
-        if (keyReleased) return true;   // Disallow double running and jump cut logic
+        if (keyReleased) return true;   // Disallow double execution and jump cut logic
 
+        isWallJumping = true;
         // Get normalized camera forward, flattened on the XZ plane
         Vector3 forward = cameraTransform.forward;
         forward.y = 0f;
         forward.Normalize();
-        
+
         Vector3 awayFromWall = Vector3.zero;
         if (isOnWallLeft)
             awayFromWall = cameraTransform.right;
@@ -90,12 +104,12 @@ public class WallRunMechanic : MonoBehaviour {
         // Get jump force from Player
         float jumpForce = player.GetJumpForce();
 
-        
-        Vector3 jumpVelocity = (forward * jumpForce * wallJumpForce.x) + (Vector3.up * jumpForce * wallJumpForce.y) + (awayFromWall * jumpForce * wallJumpForce.z);
-        
 
-        // Apply the new velocity
-        rb.linearVelocity += jumpVelocity;
+        jumpVelocity = (forward * jumpForce * wallJumpForce.x) + (Vector3.up * jumpForce * wallJumpForce.y) + (awayFromWall * jumpForce * wallJumpForce.z);
+
+
+        // Apply the new velocity (Moved to player update)
+        //rb.linearVelocity += jumpVelocity;
 
         // Reset wall-running state
         currentWallGravity = wallGravity;
@@ -103,7 +117,7 @@ public class WallRunMechanic : MonoBehaviour {
         isWallRunning = false;
         return true;
     }
-    
+
     /// <summary>
     /// Get if the player is on a wall.
     /// Use "direction" to get a specific direction, case doesn't matter.
@@ -117,10 +131,10 @@ public class WallRunMechanic : MonoBehaviour {
         return isOnWallLeft || isOnWallRight;
     }
 
-    internal void JumpKeyReleased(bool jumpKeyReleased) {
-        this.jumpKeyReleased = jumpKeyReleased;
-    }
-
+    internal void JumpKeyReleased(bool jumpKeyReleased) { this.jumpKeyReleased = jumpKeyReleased; }
     internal bool IsWallRunning() { return isWallRunning; }
-
+    internal bool IsWallJumping() { return isWallJumping; }
+    internal float InAirSpeedMultiplier() { return IsWallJumping() ? 0.5f : 1f; }
+    internal Vector3 GetJumpVelocity() { return jumpVelocity; }
+    internal void SetJumpVelocity(Vector3 jumpVelocity) { this.jumpVelocity = jumpVelocity; }
 }

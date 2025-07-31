@@ -132,7 +132,6 @@ public class Enemy : MonoBehaviour, IDamageable {
         rb.AddTorque(randomTorque, ForceMode.Impulse);
 
         SetState(State.Dead);
-        print($"{gameObject.name}: Died.");
         disableStateChange = true;
         anim.ResetTrigger("Attack");
         anim.SetBool("Move", false);
