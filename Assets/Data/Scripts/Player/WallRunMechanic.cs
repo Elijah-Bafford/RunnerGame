@@ -26,6 +26,7 @@ public class WallRunMechanic : MonoBehaviour {
     private bool isOnWallRight = false;
     private bool isWallRunning = false;
     private bool isWallJumping = false;
+    private bool wasOnWallLastFrame = false;
 
     private void Awake() {
         rb = GetComponent<Rigidbody>();
@@ -38,6 +39,7 @@ public class WallRunMechanic : MonoBehaviour {
     /// </summary>
     /// <param name="isGrounded"></param>
     internal void UpdatePhysics(bool isGrounded) {
+        wasOnWallLastFrame = IsOnWall();
         isOnWallLeft = !isGrounded && Physics.CheckSphere(wallCheckLeft.position, wallCheckRadius, wallLayer);
         isOnWallRight = !isGrounded && Physics.CheckSphere(wallCheckRight.position, wallCheckRadius, wallLayer);
     }
@@ -69,7 +71,12 @@ public class WallRunMechanic : MonoBehaviour {
     }
 
     internal void UpdateWallJumpVelocity() {
-        if (isWallJumping && player.IsGrounded()) {
+        /*
+         * If the player is grounded
+         * or was NOT on a wall last frame and is this frame
+         * isWallJumping = false
+         */
+        if (player.IsGrounded() || (!wasOnWallLastFrame && IsOnWall())) {
             isWallJumping = false;
         }
         float x = Mathf.Lerp(jumpVelocity.x, 0, Time.deltaTime);
