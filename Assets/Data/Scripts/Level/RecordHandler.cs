@@ -37,9 +37,9 @@ public class RecordHandler : MonoBehaviour {
         } else {
             records = new LevelRecord[SceneHandler.numLevels];
             for (int i = 0; i < records.Length; i++) {
-                print("test" + i);
-                records[i] = new LevelRecord(i, 0f, 0f);
+                records[i] = new LevelRecord(i, 0f, 0f, false);
             }
+            if (records.Length > 1) records[1].unlocked = true;
             SaveRecords();
         }
     }
@@ -50,7 +50,8 @@ public class RecordHandler : MonoBehaviour {
         float hm = Mathf.Max(records[level].highestMomentum, highestMomentum);
         bool isTimeRecord = ft == fastestTime;
         bool isMomentumRecord = hm == highestMomentum;
-        records[level] = new LevelRecord(level, ft, hm);
+        records[level] = new LevelRecord(level, ft, hm, true);
+        if (records[level + 1] != null) records[level + 1].unlocked = true;
         SaveRecords();
 
         OnRecordUpdated?.Invoke(level, records[level], isTimeRecord, isMomentumRecord);
@@ -93,11 +94,13 @@ public class LevelRecord {
     public int level;
     public float fastestTime;
     public float highestMomentum;
+    public bool unlocked;
 
-    public LevelRecord(int level, float fastestTime, float highestMomentum) {
+    public LevelRecord(int level, float fastestTime, float highestMomentum, bool unlocked) {
         this.level = level;
         this.fastestTime = fastestTime;
         this.highestMomentum = highestMomentum;
+        this.unlocked = unlocked;
     }
 
     public override string ToString() {

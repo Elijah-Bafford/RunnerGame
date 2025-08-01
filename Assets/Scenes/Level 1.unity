@@ -15650,10 +15650,10 @@ MonoBehaviour:
     m_ActionName: 'Player/Grapple[/Mouse/rightButton]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 479569802}
-        m_TargetAssemblyTypeName: PlayingInput, Assembly-CSharp
-        m_MethodName: DELETE
-        m_Mode: 0
+      - m_Target: {fileID: 479569804}
+        m_TargetAssemblyTypeName: GameStateHandler, Assembly-CSharp
+        m_MethodName: ButtonQuit
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -15796,7 +15796,7 @@ MonoBehaviour:
   wallGravity: 1.5
   wallGravityMax: 7
   wallGravityIncrease: 2
-  wallJumpForce: {x: 1, y: 0.6, z: 0.8}
+  wallJumpForce: {x: 2.5, y: 0.35, z: 2}
 --- !u!43 &1806059070
 Mesh:
   m_ObjectHideFlags: 0

@@ -31,7 +31,7 @@ public class LevelComplete : MonoBehaviour {
     private void OnLevelComplete() {
         gameStateHandler.TriggerLevelComplete();
         speedNum.text = momentumMech.GetHighestSpeed().ToString();
-        timeNum.text = timer.GetTimeAsString(true);
+        timeNum.text = GameTimer.GetTimeAsString(true);
         RecordHandler.Instance.UpdateRecord(SceneHandler.currentLevel, timer.GetCurrentTime(), momentumMech.GetHighestSpeed());
     }
 

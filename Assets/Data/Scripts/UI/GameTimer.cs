@@ -5,7 +5,7 @@ public class GameTimer : MonoBehaviour {
 
     [SerializeField] TextMeshProUGUI UITimer;
 
-    private float currentTime;
+    private static float currentTime;
     private bool isRunning = true;
 
     private void Update() {
@@ -22,7 +22,7 @@ public class GameTimer : MonoBehaviour {
     /// <param name="unit"></param>
     /// <param name="time"></param>
     /// <returns></returns>
-    public int GetTimeAs(string unit, float time) {
+    public static int GetTimeAs(string unit, float time) {
         return unit switch {
             "minutes" => Mathf.FloorToInt(time / 60),
             "seconds" => Mathf.FloorToInt(time % 60),
@@ -55,7 +55,7 @@ public class GameTimer : MonoBehaviour {
     /// <param name="isCurrentTime"></param>
     /// <param name="time"></param>
     /// <returns></returns>
-    public string GetTimeAsString(bool isCurrentTime, float time = 0) {
+    public static string GetTimeAsString(bool isCurrentTime, float time = 0) {
         float time_v = isCurrentTime ? currentTime : time;
         int minutes = GetTimeAs("minutes", time_v);
         int seconds = GetTimeAs("seconds", time_v);

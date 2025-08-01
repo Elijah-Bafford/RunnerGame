@@ -50,7 +50,7 @@ public class GameStateHandler : MonoBehaviour {
                 highestMomentum = "None";
                 return;
             }
-            fastestTime = gameTimer.GetTimeAsString(false, thisRecord.fastestTime);
+            fastestTime = GameTimer.GetTimeAsString(false, thisRecord.fastestTime);
             highestMomentum = thisRecord.highestMomentum.ToString();
         }
     }
