@@ -5271,7 +5271,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 1607045371}
-  m_VersionIndex: 5777
+  m_VersionIndex: 5780
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -19226,7 +19226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8108344319191768933, guid: d2269274f3b6c994d9f12e5ea2457267, type: 3}
       propertyPath: m_fontSize
-      value: 30
+      value: 35.8
       objectReference: {fileID: 0}
     - target: {fileID: 8108344319191768933, guid: d2269274f3b6c994d9f12e5ea2457267, type: 3}
       propertyPath: m_fontColor.b

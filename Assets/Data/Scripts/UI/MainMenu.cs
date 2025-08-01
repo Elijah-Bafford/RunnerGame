@@ -39,7 +39,12 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
+    private void UISound() {
+        AudioHandler.Instance.PlaySound(SoundType.UISelect);
+    }
+
     private void OnLevelButtonClicked(int levelIndex) {
+        UISound();
         sceneHandler.LoadLevel(levelIndex);
     }
 
@@ -49,9 +54,9 @@ public class MainMenu : MonoBehaviour {
     }
 
     // Button events
-    public void StartGame() { ShowLevelSelectMenu(true); }
-    public void Return_LSM() { ShowLevelSelectMenu(false); }
-    public void QuitGame() { Application.Quit(); }
+    public void StartGame() { UISound(); ShowLevelSelectMenu(true); }
+    public void Return_LSM() { UISound(); ShowLevelSelectMenu(false); }
+    public void QuitGame() { UISound(); Application.Quit(); }
 
     public void QuitInEditor() {
 #if UNITY_EDITOR

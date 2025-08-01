@@ -1,0 +1,25 @@
+	UI Select, Jump FX
+Title: Sound Effects Pack
+
+Created by: Ashe (OwlishMedia)
+
+Creator Profile: https://opengameart.org/users/owlishmedia
+
+Source: https://opengameart.org/content/sound-effects-pack
+
+License: Licensed under CC0 1.0 UNIVERSAL (Public Domain)
+
+https://creativecommons.org/publicdomain/zero/1.0/
+
+	Sword Impact FX
+Title: RPG Sound Pack
+
+Created by: Ben (artisticdude)
+
+Creator Profile: https://opengameart.org/users/artisticdude
+
+Source: https://opengameart.org/content/rpg-sound-pack
+
+License: Licensed under CC0 1.0 UNIVERSAL (Public Domain)
+
+https://creativecommons.org/publicdomain/zero/1.0/

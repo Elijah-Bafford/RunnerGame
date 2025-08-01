@@ -151,9 +151,11 @@ public class GameStateHandler : MonoBehaviour {
         }
     }
 
-    public void ButtonUnpause() { state = GameState.Playing; }
-    public void ButtonQuit() { state = GameState.MainMenu; }
-    public void ButtonRestart() { state = GameState.LevelRestart; }
-    public void ButtonContinue() { state = GameState.NextLevel; }
+    private void UISound() { AudioHandler.Instance.PlaySound(SoundType.UISelect); }
+
+    public void ButtonUnpause() { UISound(); state = GameState.Playing; }
+    public void ButtonQuit() { UISound(); state = GameState.MainMenu; }
+    public void ButtonRestart() { UISound(); state = GameState.LevelRestart; }
+    public void ButtonContinue() { UISound(); state = GameState.NextLevel; }
     public void TriggerLevelComplete() { state = GameState.LevelComplete; }
 }
