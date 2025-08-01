@@ -51,7 +51,9 @@ public class RecordHandler : MonoBehaviour {
         bool isTimeRecord = ft == fastestTime;
         bool isMomentumRecord = hm == highestMomentum;
         records[level] = new LevelRecord(level, ft, hm, true);
-        if (records[level + 1] != null) records[level + 1].unlocked = true;
+        if (level + 1 < records.Length && records[level + 1] != null) {
+            records[level + 1].unlocked = true;
+        }
         SaveRecords();
 
         OnRecordUpdated?.Invoke(level, records[level], isTimeRecord, isMomentumRecord);

@@ -37,6 +37,7 @@ public class Player : MonoBehaviour {
     private bool isOnSlope = false;
 
     private bool isInAttack = false;
+    private bool slideAudioPlaying = false;
 
     private float leanAmount = 0.0f;
 
@@ -71,6 +72,16 @@ public class Player : MonoBehaviour {
         UpdateDirection();
         Move();
         UpdateLean();
+
+        bool shouldPlaySlideAudio = isSliding && isGrounded;
+
+        if (shouldPlaySlideAudio && !slideAudioPlaying) {
+            slideAudioPlaying = true;
+            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, true);
+        } else if (!shouldPlaySlideAudio && slideAudioPlaying) {
+            slideAudioPlaying = false;
+            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
+        }
     }
 
     private void LateUpdate() {
@@ -140,6 +151,7 @@ public class Player : MonoBehaviour {
 
     public void Attack() {
         if (isInAttack) return;
+        AudioHandler.Instance.PlaySound(SoundType.SwordImpact);
         playerAttack.HasAttacked(true);
         isInAttack = true;
         anim.SetTrigger("Attack");
@@ -147,12 +159,16 @@ public class Player : MonoBehaviour {
 
     private void Slide() {
         isSliding = !isSliding;
+
         anim.SetBool("Slide", isSliding);
         speedLossMult = isSliding ? speedLossMult + 1.5f : speedLossMult - 1.5f;
     }
 
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
+        if (!keyReleased) {
+            AudioHandler.Instance.PlaySound(SoundType.Jump);
+        }
 
         if (wallRunMech.IsOnWall()) {
             TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), -2.5f, wallRunMech.IsOnWall() && !keyReleased);

@@ -23,3 +23,16 @@ Source: https://opengameart.org/content/rpg-sound-pack
 License: Licensed under CC0 1.0 UNIVERSAL (Public Domain)
 
 https://creativecommons.org/publicdomain/zero/1.0/
+
+	Sliding
+Title: 100 CC0 SFX #2
+
+Created by: rubberduck
+
+Creator Profile: https://opengameart.org/users/rubberduck
+
+Source: https://opengameart.org/content/100-cc0-sfx-2
+
+License: Licensed under CC0 1.0 UNIVERSAL (Public Domain)
+
+https://creativecommons.org/publicdomain/zero/1.0/

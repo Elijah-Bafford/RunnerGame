@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public enum SoundType { 
-    UISelect, SwordImpact, Jump 
+public enum SoundType {
+    UISelect, SwordImpact, Jump, Slide
 }
 
 [System.Serializable]
@@ -46,4 +46,22 @@ public class AudioHandler : MonoBehaviour {
             Debug.LogWarning($"No AudioSource found for SoundType {sound}");
         }
     }
+
+    public void SetPlaySoundLoop(SoundType sound, bool play) {
+        if (soundDict.TryGetValue(sound, out var audioSource)) {
+            if (play && !audioSource.isPlaying) audioSource.Play();
+            else if (audioSource.isPlaying) audioSource.Stop();
+        } else Debug.LogWarning($"No AudioSource found for SoundType {sound}");
+    }
+
+    public void SetPauseAll(bool pauseAll) {
+        foreach (var kvp in soundDict) {
+            // Only pause/unpause if NOT a UI sound
+            if (kvp.Key != SoundType.UISelect) {
+                if (pauseAll) kvp.Value.Pause();
+                else kvp.Value.UnPause();
+            }
+        }
+    }
+
 }

@@ -103,6 +103,7 @@ public class GameStateHandler : MonoBehaviour {
     /// </summary>
     /// <param name="inMenuMode"></param>
     private void ToggleMenuMode(bool inMenuMode) {
+        AudioHandler.Instance.SetPauseAll(inMenuMode);
         Cursor.lockState = inMenuMode ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = inMenuMode;
 
