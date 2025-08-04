@@ -6,8 +6,7 @@ public class GrappleMechanic : MonoBehaviour {
     [Header("Lock-on/Grapple Mechanics")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private RectTransform lockOnReticle;
-    [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private LayerMask enemyLayer, wallLayer, groundLayer;
     [SerializeField] private float detectRange = 20f;
     [SerializeField] private float grappleRange = 10f;
     [SerializeField] private float grappleSpeed = 30f;
@@ -97,6 +96,10 @@ public class GrappleMechanic : MonoBehaviour {
             float distance = Vector3.Distance(origin, enemy.transform.position);
 
             // Don't allow grapple through walls
+            if (Physics.Raycast(origin, toEnemy.normalized, out RaycastHit hit_, distance, groundLayer))
+                if (!hit_.collider.GetComponentInParent<Enemy>()) continue;
+
+            Debug.DrawLine(origin, enemy.transform.position, Color.green, 1.0f);
             RaycastHit rayHit;
             if (Physics.Raycast(origin, toEnemy.normalized, out rayHit, distance, enemyLayer | wallLayer))
                 if (!rayHit.collider.GetComponentInParent<Enemy>()) continue;
@@ -116,7 +119,20 @@ public class GrappleMechanic : MonoBehaviour {
             lockOnTarget = bestTarget;
             lastLockTarget = bestTarget;
         } else if (lastLockTarget != null) {
-            bool stillVisible = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= detectRange;
+            float lastDistance = Vector3.Distance(origin, lastLockTarget.transform.position);
+            Vector3 toLast = (lastLockTarget.transform.position - origin).normalized;
+            bool losBlocked = false;
+
+            // Check occlusion
+            RaycastHit lastHit;
+            int mask = enemyLayer.value | wallLayer.value | groundLayer.value;
+            if (Physics.Raycast(origin, toLast, out lastHit, lastDistance, mask)) {
+                if (!lastHit.collider.GetComponentInParent<Enemy>()) {
+                    losBlocked = true;
+                }
+            }
+
+            bool stillVisible = lastDistance <= detectRange && !losBlocked;
             if (!stillVisible) lastLockTarget = null;
         }
 

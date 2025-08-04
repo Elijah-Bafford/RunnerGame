@@ -68,6 +68,7 @@ public class GameStateHandler : MonoBehaviour {
                 playerInput.SwitchCurrentActionMap("UI");
                 Time.timeScale = 1;
                 sceneHandler.LoadLevel(0);
+                gameTimer.ResetTimer();
                 break;
             case GameState.Playing:
                 ShowPauseOverlay(false);
@@ -80,10 +81,13 @@ public class GameStateHandler : MonoBehaviour {
                 ShowDeathOverlay(false);
                 sceneHandler.LoadLevel(SceneHandler.currentLevel);
                 state = GameState.Playing;
+                gameTimer.ResetTimer();
                 break;
             case GameState.Death:
+                gameTimer.ResetTimer();
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(true);
+                gameTimer.ResetTimer();
                 break;
             case GameState.LevelComplete:
                 ShowPauseOverlay(false);
@@ -95,6 +99,7 @@ public class GameStateHandler : MonoBehaviour {
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(false);
                 sceneHandler.LoadLevel(SceneHandler.currentLevel + 1);
+                gameTimer.ResetTimer();
                 break;
         }
     }

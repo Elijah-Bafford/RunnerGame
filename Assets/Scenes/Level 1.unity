@@ -15803,6 +15803,9 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 1024
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 8
   detectRange: 20
   grappleRange: 10
   grappleSpeed: 30
