@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class MainMenu : MonoBehaviour {
 
-    [Header("Scene Handler Ref")]
-    [SerializeField] private SceneHandler sceneHandler;
-
     [Header("Level Buttons")]
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private RectTransform scrollContent;
@@ -45,7 +42,7 @@ public class MainMenu : MonoBehaviour {
 
     private void OnLevelButtonClicked(int levelIndex) {
         UISound();
-        sceneHandler.LoadLevel(levelIndex);
+        SceneHandler.Instance.LoadLevel(levelIndex);
     }
 
     private void ShowLevelSelectMenu(bool show) {

@@ -4,69 +4,73 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-5)]
 public class SceneHandler : MonoBehaviour {
-    
+
+    public static SceneHandler Instance { get; private set; }
+
+    [Header("Set the number of levels (including the Main Menu)")]
+    [SerializeField] private int numberOfLevels;
     public static int currentLevel;
-    public static int numLevels = 3;
+    public static int numLevels;
 
     [Header("Loading UI")]
-    [Tooltip("Set this index value of the scene this Handler is attached to")]
-    [SerializeField] private int thisLevel;
-
-    [Tooltip("Disable an element when loading starts. Not required.")]
-    [SerializeField] private GameObject ObjToDisable;
-
-    public static event Action<int> OnLevelLoad;
-
-
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private Slider progressBar;
 
+    public static event Action<int> OnLevelLoad;
+
     private void Awake() {
-        currentLevel = thisLevel;
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        numLevels = numberOfLevels;
+        currentLevel = SceneManager.GetActiveScene().buildIndex;
+        print("Current Level: " + currentLevel);
     }
 
     /// <summary>
-    /// Normally load a level.
+    /// Load a level.
     /// </summary>
     /// <param name="level"></param>
     public void LoadLevel(int level) {
         currentLevel = level;
         StartCoroutine(LoadSceneAsync(level));
-        print("OnLoad");
-        OnLevelLoad?.Invoke(level);
     }
-
-    /*
-    /// <summary>
-    /// Load a level with no loading screen.
-    /// </summary>
-    /// <param name="level"></param>
-    public void InstantLoad(int level) {
-        currentLevel = level;
-        SceneManager.LoadScene(currentLevel);
-    }
-    */
 
     private IEnumerator LoadSceneAsync(int levelIndex) {
-        if (ObjToDisable) ObjToDisable.SetActive(false);
         loadingScreen.SetActive(true);
         progressBar.value = 0f;
 
-        yield return new WaitForSeconds(0.5f);      // Showing the loading sreen for debugging.
-        AsyncOperation operation = SceneManager.LoadSceneAsync(levelIndex);
+        yield return new WaitForSeconds(0.5f);
 
+        AsyncOperation operation = SceneManager.LoadSceneAsync(levelIndex);
+        operation.allowSceneActivation = false; // Hold off activation until we're ready
+
+        // While loading, update progress
         while (operation.progress < 0.9f) {
             float progress = Mathf.Clamp01(operation.progress / 0.9f);
-            
             progressBar.value = progress;
             yield return null;
         }
 
         progressBar.value = 1f;
 
+        // Now allow the scene to activate
         operation.allowSceneActivation = true;
-        yield return null;
+
+        // Wait for the scene activation to complete
+        while (!operation.isDone) {
+            yield return null;
+        }
+
+        OnLevelLoad?.Invoke(levelIndex);
+
+        print("Current Level: " + currentLevel);
+        loadingScreen?.SetActive(false);
     }
+
 }

@@ -2322,6 +2322,10 @@ PrefabInstance:
       propertyPath: ObjToDisable
       value: 
       objectReference: {fileID: 1051051755}
+    - target: {fileID: 142673415750973883, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
+      propertyPath: numberOfLevels
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 4477843197095016659, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
       propertyPath: m_Name
       value: Scene Handler

@@ -12,7 +12,6 @@ public class GameStateHandler : MonoBehaviour {
 
     [Header("General Refs")]
     [SerializeField] GameTimer gameTimer;
-    [SerializeField] SceneHandler sceneHandler;
     [SerializeField] PlayerInput playerInput;
 
     [Header("Other Overlay Refs")]
@@ -67,7 +66,7 @@ public class GameStateHandler : MonoBehaviour {
             case GameState.MainMenu:
                 playerInput.SwitchCurrentActionMap("UI");
                 Time.timeScale = 1;
-                sceneHandler.LoadLevel(0);
+                SceneHandler.Instance.LoadLevel(0);
                 gameTimer.ResetTimer();
                 break;
             case GameState.Playing:
@@ -79,7 +78,7 @@ public class GameStateHandler : MonoBehaviour {
             case GameState.LevelRestart:
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(false);
-                sceneHandler.LoadLevel(SceneHandler.currentLevel);
+                SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel);
                 state = GameState.Playing;
                 gameTimer.ResetTimer();
                 break;
@@ -98,7 +97,7 @@ public class GameStateHandler : MonoBehaviour {
                 ShowLevelCompleteOverlay(false);
                 ShowPauseOverlay(false);
                 ShowDeathOverlay(false);
-                sceneHandler.LoadLevel(SceneHandler.currentLevel + 1);
+                SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel + 1);
                 gameTimer.ResetTimer();
                 break;
         }
