@@ -166,7 +166,7 @@ public class Player : MonoBehaviour {
 
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
-        if (!keyReleased && (isGrounded || IsWallRunning())) {
+        if (!keyReleased && (isGrounded || (IsWallRunning() && speedStat > 0))) {
             AudioHandler.Instance.PlaySound(SoundType.Jump);
         }
 

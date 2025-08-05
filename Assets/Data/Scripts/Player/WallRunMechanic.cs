@@ -44,6 +44,13 @@ public class WallRunMechanic : MonoBehaviour {
         isOnWallRight = !isGrounded && Physics.CheckSphere(wallCheckRight.position, wallCheckRadius, wallLayer);
     }
 
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(wallCheckLeft.position, wallCheckRadius);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(wallCheckRight.position, wallCheckRadius);
+    }
+
     /// <summary>
     /// Called in fixed update in the player class.
     /// When wall running, slowly increase gravity over time. 
