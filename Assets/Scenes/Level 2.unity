@@ -22251,19 +22251,7 @@ MonoBehaviour:
     m_ActionId: 10b4632c-6244-45ec-b4be-c01068739466
     m_ActionName: 'Player/Grapple[/Mouse/rightButton]'
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 479569804}
-        m_TargetAssemblyTypeName: GameStateHandler, Assembly-CSharp
-        m_MethodName: ButtonQuit
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_ActionId: 57845174-c107-4c6c-b5f4-2fd81df74a26
     m_ActionName: 'Player/Temp[/Keyboard/f]'
   m_NeverAutoSwitchControlSchemes: 0

@@ -1704,7 +1704,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 597d1cd96e3399c4ca5f616fedc96e25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneHandler: {fileID: 1564538973}
   levelButtonPrefab: {fileID: 8420229685885669827, guid: b612664b54b4edd42a73b0e52d893469, type: 3}
   scrollContent: {fileID: 118711105}
   titleMenu: {fileID: 398070713}
@@ -2193,17 +2192,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1564538973 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 142673415750973883, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
-  m_PrefabInstance: {fileID: 5046688726865502799}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7d5d47b649e2054aa51ad21d9ac6069, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1615412269 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8156449839259477768, guid: c4cc283e885acdc408cf908393c7f344, type: 3}
@@ -2324,7 +2312,7 @@ PrefabInstance:
       objectReference: {fileID: 1051051755}
     - target: {fileID: 142673415750973883, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
       propertyPath: numberOfLevels
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4477843197095016659, guid: d8c98df3f6c3dd047b21dbf57ad5cc2a, type: 3}
       propertyPath: m_Name

@@ -87,6 +87,11 @@ public class RecordHandler : MonoBehaviour {
         } else {
             Debug.LogWarning("Failed to load records, creating new ones.");
             records = new LevelRecord[SceneHandler.numLevels];
+            for (int i = 0; i < records.Length; i++) {
+                records[i] = new LevelRecord(i, 0f, 0f, false);
+            }
+            if (records.Length > 1) records[1].unlocked = true;
+            SaveRecords();
         }
     }
 }
