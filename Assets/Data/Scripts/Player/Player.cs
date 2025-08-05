@@ -124,6 +124,12 @@ public class Player : MonoBehaviour {
     private void Move() {
         float speed = moveSpeed * momentumMech.GetTrueSpeedMult();
 
+        if (currentDir != Direction.None) {
+            if (!isSliding && (isGrounded || IsWallRunning())) {
+                AudioHandler.Instance.PlaySoundRND(SoundType.Footstep);
+            }
+        }
+
         // Camera-relative movement
         Vector3 camForward = cameraTransform.forward;
         camForward.y = 0;

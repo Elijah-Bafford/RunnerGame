@@ -1,4 +1,4 @@
-	UI Select, Jump FX
+	UI Select, Jump, Footsteps
 Title: Sound Effects Pack
 
 Created by: Ashe (OwlishMedia)
