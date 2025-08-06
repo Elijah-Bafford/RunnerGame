@@ -44,19 +44,31 @@ public class RecordHandler : MonoBehaviour {
         }
     }
 
-    public void UpdateRecord(int level, float fastestTime, float highestMomentum) {
-        float ft = records[level].fastestTime;
-        if (ft == 0) ft = fastestTime; // by default, records start at 0 and 0 can't be beat so override it.
-        float hm = Mathf.Max(records[level].highestMomentum, highestMomentum);
-        bool isTimeRecord = ft == fastestTime;
-        bool isMomentumRecord = hm == highestMomentum;
-        records[level] = new LevelRecord(level, ft, hm, true);
-        if (level + 1 < records.Length && records[level + 1] != null) {
+    public void UpdateRecord(int level, float newTime, float newMomentum) {
+        // grab the existing record
+        var rec = records[level];
+
+        // determine if we've beaten the time record (or if it's the first run)
+        bool isTimeRecord = rec.fastestTime == 0f || newTime < rec.fastestTime;
+        float bestTime = isTimeRecord ? newTime : rec.fastestTime;
+
+        // determine if we've beaten the momentum record
+        bool isMomentumRecord = newMomentum > rec.highestMomentum;
+        float bestMomentum = isMomentumRecord ? newMomentum : rec.highestMomentum;
+
+        // update in place, preserve/unlock state
+        rec.fastestTime = bestTime;
+        rec.highestMomentum = bestMomentum;
+        rec.unlocked = true;
+
+        // unlock next level if it exists
+        if (level + 1 < records.Length)
             records[level + 1].unlocked = true;
-        }
+
         SaveRecords();
 
-        OnRecordUpdated?.Invoke(level, records[level], isTimeRecord, isMomentumRecord);
+        // notify listeners
+        OnRecordUpdated?.Invoke(level, rec, isTimeRecord, isMomentumRecord);
     }
 
     public LevelRecord GetRecord(int level) {
