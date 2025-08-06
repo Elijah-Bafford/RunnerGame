@@ -1,19 +1,52 @@
+using System;
 using UnityEngine;
 
 public class MainMenu : MonoBehaviour {
+    public static MainMenu Instance { get; private set; }
 
     [Header("Level Buttons")]
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private RectTransform scrollContent;
 
     [Header("Menus")]
+    [SerializeField] private GameObject MainMenuUI;
     [SerializeField] private GameObject titleMenu;
     [SerializeField] private GameObject levelSelectMenu;
+    [SerializeField] private GameObject creditsMenu;
+    [SerializeField] private GameObject settingsMenu;
 
+    private enum MenuType { TitleMenu, LevelSelect, Credits, Settings }
+    private MenuType currentMenu = MenuType.TitleMenu;
+    private GameObject[] menus = new GameObject[Enum.GetValues(typeof(MenuType)).Length];
 
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        menus[(int)MenuType.TitleMenu] = titleMenu;
+        menus[(int)MenuType.LevelSelect] = levelSelectMenu;
+        menus[(int)MenuType.Credits] = creditsMenu;
+        menus[(int)MenuType.Settings] = settingsMenu;
+        print("AWAKE");
+    }
 
     private void Start() {
-        ShowLevelSelectMenu(false);
+        SceneHandler.OnLevelLoad += OnLevelLoad;
+        print("START");
+
+        for (int i = 0; i < menus.Length; i++) {
+            if (menus[i] != menus[(int)MenuType.TitleMenu] && menus[i] != null) {
+                menus[i].SetActive(false);
+            }
+        }
+        currentMenu = MenuType.TitleMenu;
+        ShowMenu(currentMenu);
+
+
         for (int i = 0; i < SceneHandler.numLevels; i++) {
             if (i == 0) continue;
 
@@ -36,6 +69,15 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
+    private void OnLevelLoad(int level) {
+        if (level == 0) {
+            MainMenuUI.SetActive(true);
+            ShowMenu(MenuType.TitleMenu);
+        } else {
+            MainMenuUI.SetActive(false);
+        }
+    }
+
     private void UISound() {
         AudioHandler.Instance.PlaySound(SoundType.UISelect);
     }
@@ -45,14 +87,17 @@ public class MainMenu : MonoBehaviour {
         SceneHandler.Instance.LoadLevel(levelIndex);
     }
 
-    private void ShowLevelSelectMenu(bool show) {
-        levelSelectMenu.SetActive(show);
-        titleMenu.SetActive(!show);
+    private void ShowMenu(MenuType menu, bool show = true) {
+        menus[(int)currentMenu].SetActive(!show);
+        menus[(int)menu].SetActive(show);
+        currentMenu = menu;
     }
 
     // Button events
-    public void StartGame() { UISound(); ShowLevelSelectMenu(true); }
-    public void Return_LSM() { UISound(); ShowLevelSelectMenu(false); }
+    public void ReturnToTitle() { UISound(); ShowMenu(MenuType.TitleMenu); }
+    public void StartGame() { UISound(); ShowMenu(MenuType.LevelSelect); }
+    public void Settings() { UISound(); ShowMenu(MenuType.Settings); }
+    public void Credits() { UISound(); ShowMenu(MenuType.Credits); }
     public void QuitGame() { UISound(); Application.Quit(); }
 
     public void QuitInEditor() {
