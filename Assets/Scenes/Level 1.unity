@@ -11232,11 +11232,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357f94c6aa833804bacaf40deee1c06a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1785767171}
   gameStateHandler: {fileID: 479569804}
   timer: {fileID: 1980729243}
-  player: {fileID: 1785767171}
   timeNum: {fileID: 292895731}
-  speedNum: {fileID: 1467391350}
+  momentumNum: {fileID: 1467391350}
   ARecord: {fileID: 2030550507}
   gold: {r: 1, g: 0.8515253, b: 0, a: 1}
   blue: {r: 0.4862745, g: 0.61960787, b: 1, a: 1}

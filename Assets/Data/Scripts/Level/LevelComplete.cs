@@ -3,11 +3,15 @@ using UnityEngine;
 
 public class LevelComplete : MonoBehaviour {
 
-    [SerializeField] GameStateHandler gameStateHandler;
-    [SerializeField] GameTimer timer;
+
     [SerializeField] Player player;
+    [Header("Game Input Object")]
+    [SerializeField] GameStateHandler gameStateHandler;
+    [Header("Game Timer Object")]
+    [SerializeField] GameTimer timer;
+    [Header("Level Complete Overlay TMPs")]
     [SerializeField] TextMeshProUGUI timeNum;
-    [SerializeField] TextMeshProUGUI speedNum;
+    [SerializeField] TextMeshProUGUI momentumNum;
     [Header("The \"record\" text in the Level Complete Overlay")]
     [SerializeField] GameObject ARecord;
     [Header("Colors")]
@@ -30,14 +34,14 @@ public class LevelComplete : MonoBehaviour {
 
     private void OnLevelComplete() {
         gameStateHandler.TriggerLevelComplete();
-        speedNum.text = momentumMech.GetHighestSpeed().ToString();
+        momentumNum.text = momentumMech.GetHighestSpeed().ToString();
         timeNum.text = GameTimer.GetTimeAsString(true);
         RecordHandler.Instance.UpdateRecord(SceneHandler.currentLevel, timer.GetCurrentTime(), momentumMech.GetHighestSpeed());
     }
 
     private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {
         if (ARecord != null) ARecord.SetActive(isTimeRecord || isMomentumRecord);
-        speedNum.color = isMomentumRecord ? gold : blue;
+        momentumNum.color = isMomentumRecord ? gold : blue;
         timeNum.color = isTimeRecord ? gold : red;
     }
 }
