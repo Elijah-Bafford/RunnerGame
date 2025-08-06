@@ -241,6 +241,10 @@ public class Player : MonoBehaviour {
         speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
     }
 
+    public void Buff(int time) {
+        momentumMech.BuffSpeed(time);
+    }
+
     /// <summary>
     /// Update the speed bar. Lerp the value.
     /// </summary>

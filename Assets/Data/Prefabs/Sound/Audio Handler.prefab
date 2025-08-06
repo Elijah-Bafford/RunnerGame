@@ -55,6 +55,14 @@ MonoBehaviour:
     audioSource: {fileID: 1711364344499477025}
   - Type: 3
     audioSource: {fileID: 1571415510306671155}
+  - Type: 4
+    audioSource: {fileID: 8041446375838693193}
+  - Type: 4
+    audioSource: {fileID: 3767401592158879849}
+  - Type: 4
+    audioSource: {fileID: 4475226855792255295}
+  - Type: 4
+    audioSource: {fileID: 7522397687713552051}
 --- !u!1 &2993374596837872590
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +237,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 399887179c5572b4aaef210989b2ea33, type: 3}
   m_Resource: {fileID: 8300000, guid: 399887179c5572b4aaef210989b2ea33, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -487,7 +495,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 4149b39be64ad5c479ab521983bd4ad0, type: 3}
   m_Resource: {fileID: 8300000, guid: 4149b39be64ad5c479ab521983bd4ad0, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -780,7 +788,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: ad06c62b19e3769408cb43ccb578fe5d, type: 3}
   m_Resource: {fileID: 8300000, guid: ad06c62b19e3769408cb43ccb578fe5d, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.584
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -909,7 +917,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 3967c37ac15a38d4ab50c4dd914a9b67, type: 3}
   m_Resource: {fileID: 8300000, guid: 3967c37ac15a38d4ab50c4dd914a9b67, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 0
   Mute: 0

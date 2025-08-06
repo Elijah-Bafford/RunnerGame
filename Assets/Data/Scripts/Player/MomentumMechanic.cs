@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using Unity.Collections;
 using UnityEngine;
@@ -7,6 +8,7 @@ using UnityEngine.UI;
 public class MomentumMechanic : MonoBehaviour {
     [Header("UI Refs")]
     [SerializeField] private TextMeshProUGUI speedMultDisplay;
+    [SerializeField] private GameObject buffDisplay;
     [Header("Momentum Settings")]
     [Tooltip("How Fast the player loses SpeedStat")]
     [SerializeField] private float speedLossMult = 2f;
@@ -14,6 +16,7 @@ public class MomentumMechanic : MonoBehaviour {
     [SerializeField] private float timeScale = 1f;
     private Player player;
 
+    private int buffTimer = 0;
     private float speedMult = 1.0f;
     private float speedBasis = 1.0f;
     private float highestSpeed = 0f;
@@ -65,6 +68,8 @@ public class MomentumMechanic : MonoBehaviour {
         // Always drain speed stat, this value is clamped.
         player.ChangeSpeedStat(-speedLossMult * Time.fixedDeltaTime);
 
+        if (buffTimer > 0) buffTimer--;
+
         bool hasSpeedStat = speedStat > 0f;
 
         SetBasis(currentDir, hasSpeedStat);
@@ -102,13 +107,30 @@ public class MomentumMechanic : MonoBehaviour {
 
         } else if (!hasSpeedStat || currentDir == Player.Direction.None) momentum = -0.07f;
 
+        if (momentum > 0f && buffTimer > 0) {
+            print("2X MOVEMENT");
+            momentum *= 2f;
+        }
+
         EditSpeedMult(momentum);
         UpdateUI(speedStat);
         UpdateHighestSpeed();
     }
 
-    private void UpdateHighestSpeed() {
-        if (speedMult > highestSpeed) highestSpeed = speedMult;
+    public void BuffSpeed(int time) {
+        if (buffTimer > 0) {
+            StopCoroutine("DisplayBuff");
+        }
+        StartCoroutine(DisplayBuff(time));
+        float ticksPerSec = 1f / Time.fixedDeltaTime;
+        buffTimer = Mathf.CeilToInt(time * ticksPerSec);
+        
+    }
+
+    private IEnumerator DisplayBuff(float time) {
+        buffDisplay.SetActive(true);
+        yield return new WaitForSeconds(time);
+        buffDisplay.SetActive(false);
     }
 
     private void SetBasis(Player.Direction currentDir, bool hasSpeedStat) {
@@ -151,8 +173,8 @@ public class MomentumMechanic : MonoBehaviour {
         if (speedMult < 1.0f) { speedMult = 1.0f; }
     }
 
+    private void UpdateHighestSpeed() { if (speedMult > highestSpeed) highestSpeed = speedMult; }
     public float GetTrueSpeedMult() { return speedMult * speedBasis; }
     public float GetActualSpeedMult() { return speedMult; }
-
     public float GetHighestSpeed() { return highestSpeed; }
 }
