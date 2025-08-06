@@ -33,12 +33,8 @@ public class MomentumMechanic : MonoBehaviour {
     private bool isWallJumping = false;
 
 
-    /// <summary>
-    /// Call when the player script starts.
-    /// </summary>
-    /// <param name="speedStat"></param>
-    internal void SetPlayerRef(Player player) {
-        this.player = player;
+    private void Start() {
+        player = GetComponent<Player>();
     }
 
     /* How it works:

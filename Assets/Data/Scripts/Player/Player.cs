@@ -3,7 +3,9 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-1)]
 public class Player : MonoBehaviour {
+    public static Player player;
 
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -47,13 +49,13 @@ public class Player : MonoBehaviour {
     private Direction currentDir;
 
     private void Awake() {
+        player = this;      // Pseudo-Singleton?
         rb = GetComponent<Rigidbody>();
         speedBarAnimator = speedBar.GetComponent<Animator>();
         grappleMech = GetComponent<GrappleMechanic>();
         momentumMech = GetComponent<MomentumMechanic>();
         wallRunMech = GetComponent<WallRunMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
-        momentumMech.SetPlayerRef(this);
     }
 
     private void OnEnable() {
@@ -261,4 +263,6 @@ public class Player : MonoBehaviour {
     public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
     public float GetJumpForce() { return jumpForce; }
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
+
+    public Transform GetTransform() { return transform; }
 }

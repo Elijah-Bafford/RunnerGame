@@ -2,21 +2,22 @@ using UnityEngine;
 
 public class DeathPlane : MonoBehaviour {
 
-    [Header("The Y position of this object is the lowest the player can go\nPlayer Object Ref:")]
-    [SerializeField] private GameObject player;
-
-    private Player playerScript;
+    [Header("The height at which the player dies from falling off the map")]
+    [SerializeField] private float yPosition;
+    private Transform playerTransform;
+    private Player player;
     private bool isDead = false;
 
     private void Start() {
         isDead = false;
-        playerScript = player.GetComponent<Player>();
+        player = Player.player;
+        playerTransform = player.GetTransform();
     }
 
     private void FixedUpdate() {
         if (isDead) return;
-        if (player.transform.position.y < gameObject.transform.position.y) {
-            playerScript.Die();
+        if (playerTransform.position.y <= yPosition) {
+            player.Die();
         }
     }
 }

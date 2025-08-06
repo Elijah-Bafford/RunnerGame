@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour, IDamageable {
@@ -11,7 +10,6 @@ public class Enemy : MonoBehaviour, IDamageable {
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float turnSpeed = 720f;
     [Header("Refs")]
-    [SerializeField] Player player;
     [SerializeField] private Animator anim;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundCheck;
@@ -21,6 +19,7 @@ public class Enemy : MonoBehaviour, IDamageable {
     public static bool stopCombat = false;
 
     private Transform playerTransform;
+    private Player player;
     private Rigidbody rb;
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -38,7 +37,9 @@ public class Enemy : MonoBehaviour, IDamageable {
     private State currentState;
 
     private void Awake() {
+        player = Player.player;
         playerTransform = player.GetComponent<Transform>();
+        
         rb = GetComponent<Rigidbody>();
         startPosition = rb.position;
         startRotation = rb.rotation;

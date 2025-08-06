@@ -2,23 +2,15 @@ using System;
 using System.IO;
 using UnityEngine;
 
-[DefaultExecutionOrder(-2)]
+[DefaultExecutionOrder(-3)]
 public class RecordHandler : MonoBehaviour {
     public static RecordHandler Instance { get; private set; }
 
     [SerializeField] private LevelRecord[] records;
+
     public static event Action<int, LevelRecord, bool, bool> OnRecordUpdated;
 
     private string filePath;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Init() {
-        if (Instance == null) {
-            var go = new GameObject("Record Handler");
-            go.AddComponent<RecordHandler>();
-            DontDestroyOnLoad(go);
-        }
-    }
 
     private void Awake() {
         if (Instance != null && Instance != this) {
