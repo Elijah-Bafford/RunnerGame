@@ -50,9 +50,12 @@ public class AudioHandler : MonoBehaviour {
     /// Only plays the first sound of the LinkedSound
     /// </summary>
     /// <param name="sound"></param>
-    public void PlaySound(SoundType sound) {
+    public void PlaySound(SoundType sound, bool allowOverlap = true) {
         if (soundDict.TryGetValue(sound, out var audioSource)) {
+            // If not allowing sound to overlap, and the audio is playing, return
+            if (!allowOverlap && audioSource[0].isPlaying) return;
             audioSource[0].Play();
+
         } else {
             Debug.LogWarning($"No AudioSource found for SoundType {sound}");
         }
@@ -99,6 +102,14 @@ public class AudioHandler : MonoBehaviour {
             foreach (var audioSource in kvp.Value) {
                 if (pauseAll) audioSource.Pause();
                 else audioSource.UnPause();
+            }
+        }
+    }
+
+    public void SetVolume(float volume) {
+        foreach (var kvp in soundDict) {
+            foreach (var audioSource in kvp.Value) {
+                audioSource.volume = volume;
             }
         }
     }
