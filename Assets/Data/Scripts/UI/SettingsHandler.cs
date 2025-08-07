@@ -16,7 +16,7 @@ public class SettingsHandler : MonoBehaviour {
 
     [SerializeField] private Slider volumeSlider;
 
-    [SerializeField] private TMP_Dropdown refreshRateDropdown;
+    [SerializeField] private TMP_Dropdown vSyncDropdown;
 
     // Resolution
     [Header("Resolution and Fullscreen")]
@@ -30,17 +30,8 @@ public class SettingsHandler : MonoBehaviour {
         new Vector2Int(3840, 2160),
     };
 
-    private readonly int[] allowedRefreshRates = new int[] {
-        30, 60, 120, 144, 165, 240
-    };
-
-    private int highestRefreshRate;
-
     private Resolution[] resolutions;
     private List<Resolution> selectedResolutionList = new();
-    private List<RefreshRate> selectedRefreshRateList = new();
-
-    private List<double> refreshRates = new();
 
     // Json file
     private string filePath;
@@ -57,8 +48,8 @@ public class SettingsHandler : MonoBehaviour {
     }
 
     private void Start() {
+        Application.targetFrameRate = 300;
         BuildResolutions();
-        BuildRefreshRates();
         LoadSettings();
     }
 
@@ -70,7 +61,6 @@ public class SettingsHandler : MonoBehaviour {
         List<string> resStringList = new List<string>();
 
         foreach (var resolution in resolutions) {
-            highestRefreshRate = Mathf.RoundToInt((float)resolution.refreshRateRatio.value);
             Vector2Int res = new Vector2Int(resolution.width, resolution.height);
             if (allowedResolutions.Contains(res)) {
                 string resString = $"{resolution.width}x{resolution.height}";
@@ -83,34 +73,18 @@ public class SettingsHandler : MonoBehaviour {
         resolutionDropdown.AddOptions(resStringList);
     }
 
-    private void BuildRefreshRates() {
-        refreshRateDropdown.ClearOptions();
-        refreshRates.Clear();
-        List<string> refreshRateList = new List<string>();
-
-        foreach (var refreshRate in allowedRefreshRates) {
-            // Only allow refresh rates that the monitor can handle
-            if (refreshRate <= highestRefreshRate) {
-                RefreshRate rate = new RefreshRate();
-                rate.numerator = (uint)refreshRate;
-                rate.denominator = 1;
-                selectedRefreshRateList.Add(rate);
-                refreshRateList.Add(rate.ToString());
-            }
-
-        }
-        refreshRateDropdown.AddOptions(refreshRateList);
-    }
-
     private void LoadSettings() {
         if (File.Exists(filePath)) {
             string json = File.ReadAllText(filePath);
             currentSettings = JsonUtility.FromJson<GameSettings>(json);
         }
+        if (currentSettings == null) currentSettings = new GameSettings();
+
 
         // Apply loaded settings to UI
         showTutorialsToggle.isOn = currentSettings.showTutorials;
         volumeSlider.value = currentSettings.volume;
+        vSyncDropdown.value = currentSettings.vSync;
 
 
         ApplySettings();
@@ -128,24 +102,14 @@ public class SettingsHandler : MonoBehaviour {
             r.width == currentSettings.resolutionWidth &&
             r.height == currentSettings.resolutionHeight);
 
-        int rrIndex = selectedRefreshRateList.FindIndex(r =>
-        r.numerator == (uint)currentSettings.refreshRate);
 
-        RefreshRate rate = new() { numerator = 30, denominator = 1 };
-        if (rrIndex != -1) {
-            rate = new() { numerator = (uint)currentSettings.refreshRate, denominator = 1 };
-            refreshRateDropdown.value = rrIndex;
-            refreshRateDropdown.RefreshShownValue();
-        }
-        
         if (resIndex != -1) {
             resolutionDropdown.value = resIndex;
             resolutionDropdown.RefreshShownValue();
             Screen.SetResolution(
                 currentSettings.resolutionWidth,
                 currentSettings.resolutionHeight,
-                currentSettings.isFullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed,
-                rate
+                currentSettings.isFullscreen
             );
         } else {
             Debug.LogWarning("Saved resolution not found in allowed list.");
@@ -164,9 +128,7 @@ public class SettingsHandler : MonoBehaviour {
         Resolution selectedRes = selectedResolutionList[resolutionDropdown.value];
         currentSettings.resolutionWidth = selectedRes.width;
         currentSettings.resolutionHeight = selectedRes.height;
-
-        RefreshRate rate = selectedRefreshRateList[refreshRateDropdown.value];
-        currentSettings.refreshRate = (int)rate.numerator;
+        currentSettings.vSync = QualitySettings.vSyncCount;
 
         string json = JsonUtility.ToJson(currentSettings, true);
         File.WriteAllText(filePath, json);
@@ -179,40 +141,18 @@ public class SettingsHandler : MonoBehaviour {
     public void OnShowTutorialsChanged(bool isOn) { UISound(); NotificationHandler.disableTutorials = !isOn; }
     public void OnVolumeChanged() { UISound(allowOverlap: false); AudioHandler.Instance.SetVolume(volumeSlider.value); }
     public void OnSettingsMenuClosed() { SaveSettings(); }
-    public void OnFullscreenChanged(bool isOn) {
-        UISound();
-        Screen.fullScreen = isOn;
-
-    }
+    public void OnFullscreenChanged(bool isOn) { UISound(); Screen.fullScreen = isOn; }
+    public void OnVSyncChanged(int index) { QualitySettings.vSyncCount = index; }
     public void OnResolutionChanged() {
         UISound();
         int index = resolutionDropdown.value;
         Resolution res = selectedResolutionList[index];
-        Screen.SetResolution(
-            res.width,
-            res.height,
-            Screen.fullScreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed,
-            new RefreshRate { numerator = (uint)currentSettings.refreshRate, denominator = 1 }
-        );
+        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
 
         currentSettings.resolutionWidth = res.width;
         currentSettings.resolutionHeight = res.height;
     }
 
-    public void OnRefreshRateChanged() {
-        UISound();
-        int index = refreshRateDropdown.value;
-
-        RefreshRate refreshRate = selectedRefreshRateList[index];
-        Screen.SetResolution(
-            currentSettings.resolutionWidth,
-            currentSettings.resolutionHeight,
-            Screen.fullScreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed,
-            refreshRate
-        );
-
-        currentSettings.refreshRate = (int)refreshRate.numerator;
-    }
 
 }
 
@@ -223,5 +163,5 @@ public class GameSettings {
     public bool isFullscreen = true;
     public int resolutionWidth = 1920;
     public int resolutionHeight = 1080;
-    public int refreshRate = 60;
+    public int vSync = 1;
 }
