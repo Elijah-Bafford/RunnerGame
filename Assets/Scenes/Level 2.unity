@@ -20199,7 +20199,7 @@ PrefabInstance:
       objectReference: {fileID: 1317280905}
     - target: {fileID: 5390951407288029087, guid: 8850ed62f95f5134c811801999c5419c, type: 3}
       propertyPath: m_VersionIndex
-      value: 5834
+      value: 5840
       objectReference: {fileID: 0}
     - target: {fileID: 6999216787008137836, guid: 8850ed62f95f5134c811801999c5419c, type: 3}
       propertyPath: m_AnchorMax.y

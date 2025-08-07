@@ -51,12 +51,17 @@ public class MainMenu : MonoBehaviour {
             GameObject btnObj = Instantiate(levelButtonPrefab, scrollContent);
             LevelButtonUI buttonUI = btnObj.GetComponent<LevelButtonUI>();
 
-            buttonUI.levelText.text = $"Level {i}";
+            if (i == 1) {
+                buttonUI.levelText.text = $"Tutorial";
+            } else {
+                buttonUI.levelText.text = $"Level {i - 1}";
+            }
 
             LevelRecord record = RecordHandler.Instance.GetRecord(i);
 
             buttonUI.momentumNum.text = record.highestMomentum == 0 ? "None" : record.highestMomentum.ToString();
             buttonUI.timeNum.text = record.fastestTime == 0 ? "None" : GameTimer.GetTimeAsString(false, record.fastestTime);
+
 
             int levelIndex = i;
             if (!record.unlocked) {
@@ -72,7 +77,7 @@ public class MainMenu : MonoBehaviour {
             MainMenuUI.SetActive(true);
             ShowMenu(MenuType.TitleMenu);
         } else {
-            //MainMenuUI.SetActive(false);
+            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
         }
     }
 

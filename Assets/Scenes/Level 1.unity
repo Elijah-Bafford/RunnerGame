@@ -6231,7 +6231,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: message
-      value: Keep moving to run on walls
+      value: Keep moving to run on walls.\nYou can jump off walls
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: messageTMP
@@ -6239,7 +6239,7 @@ PrefabInstance:
       objectReference: {fileID: 284329572}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: displayTime
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2513416077277074166, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: notificationBox
@@ -15774,63 +15774,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8817131383092750843, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
   m_PrefabInstance: {fileID: 3376143956609106565}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &5091982612165104158
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 6355922606061014312, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_Name
-      value: Speed Buff
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 65.669
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -3.35
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 28.32
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
 --- !u!1001 &5208151169816300643
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15925,6 +15868,14 @@ PrefabInstance:
       propertyPath: m_VersionIndex
       value: 5837
       objectReference: {fileID: 0}
+    - target: {fileID: 6012491951304129063, guid: 8850ed62f95f5134c811801999c5419c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 146.92
+      objectReference: {fileID: 0}
+    - target: {fileID: 6012491951304129063, guid: 8850ed62f95f5134c811801999c5419c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -18.7
+      objectReference: {fileID: 0}
     - target: {fileID: 6999216787008137836, guid: 8850ed62f95f5134c811801999c5419c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -15990,7 +15941,6 @@ SceneRoots:
   - {fileID: 5891021798051546709}
   - {fileID: 1341585233}
   - {fileID: 525640068}
-  - {fileID: 5091982612165104158}
   - {fileID: 3281875240336408479}
   - {fileID: 758826545}
   - {fileID: 987972297}

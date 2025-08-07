@@ -26,6 +26,20 @@ public class RecordHandler : MonoBehaviour {
 
         if (File.Exists(filePath)) {
             LoadRecords();
+
+            if (records.Length < SceneHandler.numLevels) {
+                LevelRecord[] temp = new LevelRecord[SceneHandler.numLevels];
+                for (int i = 0; i < temp.Length; i++) {
+                    if (i < records.Length && records[i] != null) {
+                        temp[i] = records[i];
+                    } else {
+                        bool unlocked = (temp[i - 1].fastestTime > 0 && i > 1) || i == 1;
+                        temp[i] = new LevelRecord(i, 0f, 0f, unlocked);
+                    }
+                }
+                records = temp;
+            }
+
         } else {
             records = new LevelRecord[SceneHandler.numLevels];
             for (int i = 0; i < records.Length; i++) {

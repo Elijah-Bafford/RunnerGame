@@ -37,6 +37,10 @@ public class SceneHandler : MonoBehaviour {
     /// </summary>
     /// <param name="level"></param>
     public void LoadLevel(int level) {
+        if (level >= numLevels) {
+            Debug.LogWarning("Level index out of bounds.");
+            return;
+        }
         currentLevel = level;
         StartCoroutine(LoadSceneAsync(level));
     }
