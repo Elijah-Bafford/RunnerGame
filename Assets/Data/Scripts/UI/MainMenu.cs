@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MainMenu : MonoBehaviour {
     public static MainMenu Instance { get; private set; }
@@ -31,12 +32,6 @@ public class MainMenu : MonoBehaviour {
         menus[(int)MenuType.LevelSelect] = levelSelectMenu;
         menus[(int)MenuType.Credits] = creditsMenu;
         menus[(int)MenuType.Settings] = settingsMenu;
-        print("AWAKE");
-    }
-
-    private void Start() {
-        SceneHandler.OnLevelLoad += OnLevelLoad;
-        print("START");
 
         for (int i = 0; i < menus.Length; i++) {
             if (menus[i] != menus[(int)MenuType.TitleMenu] && menus[i] != null) {
@@ -45,7 +40,10 @@ public class MainMenu : MonoBehaviour {
         }
         currentMenu = MenuType.TitleMenu;
         ShowMenu(currentMenu);
+    }
 
+    private void Start() {
+        SceneHandler.OnLevelLoad += OnLevelLoad;
 
         for (int i = 0; i < SceneHandler.numLevels; i++) {
             if (i == 0) continue;
@@ -74,7 +72,7 @@ public class MainMenu : MonoBehaviour {
             MainMenuUI.SetActive(true);
             ShowMenu(MenuType.TitleMenu);
         } else {
-            MainMenuUI.SetActive(false);
+            //MainMenuUI.SetActive(false);
         }
     }
 
@@ -85,6 +83,7 @@ public class MainMenu : MonoBehaviour {
     private void OnLevelButtonClicked(int levelIndex) {
         UISound();
         SceneHandler.Instance.LoadLevel(levelIndex);
+        MainMenuUI.SetActive(false);
     }
 
     private void ShowMenu(MenuType menu, bool show = true) {
@@ -99,6 +98,14 @@ public class MainMenu : MonoBehaviour {
     public void Settings() { UISound(); ShowMenu(MenuType.Settings); }
     public void Credits() { UISound(); ShowMenu(MenuType.Credits); }
     public void QuitGame() { UISound(); Application.Quit(); }
+
+    // Input Actions
+
+    public void I_ReturnToTitle(InputAction.CallbackContext cont) {
+        if (cont.performed && currentMenu != MenuType.TitleMenu) {
+            ReturnToTitle();
+        }
+    }
 
     public void QuitInEditor() {
 #if UNITY_EDITOR
