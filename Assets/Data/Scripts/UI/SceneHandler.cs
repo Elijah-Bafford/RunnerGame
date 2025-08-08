@@ -42,6 +42,7 @@ public class SceneHandler : MonoBehaviour {
             return;
         }
         currentLevel = level;
+        Time.timeScale = 1.0f;
         StartCoroutine(LoadSceneAsync(level));
     }
 

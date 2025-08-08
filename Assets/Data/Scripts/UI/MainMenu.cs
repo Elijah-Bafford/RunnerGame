@@ -43,8 +43,22 @@ public class MainMenu : MonoBehaviour {
     }
 
     private void Start() {
+        RecordHandler.OnRecordUpdated += HandleRecordUpdated;
         SceneHandler.OnLevelLoad += OnLevelLoad;
+        RefreshLevelButtons();
+    }
 
+    private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {
+        RefreshLevelButtons();
+    }
+
+    private void RefreshLevelButtons() {
+        // Clear existing buttons
+        foreach (Transform child in scrollContent) {
+            Destroy(child.gameObject);
+        }
+
+        // Recreate all buttons
         for (int i = 0; i < SceneHandler.numLevels; i++) {
             if (i == 0) continue;
 
@@ -59,9 +73,8 @@ public class MainMenu : MonoBehaviour {
 
             LevelRecord record = RecordHandler.Instance.GetRecord(i);
 
-            buttonUI.momentumNum.text = record.highestMomentum == 0 ? "None" : record.highestMomentum.ToString();
-            buttonUI.timeNum.text = record.fastestTime == 0 ? "None" : GameTimer.GetTimeAsString(false, record.fastestTime);
-
+            buttonUI.momentumNum.text = record.highestMomentum == 0 && record != null ? "None" : record.highestMomentum.ToString();
+            buttonUI.timeNum.text = record.fastestTime == 0 && record != null ? "None" : GameTimer.GetTimeAsString(false, record.fastestTime);
 
             int levelIndex = i;
             if (!record.unlocked) {
@@ -72,10 +85,13 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
+
     private void OnLevelLoad(int level) {
         if (level == 0) {
             MainMenuUI.SetActive(true);
             ShowMenu(MenuType.TitleMenu);
+            RecordHandler.Instance.LoadRecords();
+
         } else {
             AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
         }
