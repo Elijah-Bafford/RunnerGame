@@ -13055,7 +13055,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetPosition: {x: 22.66, y: 0, z: 0}
   _useRelativePosition: 1
-  _frequency: 0.2
+  _timeToArrive: 7
 --- !u!43 &1806059070
 Mesh:
   m_ObjectHideFlags: 0

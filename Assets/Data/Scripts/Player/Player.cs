@@ -154,7 +154,6 @@ public class Player : MonoBehaviour {
             wallRunMech.SetJumpVelocity(Vector3.zero);
             rb.linearVelocity = targetVelocity;
         }
-
     }
 
     public void Attack() {
