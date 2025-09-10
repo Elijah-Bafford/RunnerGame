@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class SpeedBuff : MonoBehaviour {
 
-    private Player player;
     private bool entered = false;
 
     // How far up and down the orb floats
@@ -22,7 +21,7 @@ public class SpeedBuff : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player") && !entered) {
             entered = true;
-            player = other.GetComponentInParent<Player>();
+            Player player = other.GetComponentInParent<Player>();
             player.ChangeSpeedStat(50f);
             player.Buff(5);
             gameObject.SetActive(false);
