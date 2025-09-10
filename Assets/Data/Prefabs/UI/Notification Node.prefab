@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8817131383092750843}
   - component: {fileID: 1579139954507163355}
   - component: {fileID: 2513416077277074166}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Notification Node
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,5 +68,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   message: Move with W A S D
   displayTime: 0
+  slowTime: 0
+  isTutorial: 1
   notificationBox: {fileID: 0}
-  messageTMP: {fileID: 0}

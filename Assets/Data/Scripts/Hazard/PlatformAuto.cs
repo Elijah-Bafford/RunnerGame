@@ -5,9 +5,11 @@ public class PlatformAuto : MonoBehaviour {
     [Tooltip("The location that the platform moves to")]
     [SerializeField] Vector3 _targetPosition;
     [Tooltip("Use the relative position of the platform's start position")]
-    [SerializeField] bool _useRelativePosition = false;
+    [SerializeField] bool _useRelativePosition = true;
     [Tooltip("Oscillation frequency in cycles per second")]
     [SerializeField] float _frequency = 0.5f; // 0.5 Hz = back/forth every 2s
+
+    public Vector3 CurrentVelocity { get; private set; }
 
     private Vector3 _startPosition;
 
