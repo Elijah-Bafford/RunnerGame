@@ -11,6 +11,7 @@ public class PlatformAuto : MonoBehaviour {
 
     public Vector3 CurrentVelocity { get; private set; }
 
+    private Vector3 _lastPosition;
     private Vector3 _startPosition;
     private float _frequency = 1f;
 
@@ -20,6 +21,8 @@ public class PlatformAuto : MonoBehaviour {
         if (_timeToArrive <= 0) _timeToArrive = 1;
         
         _frequency = 1f / _timeToArrive;
+
+        _lastPosition = transform.position;
     }
 
     private void FixedUpdate() {
@@ -27,13 +30,17 @@ public class PlatformAuto : MonoBehaviour {
         float phase = Time.time * _frequency * Mathf.PI * 2f;
         float sinValue = Mathf.Sin(phase);
         float t = (sinValue + 1f) * 0.5f;
-        transform.position = Vector3.Lerp(_startPosition, _targetPosition, t);
+        Vector3 newPos = Vector3.Lerp(_startPosition, _targetPosition, t);
+        transform.position = newPos;
+
+        // After moving
+        CurrentVelocity = (newPos - _lastPosition) / Time.fixedDeltaTime;
+        _lastPosition = newPos;
     }
 
     private void OnDrawGizmos() {
         Gizmos.color = Color.green;
-        Vector3 center = _targetPosition;
-        if (_useRelativePosition) center = _targetPosition + transform.position;
+        Vector3 center = _useRelativePosition ? transform.position + _targetPosition : _targetPosition;
         Gizmos.DrawSphere(center, 1f);
     }
 }

@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Wall
   - EnemyAttackTrigger
+  - GroundAuto
   layers:
   - Default
   - TransparentFX

@@ -34,6 +34,9 @@ public class Player : MonoBehaviour {
     private Vector2 moveVector = Vector2.zero;
     private Vector2 lastMoveVector = Vector2.zero;
 
+    private PlatformAuto conveyorPlatform;
+    private bool onConveyor = false;
+
     private bool isSliding = false;
     private bool isGrounded = false;
     private bool isOnSlope = false;
@@ -144,7 +147,13 @@ public class Player : MonoBehaviour {
         Vector3 moveDir = camForward * moveVector.y + camRight * moveVector.x;
         moveDir.Normalize();
 
-        Vector3 targetVelocity = moveDir * speed;
+        // very buggy, TODO: Fix this
+        Vector3 platformCarry = Vector3.zero;
+        if (onConveyor && conveyorPlatform != null && isGrounded && !IsWallRunning()) {
+            platformCarry = Vector3.ProjectOnPlane(conveyorPlatform.CurrentVelocity, Vector3.up);
+        }
+
+        Vector3 targetVelocity = moveDir * speed + platformCarry;
         targetVelocity.y = rb.linearVelocity.y;
         wallRunMech.UpdateWallJumpVelocity();
         if (wallRunMech.IsWallJumping()) {
@@ -252,6 +261,8 @@ public class Player : MonoBehaviour {
     /// <param name="value"></param>
     public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
+    public void SetConveyorPlatform(PlatformAuto conveyorPlatform) { this.conveyorPlatform = conveyorPlatform; }
+    public void SetOnConveyor(bool onConveyor) { this.onConveyor = onConveyor; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
     public void ResetIsInAttack() { isInAttack = false; }
     public bool IsOnSlope() { return isOnSlope; }
