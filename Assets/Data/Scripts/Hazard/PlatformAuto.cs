@@ -21,20 +21,20 @@ public class PlatformAuto : MonoBehaviour {
         if (_timeToArrive <= 0) _timeToArrive = 1;
         
         _frequency = 1f / _timeToArrive;
-
         _lastPosition = transform.position;
     }
 
     private void FixedUpdate() {
         // Move the platform
-        float phase = Time.time * _frequency * Mathf.PI * 2f;
+        float phase = Time.fixedTime * _frequency * Mathf.PI * 2f;
         float sinValue = Mathf.Sin(phase);
         float t = (sinValue + 1f) * 0.5f;
         Vector3 newPos = Vector3.Lerp(_startPosition, _targetPosition, t);
         transform.position = newPos;
 
-        // After moving
         CurrentVelocity = (newPos - _lastPosition) / Time.fixedDeltaTime;
+
+        transform.position = newPos;
         _lastPosition = newPos;
     }
 

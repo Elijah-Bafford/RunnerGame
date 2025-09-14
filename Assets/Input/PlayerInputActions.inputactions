@@ -87,9 +87,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Temp",
+                    "name": "ShowDebug",
                     "type": "Button",
-                    "id": "57845174-c107-4c6c-b5f4-2fd81df74a26",
+                    "id": "42787af8-271c-406e-b20d-25f7eb96e323",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -451,12 +451,12 @@
                 },
                 {
                     "name": "",
-                    "id": "dbe5c0be-05c3-4e32-9cc7-c2cd93dad68a",
-                    "path": "<Keyboard>/f",
+                    "id": "98d82e00-6236-4577-8104-82f04bcee684",
+                    "path": "<Keyboard>/backquote",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Temp",
+                    "action": "ShowDebug",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

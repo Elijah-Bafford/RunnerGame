@@ -275,4 +275,5 @@ public class Player : MonoBehaviour {
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
 
     public Transform GetTransform() { return transform; }
+    public GameObject GetGameObject() { return gameObject; }
 }
