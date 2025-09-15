@@ -18,6 +18,7 @@ public class GroundCollider : MonoBehaviour {
             if (auto == null) return;
             LevelMain = player.GetTransform().parent;
             player.GetTransform().SetParent(auto.transform, true);
+            player.SetConveyorVelocity(Vector3.zero);
         }
     }
 
@@ -29,6 +30,7 @@ public class GroundCollider : MonoBehaviour {
         if (other.gameObject.CompareTag("GroundAuto")) {
             PlatformAuto auto = other.GetComponent<PlatformAuto>();
             if (auto != null) player.GetTransform().SetParent(LevelMain, true);
+            player.SetConveyorVelocity(auto.CurrentVelocity);
         }
     }
 }

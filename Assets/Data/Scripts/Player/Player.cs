@@ -34,8 +34,7 @@ public class Player : MonoBehaviour {
     private Vector2 moveVector = Vector2.zero;
     private Vector2 lastMoveVector = Vector2.zero;
 
-    private PlatformAuto conveyorPlatform;
-    private bool onConveyor = false;
+    private Vector3 conveyorVelocity = Vector3.zero;
 
     private bool isSliding = false;
     private bool isGrounded = false;
@@ -147,13 +146,9 @@ public class Player : MonoBehaviour {
         Vector3 moveDir = camForward * moveVector.y + camRight * moveVector.x;
         moveDir.Normalize();
 
-        // very buggy, TODO: Fix this
-        Vector3 platformCarry = Vector3.zero;
-        if (onConveyor && conveyorPlatform != null && isGrounded && !IsWallRunning()) {
-            platformCarry = Vector3.ProjectOnPlane(conveyorPlatform.CurrentVelocity, Vector3.up);
-        }
+        conveyorVelocity = Vector3.Lerp(conveyorVelocity, Vector3.zero, Time.fixedDeltaTime);
 
-        Vector3 targetVelocity = moveDir * speed + platformCarry;
+        Vector3 targetVelocity = moveDir * speed + conveyorVelocity;
         targetVelocity.y = rb.linearVelocity.y;
         wallRunMech.UpdateWallJumpVelocity();
         if (wallRunMech.IsWallJumping()) {
@@ -261,8 +256,6 @@ public class Player : MonoBehaviour {
     /// <param name="value"></param>
     public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
-    public void SetConveyorPlatform(PlatformAuto conveyorPlatform) { this.conveyorPlatform = conveyorPlatform; }
-    public void SetOnConveyor(bool onConveyor) { this.onConveyor = onConveyor; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
     public void ResetIsInAttack() { isInAttack = false; }
     public bool IsOnSlope() { return isOnSlope; }
@@ -273,7 +266,6 @@ public class Player : MonoBehaviour {
     public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
     public float GetJumpForce() { return jumpForce; }
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
-
+    public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
     public Transform GetTransform() { return transform; }
-    public GameObject GetGameObject() { return gameObject; }
 }
