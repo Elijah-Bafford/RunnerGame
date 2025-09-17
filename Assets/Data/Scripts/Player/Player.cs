@@ -12,6 +12,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float speedStat = 0;
     [SerializeField] private float speedLossMult = 1f;
     [SerializeField] private float jumpForce = 7f;
+    [SerializeField] private bool isInvincible = false;
 
     [Header("General Refs")]
     [SerializeField] private Animator anim;
@@ -236,7 +237,10 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// Called at the first frame the player is hit.
     /// </summary>
-    public void Die() { anim.SetBool("Died", true); }
+    public void Die() {
+        if (isInvincible) return;
+        anim.SetBool("Died", true); 
+    }
 
     /// <summary>
     /// Add/subtract to/from currentSpeed (speed AV)
