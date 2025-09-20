@@ -3,7 +3,7 @@ using UnityEngine;
 
 [System.Serializable]
 public enum SoundType {
-    UISelect, SwordImpact, Jump, Slide, Footstep
+    UISelect, SwordImpact, Jump, Slide, Footstep, SwordImpactWall
 }
 
 [System.Serializable]

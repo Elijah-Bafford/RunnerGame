@@ -261,7 +261,10 @@ public class Player : MonoBehaviour {
     public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
-    public void ResetIsInAttack() { isInAttack = false; }
+    public void ResetIsInAttack() { 
+        isInAttack = false; 
+        playerAttack.ToggleAttackCollider(false);
+    }
     public bool IsOnSlope() { return isOnSlope; }
     public bool IsWallJumping() { return wallRunMech.IsWallJumping(); }
     public bool IsSliding() { return isSliding; }
@@ -270,6 +273,8 @@ public class Player : MonoBehaviour {
     public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
     public float GetJumpForce() { return jumpForce; }
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
+    public PlayerAttack GetPlayerAttackScript() { return playerAttack; }
     public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
     public Transform GetTransform() { return transform; }
+
 }

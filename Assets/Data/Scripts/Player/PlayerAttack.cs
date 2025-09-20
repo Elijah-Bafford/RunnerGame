@@ -2,9 +2,7 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour {
 
-    [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] private Player player;
-
+    private Player player;
     private Enemy target = null;
     private bool hasAttacked = false;
     private bool canHit = false;
@@ -14,9 +12,14 @@ public class PlayerAttack : MonoBehaviour {
         canHit = false;
     }
 
+    private void Start() {
+        player = GetComponentInParent<Player>();
+    }
+
     private void FixedUpdate() {
         if (!canHit || !hasAttacked || target == null) return;
         if (target.IsDead()) return;
+
         hit();
     }
 
@@ -35,18 +38,24 @@ public class PlayerAttack : MonoBehaviour {
         hit();
     }
 
+    internal void ToggleAttackCollider(bool toggle) {
+        gameObject.GetComponent<CapsuleCollider>().enabled = toggle;
+    }
+
     public void HasAttacked(bool hasAttacked) { this.hasAttacked = hasAttacked; }
 
     private void OnTriggerEnter(Collider other) {
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0) {
+        if (other.CompareTag("Enemy")) {
             target = other.GetComponentInParent<Enemy>();
             if (target != null) canHit = true;
-
+        }
+        if (other.CompareTag("Wall")) {
+            AudioHandler.Instance.PlaySound(SoundType.SwordImpactWall);
         }
     }
 
     private void OnTriggerExit(Collider other) {
-        if (((1 << other.gameObject.layer) & enemyLayer) != 0) {
+        if (other.CompareTag("Enemy")) {
             target = null;
             canHit = false;
         }

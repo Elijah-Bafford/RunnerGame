@@ -5957,6 +5957,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Audio Handler
       objectReference: {fileID: 0}
+    - target: {fileID: 2225338883134422048, guid: c4cc283e885acdc408cf908393c7f344, type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6115747138082508849, guid: c4cc283e885acdc408cf908393c7f344, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.46478
