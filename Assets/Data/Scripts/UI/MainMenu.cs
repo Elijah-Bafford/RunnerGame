@@ -60,12 +60,12 @@ public class MainMenu : MonoBehaviour {
 
         // Recreate all buttons
         for (int i = 0; i < SceneHandler.numLevels; i++) {
-            if (i == 0) continue;
+            if (i == 0 || i == 1) continue; // Bootstrap and main menu
 
             GameObject btnObj = Instantiate(levelButtonPrefab, scrollContent);
             LevelButtonUI buttonUI = btnObj.GetComponent<LevelButtonUI>();
 
-            if (i == 1) {
+            if (i == 2) {
                 buttonUI.levelText.text = $"Tutorial";
             } else {
                 buttonUI.levelText.text = $"Level {i - 1}";
@@ -87,7 +87,7 @@ public class MainMenu : MonoBehaviour {
 
 
     private void OnLevelLoad(int level) {
-        if (level == 0) {
+        if (level == 1) {
             MainMenuUI.SetActive(true);
             ShowMenu(MenuType.TitleMenu);
             RecordHandler.Instance.LoadRecords();

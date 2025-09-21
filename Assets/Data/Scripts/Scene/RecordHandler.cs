@@ -48,6 +48,7 @@ public class RecordHandler : MonoBehaviour {
             if (records.Length > 1) records[1].unlocked = true;
             SaveRecords();
         }
+        BootstrapProcess.ProcessFinished(gameObject);
     }
 
     public void UpdateRecord(int level, float newTime, float newMomentum) {
@@ -124,7 +125,6 @@ public class LevelRecord {
     public LevelRecord(int level, float fastestTime, float highestMomentum, bool unlocked) {
         this.level = level;
         this.fastestTime = fastestTime;
-        this.highestMomentum = highestMomentum;
         this.unlocked = unlocked;
     }
 

@@ -66,7 +66,7 @@ public class GameStateHandler : MonoBehaviour {
             case GameState.MainMenu:
                 playerInput.SwitchCurrentActionMap("UI");
                 Time.timeScale = 1;
-                SceneHandler.Instance.LoadLevel(0);
+                SceneHandler.Instance.LoadLevel(1); // Main menu
                 gameTimer.ResetTimer();
                 break;
             case GameState.Playing:

@@ -43,6 +43,7 @@ public class AudioHandler : MonoBehaviour {
                 soundDict[linkedSound.Type].Add(linkedSound.audioSource);
             }
         }
+        BootstrapProcess.ProcessFinished(gameObject);
     }
 
     /// <summary>

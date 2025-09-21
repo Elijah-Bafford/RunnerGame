@@ -9,8 +9,8 @@ public class SceneHandler : MonoBehaviour {
 
     public static SceneHandler Instance { get; private set; }
 
-    [Header("Set the number of levels (including the Main Menu)")]
-    [SerializeField] private int numberOfLevels;
+    [Header("Set the number of scenes")]
+    [SerializeField] private int _numberOfScenes;
     public static int currentLevel;
     public static int numLevels;
 
@@ -27,9 +27,13 @@ public class SceneHandler : MonoBehaviour {
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        numLevels = numberOfLevels;
+        numLevels = _numberOfScenes;
         currentLevel = SceneManager.GetActiveScene().buildIndex;
         print("Current Level: " + currentLevel);
+        
+    }
+    private void Start() {
+        BootstrapProcess.ProcessFinished(gameObject);
     }
 
     /// <summary>
