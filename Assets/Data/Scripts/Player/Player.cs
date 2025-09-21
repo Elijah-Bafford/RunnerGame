@@ -52,24 +52,34 @@ public class Player : MonoBehaviour {
     private Direction currentDir;
 
     private void Awake() {
-        player = this;      // Pseudo-Singleton?
+        player = this;
+    }
+
+    private void Start() {
         rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
         speedBarAnimator = speedBar.GetComponent<Animator>();
-        grappleMech = GetComponent<GrappleMechanic>();
         momentumMech = GetComponent<MomentumMechanic>();
-        wallRunMech = GetComponent<WallRunMechanic>();
+        grappleMech  = GetComponent<GrappleMechanic>();
+        wallRunMech  = GetComponent<WallRunMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
+        wallRunMech.InitWallRunMechanic(this, rb);
+        momentumMech.InitMomentumMechanic(this);
+        grappleMech.InitGrappleMechanic  (this);
+        playerAttack.InitPlayerAttack    (this);
+
+        GetComponentInChildren<AnimationEventHandler>().InitAnimationEventHandler(this, playerAttack);
     }
 
     private void OnEnable() {
         if (playerAttack) playerAttack.HasAttacked(false);
         isInAttack = false;
-        rb.freezeRotation = true;
         currentDir = Direction.None;
     }
 
 
     private void FixedUpdate() {
+        playerAttack.UpdatePlayerAttack();
         momentumMech.UpdateMomentum(speedStat, currentDir);
         if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
@@ -77,16 +87,7 @@ public class Player : MonoBehaviour {
         UpdateDirection();
         Move();
         UpdateLean();
-
-        bool shouldPlaySlideAudio = isSliding && isGrounded;
-
-        if (shouldPlaySlideAudio && !slideAudioPlaying) {
-            slideAudioPlaying = true;
-            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, true);
-        } else if (!shouldPlaySlideAudio && slideAudioPlaying) {
-            slideAudioPlaying = false;
-            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
-        }
+        CheckPlaySlideAudio(isSliding && isGrounded);
     }
 
     private void LateUpdate() {
@@ -171,9 +172,19 @@ public class Player : MonoBehaviour {
 
     private void Slide() {
         isSliding = !isSliding;
-
         anim.SetBool("Slide", isSliding);
         speedLossMult = isSliding ? speedLossMult + 1.5f : speedLossMult - 1.5f;
+    }
+
+    private void CheckPlaySlideAudio(bool shouldPlaySlideAudio) {
+        if (shouldPlaySlideAudio && !slideAudioPlaying) {
+            slideAudioPlaying = true;
+            if (currentDir != Direction.None)
+                AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, true);
+        } else if (!shouldPlaySlideAudio && slideAudioPlaying) {
+            slideAudioPlaying = false;
+            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
+        }
     }
 
     private void Jump(bool keyReleased) {
@@ -232,7 +243,10 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// Called at the last frame of the death animation.
     /// </summary>
-    public void Died() { anim.SetBool("Died", false); }
+    public void Died() {
+        print("I don't think this is ever called");
+        anim.SetBool("Died", false); 
+    }
 
     /// <summary>
     /// Called at the first frame the player is hit.
@@ -250,8 +264,8 @@ public class Player : MonoBehaviour {
         speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
     }
 
-    public void Buff(int time) {
-        momentumMech.BuffSpeed(time);
+    public void Buff(int time, float multiplier) {
+        momentumMech.BuffSpeed(time, multiplier);
     }
 
     /// <summary>
@@ -260,11 +274,8 @@ public class Player : MonoBehaviour {
     /// <param name="value"></param>
     public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
+    public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
-    public void ResetIsInAttack() { 
-        isInAttack = false; 
-        playerAttack.ToggleAttackCollider(false);
-    }
     public bool IsOnSlope() { return isOnSlope; }
     public bool IsWallJumping() { return wallRunMech.IsWallJumping(); }
     public bool IsSliding() { return isSliding; }
@@ -272,9 +283,13 @@ public class Player : MonoBehaviour {
     public bool IsGrappling() { return grappleMech.IsGrappling(); }
     public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
     public float GetJumpForce() { return jumpForce; }
+    public void ResetIsInAttack() {
+        isInAttack = false;
+        ToggleAttackCollider(false);
+    }
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
-    public PlayerAttack GetPlayerAttackScript() { return playerAttack; }
-    public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
+    public void ToggleAttackCollider(bool toggle) { playerAttack.ToggleAttackCollider(toggle); }
+    
     public Transform GetTransform() { return transform; }
 
 }

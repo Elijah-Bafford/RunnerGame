@@ -28,9 +28,9 @@ public class WallRunMechanic : MonoBehaviour {
     private bool isWallJumping = false;
     private bool wasOnWallLastFrame = false;
 
-    private void Awake() {
-        rb = GetComponent<Rigidbody>();
-        player = GetComponent<Player>();
+    public void InitWallRunMechanic(Player player, Rigidbody rb) {
+        this.player = player;
+        this.rb = rb;
         currentWallGravity = wallGravity;
     }
 

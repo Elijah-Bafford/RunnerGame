@@ -13,7 +13,7 @@ public class PlayingInput : MonoBehaviour {
     }
     public void OnAttack(InputAction.CallbackContext context) {
         if (context.performed) {
-            player.GetPlayerAttackScript().ToggleAttackCollider(true);
+            player.ToggleAttackCollider(true);
             player.Perform(Player.Act.Attack);
         }
     }

@@ -7,19 +7,21 @@ public class PlayerAttack : MonoBehaviour {
     private bool hasAttacked = false;
     private bool canHit = false;
 
+    private CapsuleCollider weaponCollider;
+
     private void OnEnable() {
         hasAttacked = false;
         canHit = false;
     }
 
-    private void Start() {
-        player = GetComponentInParent<Player>();
+    public void InitPlayerAttack(Player player) {
+        this.player = player;
+        weaponCollider = GetComponent<CapsuleCollider>();
     }
 
-    private void FixedUpdate() {
+    public void UpdatePlayerAttack() {
         if (!canHit || !hasAttacked || target == null) return;
         if (target.IsDead()) return;
-
         hit();
     }
 
@@ -33,13 +35,13 @@ public class PlayerAttack : MonoBehaviour {
         target = null;
     }
 
-    internal void ForceHit(Enemy target) {
+    public void ForceHit(Enemy target) {
         this.target = target;
         hit();
     }
 
-    internal void ToggleAttackCollider(bool toggle) {
-        gameObject.GetComponent<CapsuleCollider>().enabled = toggle;
+    public void ToggleAttackCollider(bool toggle) {
+        weaponCollider.enabled = toggle;
     }
 
     public void HasAttacked(bool hasAttacked) { this.hasAttacked = hasAttacked; }

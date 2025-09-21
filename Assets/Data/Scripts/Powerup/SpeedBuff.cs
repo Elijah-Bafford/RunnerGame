@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class SpeedBuff : MonoBehaviour {
 
+    [SerializeField] private float SpeedBuffMultiplier = 2f;
+
     private bool entered = false;
 
     // How far up and down the orb floats
@@ -23,7 +25,7 @@ public class SpeedBuff : MonoBehaviour {
             entered = true;
             Player player = other.GetComponentInParent<Player>();
             player.ChangeSpeedStat(50f);
-            player.Buff(5);
+            player.Buff(5, SpeedBuffMultiplier);
             gameObject.SetActive(false);
         }
     }

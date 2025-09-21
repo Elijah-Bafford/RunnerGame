@@ -1,9 +1,6 @@
-using System;
 using System.Collections;
 using TMPro;
-using Unity.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MomentumMechanic : MonoBehaviour {
     [Header("UI Refs")]
@@ -16,7 +13,7 @@ public class MomentumMechanic : MonoBehaviour {
     [SerializeField] private float timeScale = 1f;
     private Player player;
 
-    private int buffTimer = 0;
+    private float speedBuffMultiplier = 1f; 
     private float speedMult = 1.0f;
     private float speedBasis = 1.0f;
     private float highestSpeed = 0f;
@@ -32,9 +29,8 @@ public class MomentumMechanic : MonoBehaviour {
     private bool isWallRunning = false;
     private bool isWallJumping = false;
 
-
-    private void Start() {
-        player = GetComponent<Player>();
+    internal void InitMomentumMechanic(Player player) {
+        this.player = player;
     }
 
     /* How it works:
@@ -64,7 +60,7 @@ public class MomentumMechanic : MonoBehaviour {
         // Always drain speed stat, this value is clamped.
         player.ChangeSpeedStat(-speedLossMult * Time.fixedDeltaTime);
 
-        if (buffTimer > 0) buffTimer--;
+        //if (buffTimer > 0) buffTimer--;
 
         bool hasSpeedStat = speedStat > 0f;
 
@@ -103,30 +99,32 @@ public class MomentumMechanic : MonoBehaviour {
 
         } else if (!hasSpeedStat || currentDir == Player.Direction.None) momentum = -0.07f;
 
-        if (momentum > 0f && buffTimer > 0) {
-            print("2X MOVEMENT");
-            momentum *= 2f;
-        }
+        
+        momentum *= speedBuffMultiplier;
+        
 
         EditSpeedMult(momentum);
         UpdateUI(speedStat);
         UpdateHighestSpeed();
     }
 
-    public void BuffSpeed(int time) {
-        if (buffTimer > 0) {
+    public void BuffSpeed(int time, float multiplier = 2.0f) {
+        if (multiplier <= 1f) {
+            multiplier = 1.1f;
+            Debug.LogWarning("Cannot apply speed buff with a multiplier of less than or equal to 1. Argument changed to 1.1f");
+        }
+        if (speedBuffMultiplier > 1) {
             StopCoroutine("DisplayBuff");
         }
+        speedBuffMultiplier = multiplier;
         StartCoroutine(DisplayBuff(time));
-        float ticksPerSec = 1f / Time.fixedDeltaTime;
-        buffTimer = Mathf.CeilToInt(time * ticksPerSec);
-        
     }
 
     private IEnumerator DisplayBuff(float time) {
         buffDisplay.SetActive(true);
         yield return new WaitForSeconds(time);
         buffDisplay.SetActive(false);
+        speedBuffMultiplier = 1f;
     }
 
     private void SetBasis(Player.Direction currentDir, bool hasSpeedStat) {

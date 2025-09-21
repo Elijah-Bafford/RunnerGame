@@ -26,9 +26,9 @@ public class GrappleMechanic : MonoBehaviour {
 
     private bool hasSpeedStat = false;
 
-    private void Awake() {
+    public void InitGrappleMechanic(Player player) {
+        this.player = player;
         reticle = lockOnReticle.GetComponent<RawImage>();
-        player = GetComponent<Player>();
     }
 
     public bool UpdateGrapple(bool hasSpeed) {
