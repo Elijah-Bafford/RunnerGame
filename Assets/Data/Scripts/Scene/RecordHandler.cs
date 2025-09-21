@@ -125,6 +125,7 @@ public class LevelRecord {
     public LevelRecord(int level, float fastestTime, float highestMomentum, bool unlocked) {
         this.level = level;
         this.fastestTime = fastestTime;
+        this.highestMomentum = highestMomentum;
         this.unlocked = unlocked;
     }
 
