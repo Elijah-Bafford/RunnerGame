@@ -1,11 +1,7 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class MomentumMechanic : MonoBehaviour {
-    [Header("UI Refs")]
-    [SerializeField] private TextMeshProUGUI speedMultDisplay;
-    [SerializeField] private GameObject buffDisplay;
     [Header("Momentum Settings")]
     [Tooltip("How Fast the player loses SpeedStat")]
     [SerializeField] private float speedLossMult = 2f;
@@ -13,7 +9,7 @@ public class MomentumMechanic : MonoBehaviour {
     [SerializeField] private float timeScale = 1f;
     private Player player;
 
-    private float speedBuffMultiplier = 1f; 
+    private float speedBuffMultiplier = 1f;
     private float speedMult = 1.0f;
     private float speedBasis = 1.0f;
     private float highestSpeed = 0f;
@@ -56,7 +52,7 @@ public class MomentumMechanic : MonoBehaviour {
     * 
     * When the player jumps, if they land while sliding they will maintain their momentum otherwise they will lose most of it
     */
-    internal void UpdateMomentum(float speedStat, Player.Direction currentDir) {
+    public void UpdateMomentum(float speedStat, Player.Direction currentDir) {
         // Always drain speed stat, this value is clamped.
         player.ChangeSpeedStat(-speedLossMult * Time.fixedDeltaTime);
 
@@ -99,12 +95,12 @@ public class MomentumMechanic : MonoBehaviour {
 
         } else if (!hasSpeedStat || currentDir == Player.Direction.None) momentum = -0.07f;
 
-        
+
         momentum *= speedBuffMultiplier;
-        
+
 
         EditSpeedMult(momentum);
-        UpdateUI(speedStat);
+        MomentumUI.GetSelf().UpdateSpeedBar(speedStat);
         UpdateHighestSpeed();
     }
 
@@ -121,9 +117,9 @@ public class MomentumMechanic : MonoBehaviour {
     }
 
     private IEnumerator DisplayBuff(float time) {
-        buffDisplay.SetActive(true);
+        MomentumUI.GetSelf().ToggleBuffOverlay(true);
         yield return new WaitForSeconds(time);
-        buffDisplay.SetActive(false);
+        MomentumUI.GetSelf().ToggleBuffOverlay(false);
         speedBuffMultiplier = 1f;
     }
 
@@ -143,11 +139,6 @@ public class MomentumMechanic : MonoBehaviour {
 
         speedBasis = Mathf.Lerp(speedBasis, currBasis, Time.deltaTime * timeMult);
 
-    }
-
-    private void UpdateUI(float speedStat) {
-        speedMultDisplay.text = "Momentum: " + GetActualSpeedMult();
-        player.UpdateSpeedBar(speedStat);
     }
 
     private void UpdateStates() {

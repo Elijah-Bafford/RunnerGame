@@ -1,7 +1,6 @@
 using System;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.UI;
 
 [DefaultExecutionOrder(-1)]
 public class Player : MonoBehaviour {
@@ -18,8 +17,6 @@ public class Player : MonoBehaviour {
     [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CinemachineCamera fstPersonCamera;
-    [SerializeField] private Slider speedBar;
-    private Animator speedBarAnimator;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -58,7 +55,6 @@ public class Player : MonoBehaviour {
     private void Start() {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        speedBarAnimator = speedBar.GetComponent<Animator>();
         momentumMech = GetComponent<MomentumMechanic>();
         grappleMech  = GetComponent<GrappleMechanic>();
         wallRunMech  = GetComponent<WallRunMechanic>();
@@ -216,7 +212,7 @@ public class Player : MonoBehaviour {
                 ChangeSpeedStat(cost);
             }
         } else if (failedCondition) {
-            speedBarAnimator.SetTrigger("Flash");
+            // TODO: call MomentumUI.ActionFailed
         }
     }
 
@@ -268,11 +264,6 @@ public class Player : MonoBehaviour {
         momentumMech.BuffSpeed(time, multiplier);
     }
 
-    /// <summary>
-    /// Update the speed bar. Lerp the value.
-    /// </summary>
-    /// <param name="value"></param>
-    public void UpdateSpeedBar(float value) { speedBar.value = Mathf.Lerp(speedBar.value, value, Time.fixedDeltaTime * 4); }
     public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
     public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
     public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
