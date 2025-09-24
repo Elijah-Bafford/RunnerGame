@@ -6,7 +6,9 @@ public class GroundCollider : MonoBehaviour {
 
     private Transform LevelMain; // Not required, but keeps organized
 
-    private void Start() { player = GetComponentInParent<Player>(); }
+    private void Start() { 
+        player = Player.Instance;
+    }
 
     private void OnTriggerEnter(Collider other) {
         if (other.gameObject.CompareTag("SlopedGround")) {
@@ -16,8 +18,8 @@ public class GroundCollider : MonoBehaviour {
         if (other.gameObject.CompareTag("GroundAuto")) {
             PlatformAuto auto = other.GetComponent<PlatformAuto>();
             if (auto == null) return;
-            LevelMain = player.GetTransform().parent;
-            player.GetTransform().SetParent(auto.transform, true);
+            LevelMain = player.transform.parent;
+            player.transform.SetParent(auto.transform, true);
             player.SetConveyorVelocity(Vector3.zero);
         }
     }
@@ -29,7 +31,7 @@ public class GroundCollider : MonoBehaviour {
 
         if (other.gameObject.CompareTag("GroundAuto")) {
             PlatformAuto auto = other.GetComponent<PlatformAuto>();
-            if (auto != null) player.GetTransform().SetParent(LevelMain, true);
+            if (auto != null) player.transform.SetParent(LevelMain, true);
             player.SetConveyorVelocity(auto.CurrentVelocity);
         }
     }

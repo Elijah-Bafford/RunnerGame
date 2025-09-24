@@ -37,8 +37,8 @@ public class Enemy : MonoBehaviour, IDamageable {
     private State currentState;
 
     private void Awake() {
-        player = Player.player;
-        playerTransform = player.GetComponent<Transform>();
+        player = Player.Instance;
+        playerTransform = player.transform;
         
         rb = GetComponent<Rigidbody>();
         startPosition = rb.position;

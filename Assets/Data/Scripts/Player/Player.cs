@@ -4,7 +4,6 @@ using UnityEngine;
 
 [DefaultExecutionOrder(-1)]
 public class Player : MonoBehaviour {
-    public static Player player;
 
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -49,8 +48,16 @@ public class Player : MonoBehaviour {
 
     private Direction currentDir;
 
+    public static Player Instance { get; private set; }
+
     private void Awake() {
-        player = this;
+        if (Instance != null && Instance != this)
+            Debug.LogError("Duplicate Player Object");
+        Instance = this;
+    }
+
+    private void OnDestroy() {
+        if (Instance == this) Instance = null;
     }
 
     private void Start() {
@@ -59,13 +66,13 @@ public class Player : MonoBehaviour {
         anim = GetComponentInChildren<Animator>();
         fstPersonCamera = GetComponentInChildren<CinemachineCamera>();
         momentumMech = GetComponent<MomentumMechanic>();
-        grappleMech  = GetComponent<GrappleMechanic>();
-        wallRunMech  = GetComponent<WallRunMechanic>();
+        grappleMech = GetComponent<GrappleMechanic>();
+        wallRunMech = GetComponent<WallRunMechanic>();
         playerAttack = GetComponentInChildren<PlayerAttack>();
         wallRunMech.InitWallRunMechanic(this, rb);
         momentumMech.InitMomentumMechanic(this);
-        grappleMech.InitGrappleMechanic  (this);
-        playerAttack.InitPlayerAttack    (this);
+        grappleMech.InitGrappleMechanic(this);
+        playerAttack.InitPlayerAttack(this);
 
         GetComponentInChildren<AnimationEventHandler>().InitAnimationEventHandler(this, playerAttack);
     }
@@ -244,7 +251,7 @@ public class Player : MonoBehaviour {
     /// </summary>
     public void Died() {
         print("I don't think this is ever called");
-        anim.SetBool("Died", false); 
+        anim.SetBool("Died", false);
     }
 
     /// <summary>
@@ -252,7 +259,7 @@ public class Player : MonoBehaviour {
     /// </summary>
     public void Die() {
         if (isInvincible) return;
-        anim.SetBool("Died", true); 
+        anim.SetBool("Died", true);
     }
 
     /// <summary>
@@ -283,7 +290,7 @@ public class Player : MonoBehaviour {
     }
     public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
     public void ToggleAttackCollider(bool toggle) { playerAttack.ToggleAttackCollider(toggle); }
-    
+
     public Transform GetTransform() { return transform; }
 
 }

@@ -3,17 +3,15 @@ using UnityEngine;
 
 public class LevelComplete : MonoBehaviour {
 
-
-    [SerializeField] Player player;
     [Header("Game Input Object")]
-    [SerializeField] GameStateHandler gameStateHandler;
+    [SerializeField] private GameStateHandler gameStateHandler;
     [Header("Game Timer Object")]
-    [SerializeField] GameTimer timer;
+    [SerializeField] private GameTimer timer;
     [Header("Level Complete Overlay TMPs")]
-    [SerializeField] TextMeshProUGUI timeNum;
-    [SerializeField] TextMeshProUGUI momentumNum;
+    [SerializeField] private TextMeshProUGUI timeNum;
+    [SerializeField] private TextMeshProUGUI momentumNum;
     [Header("The \"record\" text in the Level Complete Overlay")]
-    [SerializeField] GameObject ARecord;
+    [SerializeField] private GameObject ARecord;
     [Header("Colors")]
     [SerializeField] private Color gold;
     [SerializeField] private Color blue;
@@ -22,14 +20,13 @@ public class LevelComplete : MonoBehaviour {
     private MomentumMechanic momentumMech;
 
     private void Start() {
-        momentumMech = player.GetComponent<MomentumMechanic>();
+        momentumMech = Player.Instance.GetComponent<MomentumMechanic>();
         RecordHandler.OnRecordUpdated += HandleRecordUpdated;
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player")) {
-            OnLevelComplete();
-        }
+        print(other.name);
+        //OnLevelComplete();
     }
 
     private void OnLevelComplete() {
