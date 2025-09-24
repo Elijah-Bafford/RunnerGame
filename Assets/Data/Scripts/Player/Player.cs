@@ -14,14 +14,15 @@ public class Player : MonoBehaviour {
     [SerializeField] private bool isInvincible = false;
 
     [Header("General Refs")]
-    [SerializeField] private Animator anim;
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private CinemachineCamera fstPersonCamera;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckRadius = 0.2f;
+
+    private Animator anim;
+    private CinemachineCamera fstPersonCamera;
 
     private GrappleMechanic grappleMech;
     private WallRunMechanic wallRunMech;
@@ -55,6 +56,8 @@ public class Player : MonoBehaviour {
     private void Start() {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        anim = GetComponentInChildren<Animator>();
+        fstPersonCamera = GetComponentInChildren<CinemachineCamera>();
         momentumMech = GetComponent<MomentumMechanic>();
         grappleMech  = GetComponent<GrappleMechanic>();
         wallRunMech  = GetComponent<WallRunMechanic>();
