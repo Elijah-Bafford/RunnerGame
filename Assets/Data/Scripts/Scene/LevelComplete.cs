@@ -25,8 +25,7 @@ public class LevelComplete : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        print(other.name);
-        //OnLevelComplete();
+        if (other.CompareTag("Player")) OnLevelComplete();
     }
 
     private void OnLevelComplete() {

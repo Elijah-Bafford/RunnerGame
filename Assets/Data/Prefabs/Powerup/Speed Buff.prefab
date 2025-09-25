@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42f6a001a3ce8c645a928ca822919771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  SpeedBuffMultiplier: 2
 --- !u!135 &4040854800145147208
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -179,7 +179,7 @@ SphereCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
