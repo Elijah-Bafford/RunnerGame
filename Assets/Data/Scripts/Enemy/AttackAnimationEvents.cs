@@ -1,10 +1,10 @@
 using UnityEngine;
 
 public class AttackAnimationEvents : MonoBehaviour {
-    [SerializeField] private Enemy enemy;
+    [SerializeField] private EnemyOld enemy;
 
     private void Start() {
-        enemy = GetComponentInParent<Enemy>();
+        enemy = GetComponentInParent<EnemyOld>();
     }
 
     public void WeaponCanHit() { enemy.WeaponCanHit(true); }

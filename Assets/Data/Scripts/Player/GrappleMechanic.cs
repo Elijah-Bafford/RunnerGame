@@ -11,9 +11,9 @@ public class GrappleMechanic : MonoBehaviour {
     [SerializeField] private float grappleRange = 10f;
     [SerializeField] private float grappleSpeed = 30f;
 
-    private Enemy lockOnTarget = null;
-    private Enemy lastLockTarget = null;
-    private Enemy grappleTargetEnemy = null;
+    private EnemyOld lockOnTarget = null;
+    private EnemyOld lastLockTarget = null;
+    private EnemyOld grappleTargetEnemy = null;
 
     private Player player;
     private RawImage reticle;
@@ -82,13 +82,13 @@ public class GrappleMechanic : MonoBehaviour {
         Vector3 direction = cameraTransform.forward;
         Collider[] hits = Physics.OverlapSphere(origin + direction * (detectRange * 0.5f), detectRange * 0.5f, enemyLayer);
 
-        Enemy bestTarget = null;
+        EnemyOld bestTarget = null;
         float bestDot = -1f; // Closest to 1 is most centered
         float bestDistance = float.MaxValue;
 
         foreach (var hit in hits) {
             if (!hit.CompareTag("Enemy")) continue;
-            Enemy enemy = hit.GetComponentInParent<Enemy>();
+            EnemyOld enemy = hit.GetComponentInParent<EnemyOld>();
             if (enemy == null || enemy.IsDead()) continue;
 
             Vector3 toEnemy = (enemy.transform.position - origin).normalized;
@@ -97,12 +97,12 @@ public class GrappleMechanic : MonoBehaviour {
 
             // Don't allow grapple through walls
             if (Physics.Raycast(origin, toEnemy.normalized, out RaycastHit hit_, distance, groundLayer))
-                if (!hit_.collider.GetComponentInParent<Enemy>()) continue;
+                if (!hit_.collider.GetComponentInParent<EnemyOld>()) continue;
 
             Debug.DrawLine(origin, enemy.transform.position, Color.green, 1.0f);
             RaycastHit rayHit;
             if (Physics.Raycast(origin, toEnemy.normalized, out rayHit, distance, enemyLayer | wallLayer))
-                if (!rayHit.collider.GetComponentInParent<Enemy>()) continue;
+                if (!rayHit.collider.GetComponentInParent<EnemyOld>()) continue;
 
             // Only consider those within a certain angle of the camera center (e.g., 60 degrees)
             if (dot > 0.5f && distance <= detectRange) {
@@ -127,7 +127,7 @@ public class GrappleMechanic : MonoBehaviour {
             RaycastHit lastHit;
             int mask = enemyLayer.value | wallLayer.value | groundLayer.value;
             if (Physics.Raycast(origin, toLast, out lastHit, lastDistance, mask)) {
-                if (!lastHit.collider.GetComponentInParent<Enemy>()) {
+                if (!lastHit.collider.GetComponentInParent<EnemyOld>()) {
                     losBlocked = true;
                 }
             }

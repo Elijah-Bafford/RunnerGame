@@ -1,6 +1,5 @@
 using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class NotificationHandler : MonoBehaviour {
@@ -39,9 +38,8 @@ public class NotificationHandler : MonoBehaviour {
         if (playerHasEntered) return;
         if (collision.CompareTag("Player")) {
             playerHasEntered = true;
-            if (lastNode != null) {
-                if (!lastNode.IsDestroyed()) Destroy(lastNode);
-            }
+            if (lastNode != null && !lastNode) Destroy(lastNode);
+
             if (disableTutorials && isTutorial) return;
             messageTMP.text = message;
             notificationBox.SetActive(true);

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1076043467628622276}
   - component: {fileID: 4094125395423896990}
   - component: {fileID: 8993058129807319284}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 8521867859810987166}
   - component: {fileID: 1170820554525168949}
   - component: {fileID: 4040854800145147208}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Speed Buff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -201,7 +201,8 @@ GameObject:
   - component: {fileID: 3832395371569277825}
   - component: {fileID: 338799085686435652}
   - component: {fileID: 9100107093948796827}
-  m_Layer: 0
+  - component: {fileID: 7512029407075767603}
+  m_Layer: 12
   m_Name: Orb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -276,3 +277,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7512029407075767603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7781883165137909429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 2d192ce2146035b44be649a4dc36e97c, type: 2}

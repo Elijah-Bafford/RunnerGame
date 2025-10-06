@@ -288,7 +288,7 @@ public class Player : MonoBehaviour {
         isInAttack = false;
         ToggleAttackCollider(false);
     }
-    public void ForceHitEnemy(Enemy enemy) { playerAttack.ForceHit(enemy); }
+    public void ForceHitEnemy(EnemyOld enemy) { playerAttack.ForceHit(enemy); }
     public void ToggleAttackCollider(bool toggle) { playerAttack.ToggleAttackCollider(toggle); }
 
     public Transform GetTransform() { return transform; }
