@@ -52,6 +52,8 @@ public class MainMenu : MonoBehaviour {
         RefreshLevelButtons();
     }
 
+    private GameObject tutorialLevelButton;
+
     private void RefreshLevelButtons() {
         // Clear existing buttons
         foreach (Transform child in scrollContent) {
@@ -66,6 +68,7 @@ public class MainMenu : MonoBehaviour {
             LevelButtonUI buttonUI = btnObj.GetComponent<LevelButtonUI>();
 
             if (i == 2) {
+                tutorialLevelButton = btnObj;
                 buttonUI.levelText.text = $"Tutorial";
             } else {
                 buttonUI.levelText.text = $"Level {i - 1}";
