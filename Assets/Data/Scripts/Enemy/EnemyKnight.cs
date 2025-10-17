@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 public class EnemyKnight : MonoBehaviour {
@@ -10,6 +12,10 @@ public class EnemyKnight : MonoBehaviour {
     [SerializeField] private float _turnSpeed = 1f;
     [Tooltip("How close the enemy gets to the player before stopping")]
     [SerializeField] private float _stopDistance = 2f;
+    [Tooltip("The time in seconds after an attack before the enemy can do anything")]
+    [SerializeField] private float attackCooldownTime = 1.0f;
+
+    private Coroutine _attackCoolDown = null;
 
     public enum State { Idle, Move, Attack, Dead }
     private State _currentState = State.Idle;
@@ -72,6 +78,9 @@ public class EnemyKnight : MonoBehaviour {
     /// </summary>
     private void DecideState() {
         if (_currentState == State.Dead) return;
+        if (StopCombat) return;
+
+        if (_currentState != State.Move) enemyAnimator.ResetTurnAnimation();
 
         if (_isDead)
             DecideAction(State.Dead);
@@ -107,7 +116,6 @@ public class EnemyKnight : MonoBehaviour {
     /// </summary>
     private void ActionIdle() {
         if (_lastState == State.Idle) return;
-        // nothing happens here
     }
 
     /// <summary>
@@ -123,17 +131,16 @@ public class EnemyKnight : MonoBehaviour {
 
         // update rotation
         Vector3 localPos = transform.InverseTransformPoint(player.transform.position);
-        if (enemyAnimator.ShouldProcessTurn(Mathf.Atan2(localPos.x, localPos.z) * Mathf.Rad2Deg)) {
+        float angleToPlayer = Mathf.Atan2(localPos.x, localPos.z) * Mathf.Rad2Deg;
+        if (enemyAnimator.ShouldProcessTurn(angleToPlayer)) {
             Quaternion targetRot = Quaternion.LookRotation(playerDirection);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, _turnSpeed * Time.fixedDeltaTime);
         }
 
         if (sqrDirMag <= _stopDistance) {
-            DecideAction(State.Idle); // temp until implement attack
-            //_inRangeForAttack = true;
+            _inRangeForAttack = Mathf.Abs(angleToPlayer) < 10f;
             return;
         }
-        //_inRangeForAttack = false;
 
         Vector3 vel = rb.linearVelocity;
         Vector3 targetXZ = playerDirection * _movementSpeed;
@@ -153,7 +160,9 @@ public class EnemyKnight : MonoBehaviour {
     /// Single time update on state change to "Attack"
     /// </summary>
     private void ActionAttack() {
-        if (_lastState == State.Attack) return;
+        if (_attackCoolDown != null) return;
+        enemyAnimator.TriggerAttack();
+        _attackCoolDown = StartCoroutine(AttackCooldown());
     }
 
     /// <summary>
@@ -164,7 +173,13 @@ public class EnemyKnight : MonoBehaviour {
     }
     #endregion
 
-    #region Setters
+    private IEnumerator AttackCooldown() {
+        yield return new WaitForSeconds(attackCooldownTime);
+        _inRangeForAttack = false;
+        _attackCoolDown = null;
+    }
+
+    #region Getters / Setters
 
     /// <summary>
     /// Call in PlayerDetection script on trigger enter / exit
@@ -176,6 +191,7 @@ public class EnemyKnight : MonoBehaviour {
     public Animator GetAnimator() { return GetComponentInChildren<Animator>(); }
     public Rigidbody GetRigidbody() { return rb; }
     public float GetMovementSpeed() { return _movementSpeed; }
+    public EnemyAnimator GetEnemyAnimator() { return enemyAnimator; }
 
     #endregion
 }

@@ -29,11 +29,16 @@ public class EnemyAnimator {
         UpdateRunAnimation();
     }
 
+    public void TriggerAttack() {
+        anim.SetTrigger("Attack");
+    }
+
     private void UpdateRunAnimation() {
         velocity = Mathf.Clamp01(rb.linearVelocity.magnitude / movementSpeed);
         velocity = Mathf.Round(velocity * 100f) / 100f;
 
-        if (Mathf.Abs(velocity - lastVelocity) >= 0.01f) {
+        if ((Mathf.Abs(velocity - lastVelocity) >= 0.01f) || velocity < 0.01f) {
+            if (velocity < 0.01f) velocity = 0f;
             lastVelocity = velocity;
             anim.SetFloat("Velocity", velocity);
         }
@@ -44,8 +49,8 @@ public class EnemyAnimator {
     /// <returns> True if the enemy should turn, false if the enemy shouldn't turn. </returns>
     public bool ShouldProcessTurn(float angleToPlayer) {
         float angleToPlayer_u = Mathf.Abs(angleToPlayer);
-        bool inDeadZone = angleToPlayer_u < 30f;
-        bool passedDeadZone = angleToPlayer_u > 60f;
+        bool inDeadZone = angleToPlayer_u < 10f;
+        bool passedDeadZone = angleToPlayer_u > 20f;
 
         if (velocity < 0.5f) {
             // release lock when close enough
@@ -77,5 +82,10 @@ public class EnemyAnimator {
         }
 
         return true;
+    }
+
+    public void ResetTurnAnimation() {
+        turnParam = 0f;
+        anim.SetFloat("Turn", 0f);
     }
 }
