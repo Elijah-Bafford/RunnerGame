@@ -12,13 +12,11 @@ public class PlayerDetection : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (!other.CompareTag("Player")) return;
-        print("CompareTag(\"Player\") == true | Name: " + other.name);
         enemyKnight.SetPlayerInViewDistance(true);
     }
 
     private void OnTriggerExit(Collider other) {
         if (!other.CompareTag("Player")) return;
         enemyKnight.SetPlayerInViewDistance(false);
-        print("OUT OF VIEW DISTANCE");
     }
 }

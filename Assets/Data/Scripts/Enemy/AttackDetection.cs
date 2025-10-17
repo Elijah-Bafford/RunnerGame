@@ -13,7 +13,6 @@ public class AttackDetection : MonoBehaviour {
     }
 
     private void OnTriggerStay(Collider other) {
-        print(other.name); 
         if (!other.CompareTag("Player")) return;
         Player.Instance.Die();
     }

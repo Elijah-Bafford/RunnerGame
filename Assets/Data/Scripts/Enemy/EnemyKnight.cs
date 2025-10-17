@@ -17,13 +17,14 @@ public class EnemyKnight : MonoBehaviour {
 
     private Coroutine _attackCoolDown = null;
 
-    public enum State { Idle, Move, Attack, Dead }
+    public enum State { Idle, Move, Attack, Hit, Dead }
     private State _currentState = State.Idle;
     private State _lastState = State.Idle;
 
     private bool _playerInViewDistance = false;
     private bool _playerInSight = false;
     private bool _inRangeForAttack = false;
+    private bool _isHit = false;
     private bool _isDead = false;
 
     private Rigidbody rb;
@@ -84,6 +85,8 @@ public class EnemyKnight : MonoBehaviour {
 
         if (_isDead)
             DecideAction(State.Dead);
+        else if (_isHit)
+            DecideAction(State.Hit);
         else if (_inRangeForAttack)
             DecideAction(State.Attack);
         else if (_playerInSight)
@@ -104,6 +107,7 @@ public class EnemyKnight : MonoBehaviour {
             case State.Idle: ActionIdle(); break;
             case State.Move: ActionMove(); break;
             case State.Attack: ActionAttack(); break;
+            case State.Hit: ActionHit(); break;
             case State.Dead: ActionDead(); break;
         }
     }
@@ -165,11 +169,19 @@ public class EnemyKnight : MonoBehaviour {
         _attackCoolDown = StartCoroutine(AttackCooldown());
     }
 
+    private void ActionHit() {
+        if (_lastState == State.Hit) return;
+        StopAllCoroutines();
+        _attackCoolDown = null;
+        enemyAnimator.TriggerHit();
+    }
+
     /// <summary>
     /// Single time update on state change to "Dead"
     /// </summary>
     private void ActionDead() {
         if (_lastState == State.Dead) return;
+        gameObject.SetActive(false);
     }
     #endregion
 
@@ -179,19 +191,30 @@ public class EnemyKnight : MonoBehaviour {
         _attackCoolDown = null;
     }
 
+    /// <summary>
+    /// Call to hit the enemy
+    /// </summary>
+    public void Hit() => _isHit = true;
+
+    /// <summary>
+    /// Call to kill the enemy
+    /// </summary>
+    public void Kill() => _isDead = true;
+
     #region Getters / Setters
 
     /// <summary>
     /// Call in PlayerDetection script on trigger enter / exit
     /// </summary>
     /// <param name="playerInRange"></param>
-    public void SetPlayerInViewDistance(bool playerInRange) {
-        _playerInViewDistance = playerInRange;
-    }
-    public Animator GetAnimator() { return GetComponentInChildren<Animator>(); }
-    public Rigidbody GetRigidbody() { return rb; }
-    public float GetMovementSpeed() { return _movementSpeed; }
-    public EnemyAnimator GetEnemyAnimator() { return enemyAnimator; }
+    public void SetPlayerInViewDistance(bool playerInRange) => _playerInViewDistance = playerInRange;
+
+    public bool IsHit() => _isHit;
+    public bool IsDead() => _isDead;
+    public Animator GetAnimator() => GetComponentInChildren<Animator>();
+    public Rigidbody GetRigidbody() => rb;
+    public float GetMovementSpeed() => _movementSpeed;
+    public EnemyAnimator GetEnemyAnimator() => enemyAnimator;
 
     #endregion
 }

@@ -44,7 +44,7 @@ public class GrappleMechanic : MonoBehaviour {
 
         // Stop when close enough
         if (dist < GetGrappleArrivalDistance()) {
-            player.ForceHitEnemy(grappleTargetEnemy);
+            //player.ForceHitEnemy(grappleTargetEnemy);
             SetIsGrappling(false);
             player.Attack();
             grappleTargetEnemy = null;

@@ -25,13 +25,12 @@ public class EnemyAnimator {
         movementSpeed = ek.GetMovementSpeed();
     }
 
-    public void UpdateAnimations() {
-        UpdateRunAnimation();
-    }
+    public void UpdateAnimations() => UpdateRunAnimation();
 
-    public void TriggerAttack() {
-        anim.SetTrigger("Attack");
-    }
+    public void TriggerAttack() => anim.SetTrigger("Attack");
+    
+    public void TriggerHit() => anim.SetTrigger("Hit");
+    
 
     private void UpdateRunAnimation() {
         velocity = Mathf.Clamp01(rb.linearVelocity.magnitude / movementSpeed);

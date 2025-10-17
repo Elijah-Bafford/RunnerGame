@@ -8,7 +8,7 @@ public class EnemyAnimationEvent : MonoBehaviour {
         attackDetection = GetComponentInChildren<AttackDetection>();
     }
 
-    public void TriggerAttackBox() {
-        attackDetection.TriggerAttackBox();
-    }
+    public void TriggerAttackBox() => attackDetection.TriggerAttackBox();
+    public void TriggerDeath() => GetComponentInParent<EnemyKnight>().Kill();
+    
 }
