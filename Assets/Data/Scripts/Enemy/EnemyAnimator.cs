@@ -19,7 +19,7 @@ public class EnemyAnimator {
     private float turnBlendSpeed = 5f;
     private float turnParam = 0f;
 
-    public EnemyAnimator(EnemyKnight ek) {
+    public EnemyAnimator(EnemyBase ek) {
         anim = ek.GetAnimator();
         rb = ek.GetRigidbody();
         movementSpeed = ek.GetMovementSpeed();

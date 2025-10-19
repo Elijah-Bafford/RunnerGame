@@ -1,132 +1,17 @@
-using System.Collections;
-using System.Threading;
+
 using UnityEngine;
 
-public class EnemyKnight : MonoBehaviour {
+public class EnemyKnight : EnemyBase {
 
-    public static bool StopCombat = false;
-
-    #region Fields
-    [Header("Basic Config")]
-    [SerializeField] private float _movementSpeed = 4f;
-    [SerializeField] private float _turnSpeed = 1f;
-    [Tooltip("How close the enemy gets to the player before stopping")]
-    [SerializeField] private float _stopDistance = 2f;
-    [Tooltip("The time in seconds after an attack before the enemy can do anything")]
-    [SerializeField] private float attackCooldownTime = 1.0f;
-
-    private Coroutine _attackCoolDown = null;
-
-    public enum State { Idle, Move, Attack, Hit, Dead }
-    private State _currentState = State.Idle;
-    private State _lastState = State.Idle;
-
-    private bool _playerInViewDistance = false;
-    private bool _playerInSight = false;
-    private bool _inRangeForAttack = false;
-    private bool _isHit = false;
-    private bool _isDead = false;
-
-    private Rigidbody rb;
-    private Player player;
-    private EnemyAnimator enemyAnimator;
-
-    #endregion
-
-    private void Awake() {
-        rb = GetComponent<Rigidbody>();
-        player = Player.Instance;
-        enemyAnimator = new EnemyAnimator(this);
+    protected override bool ActionHit() {
+        if (!base.ActionHit()) return false;
+        _attackCoolDown = null;
+        enemyAnimator.TriggerHit();
+        return true;
     }
 
-    private void FixedUpdate() {
-        _lastState = _currentState;
-        _playerInSight = RunPlayerDetection();
-        DecideState();
-        enemyAnimator.UpdateAnimations();
-    }
-
-    #region Player Detection
-
-    /// <summary>
-    /// Check for the player.
-    /// If the player is in view distance, then cast a ray towards the player,
-    /// if the ray hits (only) the player, then the player is in sight.
-    /// </summary>
-    private bool RunPlayerDetection() {
-        if (!_playerInViewDistance) return false;
-
-        Vector3 origin = transform.position;
-        Vector3 direction = (player.transform.position - origin).normalized;
-
-        float distanceToPlayer = Vector3.Distance(origin, player.transform.position);
-
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, distanceToPlayer, ~0)) {
-            if (!hit.collider.CompareTag("Player")) return false;
-            if (hit.collider.CompareTag("Wall")) return false;
-            if (hit.collider.CompareTag("Ground")) return false;
-            if (hit.collider.CompareTag("SlopedGround")) return false;
-            return true;
-        }
-        return false;
-    }
-    #endregion
-
-    #region State Machine
-
-    /// <summary>
-    /// Set the current State (enum) based on various bools.
-    /// </summary>
-    private void DecideState() {
-        if (_currentState == State.Dead) return;
-        if (StopCombat) return;
-
-        if (_currentState != State.Move) enemyAnimator.ResetTurnAnimation();
-
-        if (_isDead)
-            DecideAction(State.Dead);
-        else if (_isHit)
-            DecideAction(State.Hit);
-        else if (_inRangeForAttack)
-            DecideAction(State.Attack);
-        else if (_playerInSight)
-            DecideAction(State.Move);
-        else
-            DecideAction(State.Idle);
-
-        print(_currentState);
-    }
-
-    /// <summary>
-    /// Decide Enemy's next action based on the State (enum) arg.
-    /// </summary>
-    /// <param name="s"></param>
-    private void DecideAction(State s) {
-        _currentState = s;
-        switch (s) {
-            case State.Idle: ActionIdle(); break;
-            case State.Move: ActionMove(); break;
-            case State.Attack: ActionAttack(); break;
-            case State.Hit: ActionHit(); break;
-            case State.Dead: ActionDead(); break;
-        }
-    }
-    #endregion
-
-    #region Action States
-
-    /// <summary>
-    /// Single time update on state change to "Idle"
-    /// </summary>
-    private void ActionIdle() {
-        if (_lastState == State.Idle) return;
-    }
-
-    /// <summary>
-    /// Continuous update in FixedUpdate while the state is "Move"
-    /// </summary>
-    private void ActionMove() {
-        SingleUpdateActionMove();
+    protected override void ActionMove() {
+        base.ActionMove();
         Vector3 playerDirection = player.transform.position - transform.position;
         playerDirection.y = 0f;
 
@@ -155,66 +40,4 @@ public class EnemyKnight : MonoBehaviour {
         // Preserve vertical velocity
         rb.linearVelocity = new Vector3(newXZ.x, vel.y, newXZ.z);
     }
-
-    private void SingleUpdateActionMove() {
-        if (_lastState == State.Move) return;
-    }
-
-    /// <summary>
-    /// Single time update on state change to "Attack"
-    /// </summary>
-    private void ActionAttack() {
-        if (_attackCoolDown != null) return;
-        enemyAnimator.TriggerAttack();
-        _attackCoolDown = StartCoroutine(AttackCooldown());
-    }
-
-    private void ActionHit() {
-        if (_lastState == State.Hit) return;
-        StopAllCoroutines();
-        _attackCoolDown = null;
-        enemyAnimator.TriggerHit();
-    }
-
-    /// <summary>
-    /// Single time update on state change to "Dead"
-    /// </summary>
-    private void ActionDead() {
-        if (_lastState == State.Dead) return;
-        gameObject.SetActive(false);
-    }
-    #endregion
-
-    private IEnumerator AttackCooldown() {
-        yield return new WaitForSeconds(attackCooldownTime);
-        _inRangeForAttack = false;
-        _attackCoolDown = null;
-    }
-
-    /// <summary>
-    /// Call to hit the enemy
-    /// </summary>
-    public void Hit() => _isHit = true;
-
-    /// <summary>
-    /// Call to kill the enemy
-    /// </summary>
-    public void Kill() => _isDead = true;
-
-    #region Getters / Setters
-
-    /// <summary>
-    /// Call in PlayerDetection script on trigger enter / exit
-    /// </summary>
-    /// <param name="playerInRange"></param>
-    public void SetPlayerInViewDistance(bool playerInRange) => _playerInViewDistance = playerInRange;
-
-    public bool IsHit() => _isHit;
-    public bool IsDead() => _isDead;
-    public Animator GetAnimator() => GetComponentInChildren<Animator>();
-    public Rigidbody GetRigidbody() => rb;
-    public float GetMovementSpeed() => _movementSpeed;
-    public EnemyAnimator GetEnemyAnimator() => enemyAnimator;
-
-    #endregion
 }
