@@ -7,6 +7,7 @@ public class EnemyAnimator {
     // Enemy component Refs
     private Rigidbody rb;
     private Animator anim;
+    private EnemyBase enemy;
     private float movementSpeed;
 
     // Run blend
@@ -19,10 +20,11 @@ public class EnemyAnimator {
     private float turnBlendSpeed = 5f;
     private float turnParam = 0f;
 
-    public EnemyAnimator(EnemyBase ek) {
-        anim = ek.GetAnimator();
-        rb = ek.GetRigidbody();
-        movementSpeed = ek.GetMovementSpeed();
+    public EnemyAnimator(EnemyBase enemyBase) {
+        enemy = enemyBase;
+        anim = enemyBase.GetAnimator();
+        rb = enemyBase.GetRigidbody();
+        movementSpeed = enemyBase.GetMovementSpeed();
     }
 
     public void UpdateAnimations() => UpdateRunAnimation();
@@ -33,6 +35,7 @@ public class EnemyAnimator {
     
 
     private void UpdateRunAnimation() {
+        anim.SetFloat("Health", enemy.GetHealth());
         velocity = Mathf.Clamp01(rb.linearVelocity.magnitude / movementSpeed);
         velocity = Mathf.Round(velocity * 100f) / 100f;
 

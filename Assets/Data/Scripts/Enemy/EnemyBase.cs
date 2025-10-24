@@ -10,6 +10,7 @@ public abstract class EnemyBase : MonoBehaviour {
     [Header("Basic Config")]
     [SerializeField] protected float _movementSpeed = 4f;
     [SerializeField] protected float _turnSpeed = 1f;
+    [SerializeField] protected float _health = 10f;
     [Tooltip("How close the enemy gets to the player before stopping")]
     [SerializeField] protected float _stopDistance = 2f;
     [Tooltip("The time in seconds after an attack before the enemy can do anything")]
@@ -21,14 +22,14 @@ public abstract class EnemyBase : MonoBehaviour {
 
     protected Coroutine _attackCoolDown = null;
 
-    public enum State { Idle, Move, Attack, Hit, Dead }
+    public enum State { Idle, Move, Attack, Stunned, Dead }
     protected State _currentState = State.Idle;
     protected State _lastState = State.Idle;
 
     protected bool _playerInViewDistance = false;
     protected bool _playerInSight = false;
     protected bool _inRangeForAttack = false;
-    protected bool _isHit = false;
+    protected bool _isStunned = false;
     protected bool _isDead = false;
 
     protected Rigidbody rb;
@@ -89,7 +90,7 @@ public abstract class EnemyBase : MonoBehaviour {
         if (_currentState != State.Move) enemyAnimator.ResetTurnAnimation();
         _currentState =
             _isDead ? State.Dead :
-            _isHit ? State.Hit :
+            _isStunned ? State.Stunned :
             _inRangeForAttack ? State.Attack :
             _playerInSight ? State.Move : State.Idle;
 
@@ -106,7 +107,7 @@ public abstract class EnemyBase : MonoBehaviour {
             case State.Idle: ActionIdle(); break;
             case State.Move: ActionMove(); break;
             case State.Attack: ActionAttack(); break;
-            case State.Hit: ActionHit(); break;
+            case State.Stunned: ActionStunned(); break;
             case State.Dead: ActionDead(); break;
         }
     }
@@ -171,10 +172,11 @@ public abstract class EnemyBase : MonoBehaviour {
     /// <returns>
     /// False on early exit, true on run
     /// </returns>
-    protected virtual bool ActionHit() {
-        if (_lastState == State.Hit) return false;
-        StopAllCoroutines();
+    protected virtual bool ActionStunned() {
+        if (_lastState == State.Stunned) return false;
         PInfo(_currentState);
+        StopCoroutine(_attackCoolDown);
+        _attackCoolDown = null;
         return true;
     }
 
@@ -200,14 +202,30 @@ public abstract class EnemyBase : MonoBehaviour {
     }
 
     /// <summary>
-    /// Call to hit the enemy
+    /// Damage the enemy. By default it's instant kill.
     /// </summary>
-    public virtual void Hit() => _isHit = true;
+    /// <param name="damage"> Positive value, the damage to deal to the enemy</param>
+    public virtual void Hurt(float damage = 10f) {
+        _health -= damage;
+        if (_health == 0.1f) _health = 0.09f; // Since the animator doesn't have "equal to" then I have to improvise
+        Stun();
+    }
 
     /// <summary>
-    /// Call to kill the enemy
+    /// Set enemy is stunned. (The stunned state means the enemy cannot act).
+    /// _isStunned is disabled at the end of the "Hit" animation.
     /// </summary>
-    public virtual void Kill() => _isDead = true;
+    /// <param name="isStunned"></param>
+    public virtual void Stun(bool isStunned = true) {
+        if (_health <= 0) {
+            _isStunned = true;
+            return;
+        }
+        _isStunned = isStunned;
+    }
+
+    public virtual void Kill(bool isKilled = true) => _isDead = isKilled;
+    public bool IsDead() => _isDead;
 
     protected void PInfo(object message, int severity = 0) {
         if (!_showDebugMessages && severity != 0) return;
@@ -220,16 +238,17 @@ public abstract class EnemyBase : MonoBehaviour {
 
     #region Getters / Setters
 
+    public Rigidbody GetRigidbody() => rb;
+    public float GetHealth() => _health;
+    public float GetMovementSpeed() => _movementSpeed;
+    public EnemyAnimator GetEnemyAnimator() => enemyAnimator;
+    public Animator GetAnimator() => GetComponentInChildren<Animator>();
+
     /// <summary>
     /// Call in PlayerDetection script on trigger enter / exit
     /// </summary>
     /// <param name="playerInRange"></param>
     public void SetPlayerInViewDistance(bool playerInRange) => _playerInViewDistance = playerInRange;
-    public bool IsDead() => _isDead;
-    public Animator GetAnimator() => GetComponentInChildren<Animator>();
-    public Rigidbody GetRigidbody() => rb;
-    public float GetMovementSpeed() => _movementSpeed;
-    public EnemyAnimator GetEnemyAnimator() => enemyAnimator;
 
     #endregion
 }

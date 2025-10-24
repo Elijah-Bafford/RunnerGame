@@ -22,22 +22,19 @@ public class PlayerAttack : MonoBehaviour {
     public void UpdatePlayerAttack() {
         if (!canHit || !hasAttacked || target == null) return;
         if (target.IsDead()) return;
-        hit();
+        Attack();
     }
 
-    private void hit() {
-        Vector3 hitDirection = transform.forward + Vector3.up * 0.5f;
-        hitDirection.Normalize();
-        player.ChangeSpeedStat(18f);
+    private void Attack() {
         print("Target: " + target.name);
-        //target.Hit(hitDirection);
-        target.Hit();
+        player.ChangeSpeedStat(18f);
+        target.Hurt(player.attackDamage);
         target = null;
     }
 
     public void ForceHit(EnemyKnight target) {
         this.target = target;
-        hit();
+        Attack();
     }
 
     public void ToggleAttackCollider(bool toggle) {

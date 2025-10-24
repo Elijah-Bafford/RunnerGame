@@ -5,6 +5,7 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public class Player : MonoBehaviour {
 
+    public float attackDamage { get; set; } = 10f;
     [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float speedStat = 0;

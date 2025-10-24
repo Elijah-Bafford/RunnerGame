@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class EnemyKnight : EnemyBase {
 
-    protected override bool ActionHit() {
-        if (!base.ActionHit()) return false;
+    protected override bool ActionStunned() {
+        if (!base.ActionStunned()) return false;
         _attackCoolDown = null;
         enemyAnimator.TriggerHit();
         return true;
