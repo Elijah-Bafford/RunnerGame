@@ -31,18 +31,21 @@ public class EnemyArcher : EnemyBase {
         bowAnimator.SetBool("Draw", false);
     }
 
-    public void ToggleConstrainedArrow() {
-        showConstrainedArrow = !showConstrainedArrow;
-        constrainedArrow.SetActive(showConstrainedArrow);
+    public void SetConstrainedArrow(bool active) {
+        showConstrainedArrow = active;
+        constrainedArrow.SetActive(active);
     }
 
     /// <summary>
     /// Called when the arrow should be released from the bow
     /// </summary>
-    public void CreateLoosedArrow() {
+    public Arrow CreateLoosedArrow() {
         Vector3 pos = constrainedArrow.transform.position;
         Quaternion rot = constrainedArrow.transform.rotation * arrowPrefab.transform.rotation;
-        Instantiate(arrowPrefab, pos, rot);
+        GameObject a = Instantiate(arrowPrefab, pos, rot);
+        a.SetActive(true);
+        return a.GetComponent<Arrow>();
+
     }
 
     public Animator GetBowAnimator() => bowAnimator;

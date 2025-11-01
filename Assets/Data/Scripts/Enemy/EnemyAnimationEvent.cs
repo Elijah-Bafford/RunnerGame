@@ -22,10 +22,12 @@ public class EnemyAnimationEvent : MonoBehaviour {
     public void TriggerDeath() => enemy.Kill();
 
     // Enemy Archer
-    public void ToggleSpineConstraint() => spineConstraint.enabled = !spineConstraint.enabled;
+    public void DisableSpineConstraint() => spineConstraint.enabled = false;
+    public void EnableSpineConstraint() => spineConstraint.enabled = true;
+    public void DisableConstrainedArrow() => enemyArcher.SetConstrainedArrow(false);
+    public void EnableConstrainedArrow() => enemyArcher.SetConstrainedArrow(true);
     public void DrawBow() => enemyArcher.TriggerBowDrawstring();
     public void CancelDraw() => enemyArcher.CancelDraw();
     public void FireBow() => enemyArcher.FireBow();
-    public void ToggleConstrainedArrow() => enemyArcher.ToggleConstrainedArrow();
     public void CreateLooseArrow() => enemyArcher.CreateLoosedArrow();
 }

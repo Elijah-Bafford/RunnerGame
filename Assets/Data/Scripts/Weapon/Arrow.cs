@@ -1,29 +1,34 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(Rigidbody))]
 public class Arrow : MonoBehaviour {
 
-    private float velocity = 5f;
-    private float distance = 15f;
-    private Vector3 targetPosition;
-    public void DestroyArrow() => Destroy(gameObject);
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float lifetime = 5f;
+    private Rigidbody rb;
+    public void DestroyArrow(float lifetime = 0) => Destroy(gameObject, lifetime);
 
-    private void Awake() {
-        targetPosition = transform.forward * distance + transform.position;
-    }
-
-    private void FixedUpdate() {
-
-        Vector3 newPos = Vector3.Lerp(transform.position, targetPosition, Time.fixedDeltaTime / velocity);
-        transform.position = newPos;
+    private void Awake() => rb = GetComponent<Rigidbody>();
+    
+    private void Start() {
+        rb.linearVelocity = transform.forward * speed;
+        DestroyArrow(lifetime);
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player")) {
-            print("Hit Player");
+        Debug.Log("Arrow hit: " + other.name + " (tag " + other.tag + ")");
+
+        switch (other.tag) {
+            case "Wall":
+            case "Ground":
+            case "SlopedGround":
+                break;
+            case "Player":
+                // Logic for player hit by arrow
+                break;
+            default: return;
         }
-        if (other.name != "Player Detection") {
-            DestroyArrow();
-        }
+        DestroyArrow();
     }
 }
