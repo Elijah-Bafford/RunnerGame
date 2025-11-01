@@ -3,13 +3,6 @@ using UnityEngine;
 
 public class EnemyKnight : EnemyBase {
 
-    protected override bool ActionStunned() {
-        if (!base.ActionStunned()) return false;
-        _attackCoolDown = null;
-        enemyAnimator.TriggerHit();
-        return true;
-    }
-
     protected override void ActionMove() {
         base.ActionMove();
         Vector3 playerDirection = player.transform.position - transform.position;
@@ -39,5 +32,11 @@ public class EnemyKnight : EnemyBase {
 
         // Preserve vertical velocity
         rb.linearVelocity = new Vector3(newXZ.x, vel.y, newXZ.z);
+    }
+
+    protected override bool ActionAttack() {
+        if (!base.ActionAttack()) return false;
+        enemyAnimator.TriggerMeleeAttack();
+        return true;
     }
 }

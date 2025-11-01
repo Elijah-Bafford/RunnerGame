@@ -8,13 +8,13 @@ public abstract class EnemyBase : MonoBehaviour {
 
     #region Fields
     [Header("Basic Config")]
-    [SerializeField] protected float _movementSpeed = 4f;
-    [SerializeField] protected float _turnSpeed = 1f;
+    [SerializeField] protected float _movementSpeed = 3.5f;
+    [SerializeField] protected float _turnSpeed = 360f;
     [SerializeField] protected float _health = 10f;
     [Tooltip("How close the enemy gets to the player before stopping")]
-    [SerializeField] protected float _stopDistance = 2f;
+    [SerializeField] protected float _stopDistance = 1.7f;
     [Tooltip("The time in seconds after an attack before the enemy can do anything")]
-    [SerializeField] protected float _attackCooldownTime = 1.0f;
+    [SerializeField] protected float _attackCooldownTime = 0.8f;
     [Tooltip("The position of the enemy's head for player detection")]
     [SerializeField] protected Transform _headPosition;
     [Header("Debug")]
@@ -49,6 +49,7 @@ public abstract class EnemyBase : MonoBehaviour {
         _playerInSight = RunPlayerDetection();
         DecideState();
         enemyAnimator.UpdateAnimations();
+        PInfo(_currentState);
     }
 
     #region Player Detection
@@ -160,7 +161,6 @@ public abstract class EnemyBase : MonoBehaviour {
     protected virtual bool ActionAttack() {
         if (_attackCoolDown != null) return false;
         PInfo(_currentState);
-        enemyAnimator.TriggerAttack();
         _attackCoolDown = StartCoroutine(AttackCooldown());
         return true;
     }
@@ -175,8 +175,12 @@ public abstract class EnemyBase : MonoBehaviour {
     protected virtual bool ActionStunned() {
         if (_lastState == State.Stunned) return false;
         PInfo(_currentState);
-        StopCoroutine(_attackCoolDown);
-        _attackCoolDown = null;
+        if (_attackCoolDown != null) {
+            StopCoroutine(_attackCoolDown);
+            _attackCoolDown = null;
+        }
+        _inRangeForAttack = false;
+        enemyAnimator.TriggerHit();
         return true;
     }
 
@@ -228,12 +232,12 @@ public abstract class EnemyBase : MonoBehaviour {
     public bool IsDead() => _isDead;
 
     protected void PInfo(object message, int severity = 0) {
-        if (!_showDebugMessages && severity != 0) return;
-        switch (severity) {
-            case 0: Debug.Log(message); break;
-            case 1: Debug.LogWarning(message); break;
-            case 2: Debug.LogError(message); break;
-        }
+        //if (!_showDebugMessages && severity != 0) return;
+        //switch (severity) {
+        //    case 0: Debug.Log(message); break;
+        //    case 1: Debug.LogWarning(message); break;
+        //    case 2: Debug.LogError(message); break;
+        //}
     }
 
     #region Getters / Setters

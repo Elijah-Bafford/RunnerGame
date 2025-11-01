@@ -7,6 +7,7 @@ public class EnemyAnimator {
     // Enemy component Refs
     private Rigidbody rb;
     private Animator anim;
+    private Animator bowAnim;
     private EnemyBase enemy;
     private float movementSpeed;
 
@@ -20,19 +21,22 @@ public class EnemyAnimator {
     private float turnBlendSpeed = 5f;
     private float turnParam = 0f;
 
+    // Enemy Specific traits
+    private bool isArcher = false;
+
     public EnemyAnimator(EnemyBase enemyBase) {
         enemy = enemyBase;
         anim = enemyBase.GetAnimator();
+        if (enemyBase is EnemyArcher ea) bowAnim = ea.GetBowAnimator();
+        isArcher = bowAnim != null;
         rb = enemyBase.GetRigidbody();
         movementSpeed = enemyBase.GetMovementSpeed();
     }
 
     public void UpdateAnimations() => UpdateRunAnimation();
-
-    public void TriggerAttack() => anim.SetTrigger("Attack");
-    
     public void TriggerHit() => anim.SetTrigger("Hit");
-    
+    public void TriggerMeleeAttack() { if (!isArcher) anim.SetTrigger("Attack"); }
+    public void TriggerRangeAttack() { if (isArcher) bowAnim.SetTrigger("Draw"); }
 
     private void UpdateRunAnimation() {
         anim.SetFloat("Health", enemy.GetHealth());

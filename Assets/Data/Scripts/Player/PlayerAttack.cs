@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour {
 
     private Player player;
-    private EnemyKnight target = null;
+    private EnemyBase target = null;
     private bool hasAttacked = false;
     private bool canHit = false;
 
@@ -26,13 +26,12 @@ public class PlayerAttack : MonoBehaviour {
     }
 
     private void Attack() {
-        print("Target: " + target.name);
         player.ChangeSpeedStat(18f);
         target.Hurt(player.attackDamage);
         target = null;
     }
 
-    public void ForceHit(EnemyKnight target) {
+    public void ForceHit(EnemyBase target) {
         this.target = target;
         Attack();
     }
@@ -46,7 +45,7 @@ public class PlayerAttack : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         print(other.name);
         if (other.CompareTag("Enemy")) {
-            target = other.GetComponent<EnemyKnight>();
+            target = other.GetComponent<EnemyBase>();
             if (target != null) canHit = true;
         }
         if (other.CompareTag("Wall")) {
