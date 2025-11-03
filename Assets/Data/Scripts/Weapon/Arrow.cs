@@ -5,15 +5,14 @@ using UnityEngine;
 public class Arrow : MonoBehaviour {
 
     [SerializeField] private float speed = 5f;
-    [SerializeField] private float lifetime = 5f;
+    [SerializeField] private float lifetime = 10f;
     private Rigidbody rb;
-    public void DestroyArrow(float lifetime = 0) => Destroy(gameObject, lifetime);
 
     private void Awake() => rb = GetComponent<Rigidbody>();
-    
+
     private void Start() {
         rb.linearVelocity = transform.forward * speed;
-        DestroyArrow(lifetime);
+        Destroy(gameObject, lifetime);
     }
 
     private void OnTriggerEnter(Collider other) {
@@ -23,12 +22,13 @@ public class Arrow : MonoBehaviour {
             case "Wall":
             case "Ground":
             case "SlopedGround":
+                rb.linearVelocity = Vector3.zero;
                 break;
             case "Player":
                 // Logic for player hit by arrow
-                break;
+                Destroy(gameObject); break;
             default: return;
         }
-        DestroyArrow();
+
     }
 }

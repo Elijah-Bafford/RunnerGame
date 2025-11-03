@@ -6689,7 +6689,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0
-    functionName: ToggleSpineConstraint
+    functionName: DisableSpineConstraint
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
