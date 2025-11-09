@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +9,7 @@ public class EnemyAnimator {
     private Rigidbody rb;
     private Animator anim;
     private Animator bowAnim;
-    private EnemyBase enemy;
+    private Enemy enemy;
     private float movementSpeed;
 
     // Run blend
@@ -24,7 +25,7 @@ public class EnemyAnimator {
     // Enemy Specific traits
     private bool isArcher = false;
 
-    public EnemyAnimator(EnemyBase enemyBase) {
+    public EnemyAnimator(Enemy enemyBase) {
         enemy = enemyBase;
         anim = enemyBase.GetAnimator();
         if (enemyBase is EnemyArcher ea) bowAnim = ea.GetBowAnimator();
@@ -39,7 +40,7 @@ public class EnemyAnimator {
     public void TriggerRangeAttack() { if (isArcher) bowAnim.SetTrigger("Draw"); }
 
     private void UpdateRunAnimation() {
-        anim.SetFloat("Health", enemy.GetHealth());
+        anim.SetFloat("Health", enemy.GetCurrentHealth());
         velocity = Mathf.Clamp01(rb.linearVelocity.magnitude / movementSpeed);
         velocity = Mathf.Round(velocity * 100f) / 100f;
 
@@ -90,8 +91,20 @@ public class EnemyAnimator {
         return true;
     }
 
+    public void SetAimAngle(float angle) {
+        float c_angle = Mathf.Clamp(angle, -35f, 35f);
+        anim.SetFloat("Aim", c_angle);
+    }
+
     public void ResetTurnAnimation() {
         turnParam = 0f;
         anim.SetFloat("Turn", 0f);
     }
+
+    public void TriggerReset() {
+        anim.SetFloat("Health", enemy.GetMaxHealth());
+        anim.SetTrigger("Reset");
+    }
+
+    public void SetBowDrawn(bool bowIsDrawn) => anim.SetBool("Draw", bowIsDrawn);
 }

@@ -2,15 +2,20 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public abstract class EnemyBase : MonoBehaviour {
+public abstract class Enemy : MonoBehaviour {
 
     public static bool StopCombat = false;
+
+    [System.Serializable]
+    public enum EnemyType {
+        Knight, Archer
+    }
 
     #region Fields
     [Header("Basic Config")]
     [SerializeField] protected float _movementSpeed = 3.5f;
     [SerializeField] protected float _turnSpeed = 360f;
-    [SerializeField] protected float _health = 10f;
+    [SerializeField] protected float _maxHealth = 10f;
     [Tooltip("How close the enemy gets to the player before stopping")]
     [SerializeField] protected float _stopDistance = 1.7f;
     [Tooltip("The time in seconds after an attack before the enemy can do anything")]
@@ -18,7 +23,9 @@ public abstract class EnemyBase : MonoBehaviour {
     [Tooltip("The position of the enemy's head for player detection")]
     [SerializeField] protected Transform _headPosition;
     [Header("Debug")]
-    [SerializeField] protected bool _showDebugMessages = true;
+    [SerializeField] protected bool _showDebugMessages = false;
+
+    protected float _currentHealth;
 
     protected Coroutine _attackCoolDown = null;
 
@@ -36,12 +43,19 @@ public abstract class EnemyBase : MonoBehaviour {
     protected Player player;
     protected EnemyAnimator enemyAnimator;
 
+    protected Vector3 spawnPosition;
+    protected Quaternion spawnRotation;
+
     #endregion
 
     protected virtual void Awake() {
         rb = GetComponent<Rigidbody>();
         player = Player.Instance;
         enemyAnimator = new EnemyAnimator(this);
+        _currentHealth = _maxHealth;
+        spawnPosition = transform.position;
+        spawnRotation = transform.rotation;
+        //GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
 
     protected virtual void FixedUpdate() {
@@ -51,6 +65,28 @@ public abstract class EnemyBase : MonoBehaviour {
         enemyAnimator.UpdateAnimations();
         PInfo(_currentState);
     }
+
+    #region Reset
+    //protected virtual void OnDestroy() => GameStateHandler.OnLevelRestart -= OnLevelRestart;
+    protected virtual void OnLevelRestart() {
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        _currentHealth = _maxHealth;
+        enemyAnimator.TriggerReset();
+        transform.position = spawnPosition;
+        transform.rotation = spawnRotation;
+
+        _currentState = State.Idle;
+        _lastState = State.Idle;
+
+        _playerInViewDistance = false;
+        _playerInSight = false;
+        _inRangeForAttack = false;
+        _isStunned = false;
+        _isDead = false;
+        gameObject.SetActive(true);
+    }
+    #endregion
 
     #region Player Detection
 
@@ -210,8 +246,8 @@ public abstract class EnemyBase : MonoBehaviour {
     /// </summary>
     /// <param name="damage"> Positive value, the damage to deal to the enemy</param>
     public virtual void Hurt(float damage = 10f) {
-        _health -= damage;
-        if (_health == 0.1f) _health = 0.09f; // Since the animator doesn't have "equal to" then I have to improvise
+        _currentHealth -= damage;
+        if (_currentHealth == 0.1f) _currentHealth = 0.09f; // Since the animator doesn't have "equal to" then I have to improvise
         Stun();
     }
 
@@ -221,7 +257,7 @@ public abstract class EnemyBase : MonoBehaviour {
     /// </summary>
     /// <param name="isStunned"></param>
     public virtual void Stun(bool isStunned = true) {
-        if (_health <= 0) {
+        if (_currentHealth <= 0) {
             _isStunned = true;
             return;
         }
@@ -232,18 +268,19 @@ public abstract class EnemyBase : MonoBehaviour {
     public bool IsDead() => _isDead;
 
     protected void PInfo(object message, int severity = 0) {
-        //if (!_showDebugMessages && severity != 0) return;
-        //switch (severity) {
-        //    case 0: Debug.Log(message); break;
-        //    case 1: Debug.LogWarning(message); break;
-        //    case 2: Debug.LogError(message); break;
-        //}
+        if (!_showDebugMessages) return;
+        switch (severity) {
+            case 0: Debug.Log(message); break;
+            case 1: Debug.LogWarning(message); break;
+            case 2: Debug.LogError(message); break;
+        }
     }
 
     #region Getters / Setters
 
     public Rigidbody GetRigidbody() => rb;
-    public float GetHealth() => _health;
+    public float GetCurrentHealth() => _currentHealth;
+    public float GetMaxHealth() => _maxHealth;
     public float GetMovementSpeed() => _movementSpeed;
     public EnemyAnimator GetEnemyAnimator() => enemyAnimator;
     public Animator GetAnimator() => GetComponentInChildren<Animator>();

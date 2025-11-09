@@ -54,8 +54,6 @@ public class SceneHandler : MonoBehaviour {
         loadingScreen.SetActive(true);
         progressBar.value = 0f;
 
-        yield return new WaitForSeconds(0.2f);
-
         AsyncOperation operation = SceneManager.LoadSceneAsync(levelIndex);
         operation.allowSceneActivation = false; // Hold off activation until we're ready
 

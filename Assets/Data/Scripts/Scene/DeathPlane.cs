@@ -17,7 +17,7 @@ public class DeathPlane : MonoBehaviour {
     private void FixedUpdate() {
         if (isDead || Time.timeScale == 0f) return;
         if (playerTransform.position.y <= deathPlaneY) {
-            player.Die();
+            player.SetDead();
         }
     }
 }

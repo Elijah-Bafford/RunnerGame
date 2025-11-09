@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Animations;
 
@@ -7,12 +8,12 @@ public class EnemyAnimationEvent : MonoBehaviour {
     [SerializeField] private RotationConstraint spineConstraint;
 
     private AttackDetection attackDetection;
-    private EnemyBase enemy;
+    private Enemy enemy;
     private EnemyArcher enemyArcher;
 
     private void Start() {
         attackDetection = GetComponentInChildren<AttackDetection>();
-        enemy = GetComponentInParent<EnemyBase>();
+        enemy = GetComponentInParent<Enemy>();
         if (spineConstraint != null) spineConstraint.enabled = false;
         if (enemy is EnemyArcher ea) enemyArcher = ea;
     }
@@ -27,7 +28,8 @@ public class EnemyAnimationEvent : MonoBehaviour {
     public void DisableConstrainedArrow() => enemyArcher.SetConstrainedArrow(false);
     public void EnableConstrainedArrow() => enemyArcher.SetConstrainedArrow(true);
     public void DrawBow() => enemyArcher.TriggerBowDrawstring();
-    public void CancelDraw() => enemyArcher.CancelDraw();
+    public void CancelDraw() { if (enemyArcher != null) enemyArcher.CancelDraw(); }
     public void FireBow() => enemyArcher.FireBow();
     public void CreateLooseArrow() => enemyArcher.CreateLoosedArrow();
+
 }

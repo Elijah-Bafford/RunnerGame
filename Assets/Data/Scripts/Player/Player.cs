@@ -15,6 +15,7 @@ public class Player : MonoBehaviour {
 
     [Header("General Refs")]
     [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Transform spawnPoint;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -22,7 +23,9 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     private Animator anim;
+
     private CinemachineCamera fstPersonCamera;
+    private CinemachinePanTilt cameraPanTilt;
 
     private GrappleMechanic grappleMech;
     private WallRunMechanic wallRunMech;
@@ -58,6 +61,7 @@ public class Player : MonoBehaviour {
     }
 
     private void OnDestroy() {
+        GameStateHandler.OnLevelRestart -= OnLevelRestart;
         if (Instance == this) Instance = null;
     }
 
@@ -66,6 +70,7 @@ public class Player : MonoBehaviour {
         rb.freezeRotation = true;
         anim = GetComponentInChildren<Animator>();
         fstPersonCamera = GetComponentInChildren<CinemachineCamera>();
+        cameraPanTilt = GetComponentInChildren<CinemachinePanTilt>();
         momentumMech = GetComponent<MomentumMechanic>();
         grappleMech = GetComponent<GrappleMechanic>();
         wallRunMech = GetComponent<WallRunMechanic>();
@@ -76,6 +81,7 @@ public class Player : MonoBehaviour {
         playerAttack.InitPlayerAttack(this);
 
         GetComponentInChildren<AnimationEventHandler>().InitAnimationEventHandler(this, playerAttack);
+        GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
 
     private void OnEnable() {
@@ -84,8 +90,13 @@ public class Player : MonoBehaviour {
         currentDir = Direction.None;
     }
 
+    private bool pendingRespawn = false;
+
+    private void OnLevelRestart() => pendingRespawn = true;
 
     private void FixedUpdate() {
+        if (pendingRespawn) Respawn();
+
         playerAttack.UpdatePlayerAttack();
         momentumMech.UpdateMomentum(speedStat, currentDir);
         if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
@@ -213,9 +224,8 @@ public class Player : MonoBehaviour {
 
     }
 
-    private void Grapple() {
+    private void Grapple() =>
         TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, failedCondition: (!isGrounded && !grappleMech.HasTarget()));
-    }
 
     private void TryAction(Func<bool> action, float cost, bool failedCondition) {
         if (speedStat > 0f) {
@@ -247,20 +257,37 @@ public class Player : MonoBehaviour {
         }
     }
 
-    /// <summary>
-    /// Called at the last frame of the death animation.
-    /// </summary>
-    public void Died() {
-        print("I don't think this is ever called");
-        anim.SetBool("Died", false);
+    private void Respawn() {
+        pendingRespawn = false;
+        SetDead(false, force: true);
+        if (playerAttack) playerAttack.HasAttacked(false);
+        isInAttack = false;
+        currentDir = Direction.None;
+
+        leanAmount = 0;
+        speedStat = 0;
+
+        moveVector = Vector3.zero;
+        lastMoveVector = Vector3.zero;
+
+        cameraPanTilt.PanAxis.Value = 0;
+        cameraPanTilt.TiltAxis.Value = 0;
+
+        if (spawnPoint != null) {
+            transform.position = spawnPoint.position;
+            transform.rotation = spawnPoint.rotation;
+        }
     }
 
     /// <summary>
+    /// Call to set the player to dead.
     /// Called at the first frame the player is hit.
     /// </summary>
-    public void Die() {
-        if (isInvincible) return;
-        anim.SetBool("Died", true);
+    /// <param name="died">Default=true, kill the player</param>
+    /// <param name="force">overrides isInvincible if true</param>
+    public void SetDead(bool died = true, bool force = false) {
+        if (isInvincible && !force) return;
+        anim.SetBool("Died", died);
     }
 
     /// <summary>
@@ -275,23 +302,20 @@ public class Player : MonoBehaviour {
         momentumMech.BuffSpeed(time, multiplier);
     }
 
-    public void SetLinearVelocity(Vector3 target) { rb.linearVelocity = target; }
-    public void SetConveyorVelocity(Vector3 velocity) { conveyorVelocity = velocity; }
-    public void SetOnSlope(bool onSlope) { isOnSlope = onSlope; }
-    public bool IsOnSlope() { return isOnSlope; }
-    public bool IsWallJumping() { return wallRunMech.IsWallJumping(); }
-    public bool IsSliding() { return isSliding; }
-    public bool IsGrounded() { return isGrounded; }
-    public bool IsGrappling() { return grappleMech.IsGrappling(); }
-    public bool IsWallRunning() { return wallRunMech.IsWallRunning(); }
-    public float GetJumpForce() { return jumpForce; }
+    public void SetLinearVelocity(Vector3 target) => rb.linearVelocity = target;
+    public void SetConveyorVelocity(Vector3 velocity) => conveyorVelocity = velocity;
+    public void SetOnSlope(bool onSlope) => isOnSlope = onSlope;
+    public bool IsOnSlope() => isOnSlope;
+    public bool IsWallJumping() => wallRunMech.IsWallJumping();
+    public bool IsSliding() => isSliding;
+    public bool IsGrounded() => isGrounded;
+    public bool IsGrappling() => grappleMech.IsGrappling();
+    public bool IsWallRunning() => wallRunMech.IsWallRunning();
+    public float GetJumpForce() => jumpForce;
     public void ResetIsInAttack() {
         isInAttack = false;
         ToggleAttackCollider(false);
     }
-    public void ForceHitEnemy(EnemyBase enemy) { playerAttack.ForceHit(enemy); }
-    public void ToggleAttackCollider(bool toggle) { playerAttack.ToggleAttackCollider(toggle); }
-
-    public Transform GetTransform() { return transform; }
-
+    public void ForceHitEnemy(Enemy enemy) => playerAttack.ForceHit(enemy);
+    public void ToggleAttackCollider(bool toggle) => playerAttack.ToggleAttackCollider(toggle);
 }

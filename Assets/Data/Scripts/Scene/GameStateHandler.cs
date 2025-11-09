@@ -20,7 +20,8 @@ public class GameStateHandler : MonoBehaviour {
 
     private string fastestTime;
     private string highestMomentum;
-    
+
+    public static event Action OnLevelRestart;
 
     public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
 
@@ -42,7 +43,7 @@ public class GameStateHandler : MonoBehaviour {
 
     private void UpdateLevelStats(int level) {
         LevelRecord thisRecord = RecordHandler.Instance.GetRecord(level);
-        
+
         if (thisRecord != null) {
             if (thisRecord.fastestTime == 0) {
                 fastestTime = "None";
@@ -76,11 +77,11 @@ public class GameStateHandler : MonoBehaviour {
                 ShowPauseOverlay(true);
                 break;
             case GameState.LevelRestart:
-                ShowPauseOverlay(false);
-                ShowDeathOverlay(false);
-                SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel);
+                OnLevelRestart?.Invoke();
                 state = GameState.Playing;
                 gameTimer.ResetTimer();
+                ShowPauseOverlay(false);
+                ShowDeathOverlay(false);
                 break;
             case GameState.Death:
                 gameTimer.ResetTimer();

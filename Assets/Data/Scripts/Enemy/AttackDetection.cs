@@ -14,6 +14,6 @@ public class AttackDetection : MonoBehaviour {
 
     private void OnTriggerStay(Collider other) {
         if (!other.CompareTag("Player")) return;
-        Player.Instance.Die();
+        Player.Instance.SetDead();
     }
 }

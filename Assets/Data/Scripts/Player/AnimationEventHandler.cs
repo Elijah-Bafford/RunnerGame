@@ -13,8 +13,7 @@ public class AnimationEventHandler : MonoBehaviour {
         this.playerAttack = playerAttack;
     }
 
-    public void DisableWeapon() { playerAttack.HasAttacked(false); }
-    public void AllowAttack() { player.ResetIsInAttack(); }
-    public void StopCombat() { uiInput.SetGameState(GameStateHandler.GameState.Death); }
-
+    public void DisableWeapon() => playerAttack.HasAttacked(false);
+    public void AllowAttack() => player.ResetIsInAttack();
+    public void StopCombat() => uiInput.SetGameState(GameStateHandler.GameState.Death);
 }

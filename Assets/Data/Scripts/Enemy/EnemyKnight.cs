@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public class EnemyKnight : EnemyBase {
+public class EnemyKnight : Enemy {
 
     protected override void ActionMove() {
         base.ActionMove();
