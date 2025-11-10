@@ -62842,7 +62842,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0
-    functionName: FireBow
+    functionName: FireBowString
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
@@ -62857,6 +62857,13 @@ AnimationClip:
     messageOptions: 0
   - time: 0.16666667
     functionName: DisableConstrainedArrow
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.33333334
+    functionName: DisableBowDraw
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

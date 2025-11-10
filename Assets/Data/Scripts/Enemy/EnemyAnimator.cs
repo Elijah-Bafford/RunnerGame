@@ -37,7 +37,11 @@ public class EnemyAnimator {
     public void UpdateAnimations() => UpdateRunAnimation();
     public void TriggerHit() => anim.SetTrigger("Hit");
     public void TriggerMeleeAttack() { if (!isArcher) anim.SetTrigger("Attack"); }
-    public void TriggerRangeAttack() { if (isArcher) bowAnim.SetTrigger("Draw"); }
+
+    /// <summary>
+    /// Loose the bow, firing an arrow. (if the bow is drawn) (Human animator)
+    /// </summary>
+    public void TriggerRangeAttack() { if (isArcher && anim.GetBool("Draw")) anim.SetTrigger("LooseArrow"); }
 
     private void UpdateRunAnimation() {
         anim.SetFloat("Health", enemy.GetCurrentHealth());
@@ -91,20 +95,30 @@ public class EnemyAnimator {
         return true;
     }
 
+    /// <summary>
+    /// Set the angle for the Archer Enemy to look at (if the bow is drawn) (Human animator)
+    /// Angle clamped [-35 - 35]
+    /// </summary>
+    /// <param name="angle"></param>
     public void SetAimAngle(float angle) {
         float c_angle = Mathf.Clamp(angle, -35f, 35f);
         anim.SetFloat("Aim", c_angle);
     }
 
-    public void ResetTurnAnimation() {
-        turnParam = 0f;
-        anim.SetFloat("Turn", 0f);
+    /// <summary>
+    /// Set the turn amount in the direction 'value'
+    /// Angle clamped [-1 - 1]
+    /// </summary>
+    /// <param name="value">The amount the enemy should appear to turn.</param>
+    public void SetTurnAnimation(float value) {
+        float clamp = Mathf.Clamp(value, -1f, 1f);
+        turnParam = clamp;
+        anim.SetFloat("Turn", clamp);
     }
 
-    public void TriggerReset() {
-        anim.SetFloat("Health", enemy.GetMaxHealth());
-        anim.SetTrigger("Reset");
-    }
-
+    /// <summary>
+    /// Pull the bow back (Human animator)
+    /// </summary>
+    /// <param name="bowIsDrawn">Set whether the character should draw the bow</param>
     public void SetBowDrawn(bool bowIsDrawn) => anim.SetBool("Draw", bowIsDrawn);
 }

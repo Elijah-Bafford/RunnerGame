@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -29,7 +31,7 @@ public abstract class Enemy : MonoBehaviour {
 
     protected Coroutine _attackCoolDown = null;
 
-    public enum State { Idle, Move, Attack, Stunned, Dead }
+    public enum State { Idle, Move, Attack, Stunned, Dead, Target }
     protected State _currentState = State.Idle;
     protected State _lastState = State.Idle;
 
@@ -43,9 +45,6 @@ public abstract class Enemy : MonoBehaviour {
     protected Player player;
     protected EnemyAnimator enemyAnimator;
 
-    protected Vector3 spawnPosition;
-    protected Quaternion spawnRotation;
-
     #endregion
 
     protected virtual void Awake() {
@@ -53,9 +52,6 @@ public abstract class Enemy : MonoBehaviour {
         player = Player.Instance;
         enemyAnimator = new EnemyAnimator(this);
         _currentHealth = _maxHealth;
-        spawnPosition = transform.position;
-        spawnRotation = transform.rotation;
-        //GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
 
     protected virtual void FixedUpdate() {
@@ -66,27 +62,6 @@ public abstract class Enemy : MonoBehaviour {
         PInfo(_currentState);
     }
 
-    #region Reset
-    //protected virtual void OnDestroy() => GameStateHandler.OnLevelRestart -= OnLevelRestart;
-    protected virtual void OnLevelRestart() {
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        _currentHealth = _maxHealth;
-        enemyAnimator.TriggerReset();
-        transform.position = spawnPosition;
-        transform.rotation = spawnRotation;
-
-        _currentState = State.Idle;
-        _lastState = State.Idle;
-
-        _playerInViewDistance = false;
-        _playerInSight = false;
-        _inRangeForAttack = false;
-        _isStunned = false;
-        _isDead = false;
-        gameObject.SetActive(true);
-    }
-    #endregion
 
     #region Player Detection
 
@@ -124,7 +99,7 @@ public abstract class Enemy : MonoBehaviour {
         if (_currentState == State.Dead) return;
         if (StopCombat) return;
 
-        if (_currentState != State.Move) enemyAnimator.ResetTurnAnimation();
+        if (_currentState != State.Move) enemyAnimator.SetTurnAnimation(0);
         _currentState =
             _isDead ? State.Dead :
             _isStunned ? State.Stunned :
@@ -145,6 +120,7 @@ public abstract class Enemy : MonoBehaviour {
             case State.Move: ActionMove(); break;
             case State.Attack: ActionAttack(); break;
             case State.Stunned: ActionStunned(); break;
+            case State.Target: ActionTarget(); break;
             case State.Dead: ActionDead(); break;
         }
     }
@@ -217,6 +193,25 @@ public abstract class Enemy : MonoBehaviour {
         }
         _inRangeForAttack = false;
         enemyAnimator.TriggerHit();
+        return true;
+    }
+
+    /// <summary>
+    /// Handle the event where the enemy is targeting the player
+    /// (Continuous cycle action)
+    /// </summary>
+    protected virtual void ActionTarget() {
+        SingleUpdateActionTarget();
+    }
+
+    /// <summary>
+    /// Handle the event where the enemy first switches to targeting the player
+    /// (Single cycle action)
+    /// </summary>
+    /// <returns>False on early exit, true on run</returns>
+    protected virtual bool SingleUpdateActionTarget() {
+        if (_lastState == State.Target) return false;
+        PInfo(_currentState);
         return true;
     }
 

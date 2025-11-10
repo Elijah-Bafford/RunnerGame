@@ -22,14 +22,20 @@ public class EnemyAnimationEvent : MonoBehaviour {
     public void DisableEnemyIsHit() => enemy.Stun(false);
     public void TriggerDeath() => enemy.Kill();
 
-    // Enemy Archer
+    #region Enemy Archer
     public void DisableSpineConstraint() => spineConstraint.enabled = false;
     public void EnableSpineConstraint() => spineConstraint.enabled = true;
     public void DisableConstrainedArrow() => enemyArcher.SetConstrainedArrow(false);
     public void EnableConstrainedArrow() => enemyArcher.SetConstrainedArrow(true);
-    public void DrawBow() => enemyArcher.TriggerBowDrawstring();
-    public void CancelDraw() { if (enemyArcher != null) enemyArcher.CancelDraw(); }
-    public void FireBow() => enemyArcher.FireBow();
-    public void CreateLooseArrow() => enemyArcher.CreateLoosedArrow();
 
+    // Human Animator
+
+    public void DisableBowDraw() => enemyArcher.DisableBowDrawn();
+
+    // Bow animator
+    public void DisableDrawstring() { if (enemyArcher != null) enemyArcher.SetBowDrawstring(false); }
+    public void EnableDrawstring() { if (enemyArcher != null) enemyArcher.SetBowDrawstring(true); }
+    public void FireBowString() => enemyArcher.BowStringFired();
+    public void CreateLooseArrow() => enemyArcher.CreateLoosedArrow();
+    #endregion
 }
