@@ -27,6 +27,7 @@ public class Player : MonoBehaviour {
     public Vector3 TargetingPos => _TargetingPos.position;
 
     private Rigidbody rb;
+    private BoxCollider hitbox;
     private Animator anim;
 
     private CinemachineCamera fstPersonCamera;
@@ -72,6 +73,7 @@ public class Player : MonoBehaviour {
     private void Start() {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        hitbox = GetComponent<BoxCollider>();
         anim = GetComponentInChildren<Animator>();
         fstPersonCamera = GetComponentInChildren<CinemachineCamera>();
         cameraPanTilt = GetComponentInChildren<CinemachinePanTilt>();
@@ -196,6 +198,16 @@ public class Player : MonoBehaviour {
         isSliding = !isSliding;
         anim.SetBool("Slide", isSliding);
         speedLossMult = isSliding ? speedLossMult + 1.5f : speedLossMult - 1.5f;
+        AdjustHitboxHeight(isSliding ? 2 : 1);
+    }
+
+    private void AdjustHitboxHeight(float divisor) {
+        float hbSizeY = 0.9f / divisor;
+        if (hitbox.size.y == hbSizeY) return;
+
+        float hbCentY = (hbSizeY - 1f) / 2;
+        hitbox.center = new Vector3(0f, hbCentY, 0f);
+        hitbox.size = new Vector3(0.8f, hbSizeY, 0.8f);
     }
 
     private void CheckPlaySlideAudio(bool shouldPlaySlideAudio) {
