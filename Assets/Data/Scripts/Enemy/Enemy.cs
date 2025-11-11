@@ -19,7 +19,7 @@ public abstract class Enemy : MonoBehaviour {
     [SerializeField] protected float _turnSpeed = 360f;
     [SerializeField] protected float _maxHealth = 10f;
     [Tooltip("How close the enemy gets to the player before stopping")]
-    [SerializeField] protected float _stopDistance = 1.7f;
+    [SerializeField] protected float _radiusOfSatisfaction = 1.7f;
     [Tooltip("The time in seconds after an attack before the enemy can do anything")]
     [SerializeField] protected float _attackCooldownTime = 0.8f;
     [Tooltip("The position of the enemy's head for player detection")]
@@ -253,6 +253,7 @@ public abstract class Enemy : MonoBehaviour {
     /// <param name="isStunned"></param>
     public virtual void Stun(bool isStunned = true) {
         if (_currentHealth <= 0) {
+            //GetComponent<BoxCollider>() // Somehow make it where the player wont collide with the dead enemy.
             _isStunned = true;
             return;
         }
@@ -260,6 +261,7 @@ public abstract class Enemy : MonoBehaviour {
     }
 
     public virtual void Kill(bool isKilled = true) => _isDead = isKilled;
+    
     public bool IsDead() => _isDead;
 
     protected void PInfo(object message, int severity = 0) {

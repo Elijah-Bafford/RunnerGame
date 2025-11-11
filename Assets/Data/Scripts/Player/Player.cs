@@ -5,8 +5,8 @@ using UnityEngine;
 [DefaultExecutionOrder(-1)]
 public class Player : MonoBehaviour {
 
-    public float attackDamage { get; set; } = 10f;
     [Header("Settings")]
+    [SerializeField] private float attackDamage;
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float speedStat = 0;
     [SerializeField] private float speedLossMult = 1f;
@@ -14,6 +14,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private bool isInvincible = false;
 
     [Header("General Refs")]
+    [SerializeField] private Transform _TargetingPos;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Transform spawnPoint;
 
@@ -22,6 +23,10 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckRadius = 0.2f;
 
+    public float AttackDamage => attackDamage;
+    public Vector3 TargetingPos => _TargetingPos.position;
+
+    private Rigidbody rb;
     private Animator anim;
 
     private CinemachineCamera fstPersonCamera;
@@ -32,7 +37,6 @@ public class Player : MonoBehaviour {
     private MomentumMechanic momentumMech;
     private PlayerAttack playerAttack;
 
-    private Rigidbody rb;
     private Vector2 moveVector = Vector2.zero;
     private Vector2 lastMoveVector = Vector2.zero;
 

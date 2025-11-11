@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3827060209009856631
 Transform:
   m_ObjectHideFlags: 0
@@ -45,11 +45,11 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 4862704454e40d049b07e2f3dcd64d94, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 1608
+    m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 7157
-  m_LayerOverridePriority: 3
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -70,6 +70,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccb08c5b418b2254daab304804871a34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Arrow
+  speed: 16.9
+  lifetime: 5
+  rb: {fileID: 9028193294620213132}
 --- !u!54 &9028193294620213132
 Rigidbody:
   m_ObjectHideFlags: 0

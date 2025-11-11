@@ -27,7 +27,7 @@ public class PlayerAttack : MonoBehaviour {
 
     private void Attack() {
         player.ChangeSpeedStat(18f);
-        target.Hurt(player.attackDamage);
+        target.Hurt(player.AttackDamage);
         target = null;
     }
 

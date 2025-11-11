@@ -30,7 +30,7 @@ public class EnemyAnimationEvent : MonoBehaviour {
 
     // Human Animator
 
-    public void DisableBowDraw() => enemyArcher.DisableBowDrawn();
+    public void DisableBowDraw() { if (enemyArcher != null) enemyArcher.DisableBowDrawn(); }
 
     // Bow animator
     public void DisableDrawstring() { if (enemyArcher != null) enemyArcher.SetBowDrawstring(false); }

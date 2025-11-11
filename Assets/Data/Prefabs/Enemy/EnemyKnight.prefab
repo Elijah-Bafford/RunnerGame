@@ -696,7 +696,7 @@ MonoBehaviour:
   _movementSpeed: 3.5
   _turnSpeed: 360
   _maxHealth: 10
-  _stopDistance: 1.7
+  _radiusOfSatisfaction: 1.7
   _attackCooldownTime: 0.8
   _headPosition: {fileID: 4732847839196335904}
   _showDebugMessages: 0
@@ -708,9 +708,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2280757285257620673}
   serializedVersion: 5
-  m_Mass: 15
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 100
+  m_LinearDamping: 3
+  m_AngularDamping: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

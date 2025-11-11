@@ -41,7 +41,9 @@ public class EnemyAnimator {
     /// <summary>
     /// Loose the bow, firing an arrow. (if the bow is drawn) (Human animator)
     /// </summary>
-    public void TriggerRangeAttack() { if (isArcher && anim.GetBool("Draw")) anim.SetTrigger("LooseArrow"); }
+    public void TriggerRangeAttack() { if (isArcher && IsBowDrawn()) anim.SetTrigger("LooseArrow"); }
+
+    public bool IsBowDrawn() => anim.GetBool("Draw");
 
     private void UpdateRunAnimation() {
         anim.SetFloat("Health", enemy.GetCurrentHealth());

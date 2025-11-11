@@ -19,7 +19,7 @@ public class EnemyKnight : Enemy {
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, _turnSpeed * Time.fixedDeltaTime);
         }
 
-        if (sqrDirMag <= _stopDistance) {
+        if (sqrDirMag <= _radiusOfSatisfaction) {
             _inRangeForAttack = Mathf.Abs(angleToPlayer) < 10f;
             return;
         }

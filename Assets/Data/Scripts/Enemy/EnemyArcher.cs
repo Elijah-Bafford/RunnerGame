@@ -50,55 +50,96 @@ public class EnemyArcher : Enemy {
             return;
         }
         SetBowDrawn_Enemy(true);
+        // Rotate the enemy's transform to face the player
+        RotateTowardPlayerInAim(out Vector3 playerDir);
 
-        Vector3 playerDir = (player.transform.position - _aimingBaseline.transform.position);
-        Vector3 toPlayer_n = playerDir.normalized;
-        playerDir.y = 0f;
-
-        Vector3 localPlayerPos = _aimingBaseline.InverseTransformPoint(player.transform.position);
-
-        float horizontalDeg2Player = Mathf.Atan2(localPlayerPos.x, localPlayerPos.z) * Mathf.Rad2Deg;
-
-        // Horizontal (Rotate towards player)
-        horizontalDeg2Player = Mathf.Round(horizontalDeg2Player) / 20f;
-        enemyAnimator.SetTurnAnimation(horizontalDeg2Player); // Clamped
-
-        Quaternion targetRot = Quaternion.LookRotation(playerDir);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, _turnSpeed * Time.fixedDeltaTime);
-
-        print("Sqr Mag: " + playerDir.sqrMagnitude + "<= " + _stopDistance + " ~ " + (playerDir.sqrMagnitude <= _stopDistance));
-
-        if (playerDir.sqrMagnitude <= _stopDistance) {
-            
+        // Check if the player is too close to the archer
+        if (playerDir.sqrMagnitude <= _radiusOfSatisfaction) {
+            //SetBowDrawn_Enemy(false);
             //_playerIsTooClose = true;
             //_currentAimAngle = 0f;
-            //SetBowDrawn(false);
             //return;
         }
+        
+        /* 
+         * Get the local position of the player relative to the aiming baseline.
+         * The aiming baseline is a transform attached as a direct child of the enemy archer, it can only be rotated by the
+         * enemies main transform. (i.e. this.transform). It's forward vector acts as a flat line that leads directly forward from
+         * where the arrow (when released) will fly.
+        */
+        Vector3 localPlayerPos = _aimingBaseline.InverseTransformPoint(player.TargetingPos);
+        Vector3 playerAimDir = (player.TargetingPos - _aimingBaseline.position).normalized;
 
-        // Vertical (Aiming)
-        float dot = Vector3.Dot(_aimingBaseline.transform.forward, toPlayer_n);
-        float verticalDeg2Player = 0f;
-        if (dot >= Mathf.Cos(_aimFOV * Mathf.Deg2Rad)) { // Within FOV
-            verticalDeg2Player = Mathf.Atan2(localPlayerPos.y, localPlayerPos.z) * Mathf.Rad2Deg;
-        }
-        _currentAimAngle = Mathf.Lerp(_currentAimAngle, verticalDeg2Player, _aimLerpSpeed * Time.fixedDeltaTime);
-        enemyAnimator.SetAimAngle(_currentAimAngle); // Clamped between -35 - 35
+        // Set turn animation based off of horizontal angle to the player
+        HorizontallyAlign(localPlayerPos, out float horizontalDeg2Player);
+        // If the player is within _aimFOV (dot) then get the ACTUAL vertical angle to the player (based off of aim baseline as 0 degrees) 
+        VerticallyAlign(localPlayerPos, playerAimDir, out float verticalDeg2Player);
 
-        bool inRange_v = Mathf.Abs(_currentAimAngle) < 5f;
+        // The player is within 1 degree of the enemy's forward
         bool inRange_h = Mathf.Abs(horizontalDeg2Player) < 1f;
-        print("|Aim Angle |: " + Mathf.Abs(_currentAimAngle) + "< 2f" + " ~ " + inRange_v);
-        print("|Turn Angle|: " + Mathf.Abs(horizontalDeg2Player) + "< 1f" + " ~ " + inRange_h);
-        if (inRange_v && inRange_h) {
+
+        if (!enemyAnimator.IsBowDrawn()) return;
+
+        // Enemy must stay lined up with the player for the hold duration
+        if (inRange_h) {
             _holdTimer += Time.fixedDeltaTime;
             if (_holdTimer >= _holdDuration) {
                 _playerTargeted = true;
                 _holdTimer = 0;
             }
         } else {
-            if (_holdTimer > 0f) _holdTimer -= Time.fixedDeltaTime;
-            if (_holdTimer < 0f) _holdTimer = 0f;
+            if (_holdTimer > 0) _holdTimer -= Time.fixedDeltaTime;
+            if (_holdTimer < 0) _holdTimer = 0;
         }
+    }
+
+    private void RotateTowardPlayerInAim(out Vector3 playerDirection) {
+        // Direction from the aiming baseline to the player, flattened to XZ
+        Vector3 playerDir = player.TargetingPos - _aimingBaseline.position;
+        playerDir.y = 0f;   
+        if (playerDir.sqrMagnitude > 0.0001f)
+            playerDir.Normalize();
+
+        // Current horizontal forward of the aiming baseline
+        Vector3 baselineForward = _aimingBaseline.forward;
+        baselineForward.y = 0f;
+        if (baselineForward.sqrMagnitude > 0.0001f)
+            baselineForward.Normalize();
+
+        // How much we need to rotate so that baselineForward points to playerDir
+        Quaternion delta = Quaternion.FromToRotation(baselineForward, playerDir);
+
+        // We only care about yaw (Y axis) — kill any pitch/roll just in case
+        Vector3 deltaEuler = delta.eulerAngles;
+        delta = Quaternion.Euler(0f, deltaEuler.y, 0f);
+
+        // Apply this delta to the enemy root
+        Quaternion targetRot = delta * transform.rotation;
+
+        // Smoothly rotate towards that
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, _turnSpeed * Time.fixedDeltaTime);
+
+        playerDirection = playerDir;
+    }
+
+
+
+    private void HorizontallyAlign(Vector3 localPlayerPosition, out float horizontalDeg2Player) {
+        horizontalDeg2Player = Mathf.Atan2(localPlayerPosition.x, localPlayerPosition.z) * Mathf.Rad2Deg;
+        horizontalDeg2Player = Mathf.Round(horizontalDeg2Player) / 20f;
+        enemyAnimator.SetTurnAnimation(horizontalDeg2Player); // Clamped
+    }
+
+    private void VerticallyAlign(Vector3 localPlayerPosition, Vector3 playerAimDirection, out float verticalDeg2Player) {
+        float dot = Vector3.Dot(_aimingBaseline.transform.forward, playerAimDirection);
+
+        verticalDeg2Player = 0f;
+
+        if (dot >= Mathf.Cos(_aimFOV * Mathf.Deg2Rad)) { // Within FOV
+            verticalDeg2Player = Mathf.Atan2(localPlayerPosition.y, localPlayerPosition.z) * Mathf.Rad2Deg;
+        }
+        _currentAimAngle = Mathf.Lerp(_currentAimAngle, verticalDeg2Player, _aimLerpSpeed * Time.fixedDeltaTime);
+        enemyAnimator.SetAimAngle(_currentAimAngle); // Clamped between -35 - 35
     }
 
     /// <summary>
