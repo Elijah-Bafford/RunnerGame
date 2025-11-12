@@ -81,6 +81,9 @@ public class GrappleMechanic : MonoBehaviour {
         Vector3 origin = cameraTransform.position;
         Vector3 direction = cameraTransform.forward;
         Collider[] hits = Physics.OverlapSphere(origin + direction * (detectRange * 0.5f), detectRange * 0.5f, enemyLayer);
+        if (hits.Length > 0) {
+            print(hits.ToString());
+        }
 
         Enemy bestTarget = null;
         float bestDot = -1f; // Closest to 1 is most centered
