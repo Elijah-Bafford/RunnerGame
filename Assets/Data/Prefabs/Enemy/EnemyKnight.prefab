@@ -663,7 +663,7 @@ GameObject:
   m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &9056338005784910813
 Transform:
   m_ObjectHideFlags: 0
@@ -4931,8 +4931,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5973205091109951206}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.058253933, y: -0.18027937, z: -0.4478608, w: 0.8738001}
-  m_LocalPosition: {x: 0.61774385, y: 1.001229, z: 0.062116154}
+  m_LocalRotation: {x: 0.0582539, y: -0.18027939, z: -0.4478606, w: 0.87380016}
+  m_LocalPosition: {x: 0.61774457, y: 1.001229, z: 0.062116303}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5001,6 +5001,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70681bb32141a6d4db446353d8c68787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackBox
+  attackBox: {fileID: 2896595331772774642}
+  enemy: {fileID: 2316760965582234931}
 --- !u!1 &6106662005291691511
 GameObject:
   m_ObjectHideFlags: 0

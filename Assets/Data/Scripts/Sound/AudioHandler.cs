@@ -89,6 +89,21 @@ public class AudioHandler : MonoBehaviour {
         } else Debug.LogWarning($"No AudioSource found for SoundType {sound}");
     }
 
+    private bool slideAudioPlaying = false;
+    public void SetContPlaySoundLoop(SoundType sound, bool play) {
+        if (sound == SoundType.Slide && ((play && slideAudioPlaying) || (!play && !slideAudioPlaying))) return;
+        if (soundDict.TryGetValue(sound, out var audioSource)) {
+            if (play) {
+                if (audioSource[0].isPlaying) return;
+                if (!audioSource[0].isPlaying) audioSource[0].Play();
+
+            } else if (audioSource[0].isPlaying) audioSource[0].Stop();
+
+            slideAudioPlaying = audioSource[0].isPlaying;
+
+        } else Debug.LogWarning($"No AudioSource found for SoundType {sound}");
+    }
+
     /// <summary>
     /// Pause all sound effects except for UI.
     /// </summary>

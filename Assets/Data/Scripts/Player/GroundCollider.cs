@@ -12,7 +12,7 @@ public class GroundCollider : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (other.gameObject.CompareTag("SlopedGround")) {
-            player.SetOnSlope(true);
+            player.isOnSlope = true;
         }
 
         if (other.gameObject.CompareTag("GroundAuto")) {
@@ -26,7 +26,7 @@ public class GroundCollider : MonoBehaviour {
 
     private void OnTriggerExit(Collider other) {
         if (other.gameObject.CompareTag("SlopedGround")) {
-            player.SetOnSlope(false);
+            player.isOnSlope = false;
         }
 
         if (other.gameObject.CompareTag("GroundAuto")) {

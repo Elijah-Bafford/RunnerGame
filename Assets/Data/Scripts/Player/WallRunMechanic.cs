@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class WallRunMechanic : MonoBehaviour {
@@ -13,20 +12,33 @@ public class WallRunMechanic : MonoBehaviour {
     [SerializeField] private float wallGravityIncrease = 0.2f; // How fast gravity ramps up
     [SerializeField] private Vector3 wallJumpForce;
 
-    private float movingDivisor = 1.0f;
-    private float currentWallGravity;
+    public Vector3 jumpVelocity { get; set; } = Vector3.zero;
+    public bool isWallRunning { get; private set; } = false;
+    public bool isWallJumping { get; private set; } = false;
 
     private Rigidbody rb;
     private Player player;
-    private Vector3 jumpVelocity = Vector3.zero;
 
+    private float movingDivisor = 1.0f;
+    private float currentWallGravity;
     private bool jumpKeyReleased = false;
     private bool allowWallRun = false;
     private bool isOnWallLeft = false;
     private bool isOnWallRight = false;
-    private bool isWallRunning = false;
-    private bool isWallJumping = false;
     private bool wasOnWallLastFrame = false;
+
+    public void OnLevelRestart() {
+        movingDivisor = 1.0f;
+        currentWallGravity = wallGravity;
+        jumpVelocity = Vector3.zero;
+        jumpKeyReleased = false;
+        allowWallRun = false;
+        isOnWallLeft = false;
+        isOnWallRight = false;
+        isWallRunning = false;
+        isWallJumping = false;
+        wasOnWallLastFrame = false;
+    }
 
     public void InitWallRunMechanic(Player player, Rigidbody rb) {
         this.player = player;
@@ -38,27 +50,20 @@ public class WallRunMechanic : MonoBehaviour {
     /// Called in Player.UpdatePhysics() (FixedUpdate)
     /// </summary>
     /// <param name="isGrounded"></param>
-    internal void UpdatePhysics(bool isGrounded) {
+    public void UpdatePhysics(bool isGrounded) {
         wasOnWallLastFrame = IsOnWall();
         isOnWallLeft = !isGrounded && Physics.CheckSphere(wallCheckLeft.position, wallCheckRadius, wallLayer);
         isOnWallRight = !isGrounded && Physics.CheckSphere(wallCheckRight.position, wallCheckRadius, wallLayer);
-    }
-
-    private void OnDrawGizmos() {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(wallCheckLeft.position, wallCheckRadius);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(wallCheckRight.position, wallCheckRadius);
     }
 
     /// <summary>
     /// Called in fixed update in the player class.
     /// When wall running, slowly increase gravity over time. 
     /// </summary>
-    internal void UpdateWallRun(Player.Direction currentDir) {
+    public void UpdateWallRun(Player.Direction currentDir) {
         // If NOT on a wall OR is grounded THEN return
         allowWallRun = jumpKeyReleased || rb.linearVelocity.y < 0f;
-        if (!IsOnWall() || player.IsGrounded()) {
+        if (!IsOnWall() || player.isGrounded) {
             jumpKeyReleased = false;
             currentWallGravity = wallGravity;
             isWallRunning = false;
@@ -77,19 +82,23 @@ public class WallRunMechanic : MonoBehaviour {
         }
     }
 
-    internal void UpdateWallJumpVelocity() {
+    public void UpdateWallJumpVelocity() {
         if (player.IsGrappling()) { isWallJumping = false; return; }
         /*
          * If the player is grounded
          * or was NOT on a wall last frame and is this frame
          * isWallJumping = false
          */
-        if (player.IsGrounded() || (!wasOnWallLastFrame && IsOnWall())) {
+
+        if (player.isGrounded || (!wasOnWallLastFrame && IsOnWall())) {
             isWallJumping = false;
         }
+
         float x = Mathf.Lerp(jumpVelocity.x, 0, Time.deltaTime);
         float y = Mathf.Lerp(jumpVelocity.y, -3, Time.deltaTime * 1.4f);
         float z = Mathf.Lerp(jumpVelocity.z, 0, Time.deltaTime * 2f);
+
+        if (y < -2f) isWallJumping = false;
 
         jumpVelocity = new Vector3(x, y, z);
     }
@@ -100,8 +109,8 @@ public class WallRunMechanic : MonoBehaviour {
     /// </summary>
     /// <param name="keyReleased"></param>
     /// <returns></returns>
-    internal bool Jump(bool keyReleased, Transform cameraTransform) {
-        if (!IsOnWall() || player.IsGrounded()) return false;
+    public bool Jump(bool keyReleased, Transform cameraTransform) {
+        if (!IsOnWall() || player.isGrounded) return false;
         if (keyReleased) return true;   // Disallow double execution and jump cut logic
 
         isWallJumping = true;
@@ -139,17 +148,20 @@ public class WallRunMechanic : MonoBehaviour {
     /// </summary>
     /// <param name="direction"></param>
     /// <returns></returns>
-    internal bool IsOnWall(string direction = "") {
+    public bool IsOnWall(string direction = "") {
         string dir = direction.ToLower();
         if (dir == "left") return isOnWallLeft;
         else if (dir == "right") return isOnWallRight;
         return isOnWallLeft || isOnWallRight;
     }
 
-    internal void JumpKeyReleased(bool jumpKeyReleased) { this.jumpKeyReleased = jumpKeyReleased; }
-    internal bool IsWallRunning() { return isWallRunning; }
-    internal bool IsWallJumping() { return isWallJumping; }
-    internal float InAirSpeedMultiplier() { return IsWallJumping() ? 0.5f : 1f; }
-    internal Vector3 GetJumpVelocity() { return jumpVelocity; }
-    internal void SetJumpVelocity(Vector3 jumpVelocity) { this.jumpVelocity = jumpVelocity; }
+    //private void OnDrawGizmos() {
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawSphere(wallCheckLeft.position, wallCheckRadius);
+    //    Gizmos.color = Color.blue;
+    //    Gizmos.DrawSphere(wallCheckRight.position, wallCheckRadius);
+    //}
+
+    public void JumpKeyReleased(bool jumpKeyReleased) => this.jumpKeyReleased = jumpKeyReleased;
+    public float InAirSpeedMultiplier() => isWallJumping ? 0.5f : 1f; 
 }

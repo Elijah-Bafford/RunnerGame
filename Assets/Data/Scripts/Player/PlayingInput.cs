@@ -11,10 +11,8 @@ public class PlayingInput : MonoBehaviour {
         else if (context.canceled) player.Perform(Player.Act.Jump, default, true);
     }
     public void OnAttack(InputAction.CallbackContext context) {
-        if (context.performed) {
-            player.ToggleAttackCollider(true);
-            player.Perform(Player.Act.Attack);
-        }
+        if (context.performed) player.Perform(Player.Act.Attack);
+        
     }
     public void OnSlide(InputAction.CallbackContext context) { if (context.performed || context.canceled) player.Perform(Player.Act.Slide); }
 

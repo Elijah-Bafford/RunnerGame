@@ -2,7 +2,7 @@ using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(-2)]
 public class Player : MonoBehaviour {
 
     [Header("Settings")]
@@ -36,26 +36,30 @@ public class Player : MonoBehaviour {
     private GrappleMechanic grappleMech;
     private WallRunMechanic wallRunMech;
     private MomentumMechanic momentumMech;
-    private PlayerAttack playerAttack;
+    private PlayerAttackCollider playerAttack;
 
     private Vector2 moveVector = Vector2.zero;
     private Vector2 lastMoveVector = Vector2.zero;
-
     private Vector3 conveyorVelocity = Vector3.zero;
 
-    private bool isSliding = false;
-    private bool isGrounded = false;
-    private bool isOnSlope = false;
+    public bool isSliding { get; set; } = false;
+    public bool isGrounded { get; set; } = false;
+    public bool isOnSlope { get; set; } = false;
 
-    private bool isInAttack = false;
-    private bool slideAudioPlaying = false;
+    ///<summary>Whether or not the player is in the attack animation.</summary>
+    public bool isInAttack { get; set; } = false;
+
+    ///<summary>Whether a restart is pending (execute on first FixedUpdate after true).</summary>
+    private bool pendingRespawn = false;
 
     private float leanAmount = 0.0f;
+
+    private Vector3 groundNormal = Vector3.up;
 
     public enum Act { Attack, Slide, Jump, Move, Grapple }
     public enum Direction { Forward, Backward, Left, Right, Other, None }
 
-    private Direction currentDir;
+    private Direction currentDir = Direction.None;
 
     public static Player Instance { get; private set; }
 
@@ -80,30 +84,43 @@ public class Player : MonoBehaviour {
         momentumMech = GetComponent<MomentumMechanic>();
         grappleMech = GetComponent<GrappleMechanic>();
         wallRunMech = GetComponent<WallRunMechanic>();
-        playerAttack = GetComponentInChildren<PlayerAttack>();
+        playerAttack = GetComponentInChildren<PlayerAttackCollider>();
         wallRunMech.InitWallRunMechanic(this, rb);
-        momentumMech.InitMomentumMechanic(this);
         grappleMech.InitGrappleMechanic(this);
         playerAttack.InitPlayerAttack(this);
 
-        GetComponentInChildren<AnimationEventHandler>().InitAnimationEventHandler(this, playerAttack);
         GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
 
-    private void OnEnable() {
-        if (playerAttack) playerAttack.HasAttacked(false);
-        isInAttack = false;
-        currentDir = Direction.None;
-    }
-
-    private bool pendingRespawn = false;
-
     private void OnLevelRestart() => pendingRespawn = true;
+
+    private void Respawn() {
+        pendingRespawn = false;
+        SetDead(false, force: true);
+        currentDir = Direction.None;
+
+        leanAmount = 0;
+        speedStat = 0;
+
+        moveVector = Vector3.zero;
+        lastMoveVector = Vector3.zero;
+
+        cameraPanTilt.PanAxis.Value = 0;
+        cameraPanTilt.TiltAxis.Value = 0;
+
+        if (spawnPoint != null) {
+            transform.position = spawnPoint.position;
+            transform.rotation = spawnPoint.rotation;
+        }
+
+        playerAttack.SetAttackBoxEnabled(false);
+        momentumMech.OnLevelRestart();
+        wallRunMech.OnLevelRestart();
+    }
 
     private void FixedUpdate() {
         if (pendingRespawn) Respawn();
 
-        playerAttack.UpdatePlayerAttack();
         momentumMech.UpdateMomentum(speedStat, currentDir);
         if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
@@ -111,7 +128,7 @@ public class Player : MonoBehaviour {
         UpdateDirection();
         Move();
         UpdateLean();
-        CheckPlaySlideAudio(isSliding && isGrounded);
+        AudioHandler.Instance.SetContPlaySoundLoop(SoundType.Slide, isSliding && isGrounded && currentDir != Direction.None);
     }
 
     private void LateUpdate() {
@@ -148,6 +165,21 @@ public class Player : MonoBehaviour {
 
     private void UpdatePhysics() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+
+        // NEW: find the ground normal when grounded
+        if (isGrounded) {
+            // Small upward offset so the ray doesn't start inside the ground
+            Vector3 origin = groundCheck.position + Vector3.up * 0.1f;
+
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 1f, groundLayer)) {
+                groundNormal = hit.normal;
+            } else {
+                groundNormal = Vector3.up;
+            }
+        } else {
+            groundNormal = Vector3.up;
+        }
+
         wallRunMech.UpdatePhysics(isGrounded);
     }
 
@@ -176,12 +208,18 @@ public class Player : MonoBehaviour {
 
         Vector3 targetVelocity = moveDir * speed + conveyorVelocity;
         targetVelocity.y = rb.linearVelocity.y;
+
+        // Bend velocity to follow ground when grounded & not moving upward
+        if (isGrounded && !IsWallRunning() && targetVelocity.y <= 0f)
+            targetVelocity = Vector3.ProjectOnPlane(targetVelocity, groundNormal);
+
         wallRunMech.UpdateWallJumpVelocity();
-        if (wallRunMech.IsWallJumping()) {
+
+        if (wallRunMech.isWallJumping) {
             targetVelocity *= wallRunMech.InAirSpeedMultiplier();
-            rb.linearVelocity = targetVelocity + wallRunMech.GetJumpVelocity();
+            rb.linearVelocity = targetVelocity + wallRunMech.jumpVelocity;
         } else {
-            wallRunMech.SetJumpVelocity(Vector3.zero);
+            wallRunMech.jumpVelocity = Vector3.zero;
             rb.linearVelocity = targetVelocity;
         }
     }
@@ -189,8 +227,6 @@ public class Player : MonoBehaviour {
     public void Attack() {
         if (isInAttack) return;
         AudioHandler.Instance.PlaySound(SoundType.SwordImpact);
-        playerAttack.HasAttacked(true);
-        isInAttack = true;
         anim.SetTrigger("Attack");
     }
 
@@ -208,17 +244,6 @@ public class Player : MonoBehaviour {
         float hbCentY = (hbSizeY - 1f) / 2;
         hitbox.center = new Vector3(0f, hbCentY, 0f);
         hitbox.size = new Vector3(0.8f, hbSizeY, 0.8f);
-    }
-
-    private void CheckPlaySlideAudio(bool shouldPlaySlideAudio) {
-        if (shouldPlaySlideAudio && !slideAudioPlaying) {
-            slideAudioPlaying = true;
-            if (currentDir != Direction.None)
-                AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, true);
-        } else if (!shouldPlaySlideAudio && slideAudioPlaying) {
-            slideAudioPlaying = false;
-            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
-        }
     }
 
     private void Jump(bool keyReleased) {
@@ -273,27 +298,6 @@ public class Player : MonoBehaviour {
         }
     }
 
-    private void Respawn() {
-        pendingRespawn = false;
-        SetDead(false, force: true);
-        if (playerAttack) playerAttack.HasAttacked(false);
-        isInAttack = false;
-        currentDir = Direction.None;
-
-        leanAmount = 0;
-        speedStat = 0;
-
-        moveVector = Vector3.zero;
-        lastMoveVector = Vector3.zero;
-
-        cameraPanTilt.PanAxis.Value = 0;
-        cameraPanTilt.TiltAxis.Value = 0;
-
-        if (spawnPoint != null) {
-            transform.position = spawnPoint.position;
-            transform.rotation = spawnPoint.rotation;
-        }
-    }
 
     /// <summary>
     /// Call to set the player to dead.
@@ -304,34 +308,25 @@ public class Player : MonoBehaviour {
     public void SetDead(bool died = true, bool force = false) {
         if (isInvincible && !force) return;
         anim.SetBool("Died", died);
+        if (died) GameStateHandler.GameOver();
     }
 
     /// <summary>
     /// Add/subtract to/from currentSpeed (speed AV)
     /// </summary>
     /// <param name="speed"></param>
-    public void ChangeSpeedStat(float speed) {
-        speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
-    }
+    public void ChangeSpeedStat(float speed) => speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
 
-    public void Buff(int time, float multiplier) {
-        momentumMech.BuffSpeed(time, multiplier);
-    }
-
+    /// <summary>Buff the player's speed stat multiplier.</summary>
+    /// <param name="time">Seconds the buff lasts.</param>
+    /// <param name="multiplier">The amount to multiply the gain by.</param>
+    public void Buff(int time, float multiplier) => momentumMech.BuffSpeed(time, multiplier);
     public void SetLinearVelocity(Vector3 target) => rb.linearVelocity = target;
     public void SetConveyorVelocity(Vector3 velocity) => conveyorVelocity = velocity;
-    public void SetOnSlope(bool onSlope) => isOnSlope = onSlope;
-    public bool IsOnSlope() => isOnSlope;
-    public bool IsWallJumping() => wallRunMech.IsWallJumping();
-    public bool IsSliding() => isSliding;
-    public bool IsGrounded() => isGrounded;
+    public bool IsWallJumping() => wallRunMech.isWallJumping;
+    public bool IsWallRunning() => wallRunMech.isWallRunning;
     public bool IsGrappling() => grappleMech.IsGrappling();
-    public bool IsWallRunning() => wallRunMech.IsWallRunning();
     public float GetJumpForce() => jumpForce;
-    public void ResetIsInAttack() {
-        isInAttack = false;
-        ToggleAttackCollider(false);
-    }
-    public void ForceHitEnemy(Enemy enemy) => playerAttack.ForceHit(enemy);
-    public void ToggleAttackCollider(bool toggle) => playerAttack.ToggleAttackCollider(toggle);
+
+    public void SetAttackBoxEnabled(bool enabled) => playerAttack.SetAttackBoxEnabled(enabled);
 }

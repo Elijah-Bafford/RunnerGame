@@ -23,6 +23,9 @@ public class GameStateHandler : MonoBehaviour {
 
     public static event Action OnLevelRestart;
 
+    private static bool gameOver = false;
+    public static void GameOver() => gameOver = true;
+
     public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
 
     private GameState state;
@@ -54,8 +57,12 @@ public class GameStateHandler : MonoBehaviour {
             highestMomentum = thisRecord.highestMomentum.ToString();
         }
     }
-
+    
     private void Update() {
+        if (gameOver) {
+            gameOver = false;
+            SetGameState(GameState.Death);
+        }
         if (state != lastState) {
             lastState = state;
             UpdateGameState();

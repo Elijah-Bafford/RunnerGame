@@ -25,8 +25,27 @@ public class MomentumMechanic : MonoBehaviour {
     private bool isWallRunning = false;
     private bool isWallJumping = false;
 
-    internal void InitMomentumMechanic(Player player) {
-        this.player = player;
+    private MomentumUI momentumUI;
+
+    public void OnLevelRestart() {
+        speedBuffMultiplier = 1f;
+        speedMult = 1.0f;
+        speedBasis = 1.0f;
+        highestSpeed = 0f;
+        wasGroundedLastFrame = false;
+        isSliding = false;
+        isGrounded = false;
+        isGrappling = false;
+        justGrappled = false;
+        justWallRan = false;
+        isWallRunning = false;
+        isWallJumping = false;
+           
+    }
+
+    private void Start() {
+        player = Player.Instance;
+        momentumUI = MomentumUI.GetSelf();
     }
 
     /* How it works:
@@ -100,7 +119,8 @@ public class MomentumMechanic : MonoBehaviour {
 
 
         EditSpeedMult(momentum);
-        MomentumUI.GetSelf().UpdateSpeedBar(speedStat);
+        momentumUI.UpdateSpeedBar(speedStat);
+        momentumUI.UpdateSpeedMult(speedMult);
         UpdateHighestSpeed();
     }
 
@@ -132,7 +152,7 @@ public class MomentumMechanic : MonoBehaviour {
             case Player.Direction.Backward: currBasis = hasSpeedStat ? 0.8f : 0.6f; break;
             default: currBasis = 1.0f; break;
         }
-        if (player.IsSliding()) currBasis = hasSpeedStat ? 1.4f : 0.5f;
+        if (player.isSliding) currBasis = hasSpeedStat ? 1.4f : 0.5f;
         if (player.IsWallRunning()) currBasis = 1.5f;
 
         float timeMult = hasSpeedStat ? 15 : 5;
@@ -147,9 +167,9 @@ public class MomentumMechanic : MonoBehaviour {
         isWallRunning = player.IsWallRunning();
         if (isWallRunning) justWallRan = true;
         wasGroundedLastFrame = isGrounded;
-        isSliding = player.IsSliding();
-        isGrounded = player.IsGrounded();
-        isOnSlope = player.IsOnSlope();
+        isSliding = player.isSliding;
+        isGrounded = player.isGrounded;
+        isOnSlope = player.isOnSlope;
         isWallJumping = player.IsWallJumping();
     }
 

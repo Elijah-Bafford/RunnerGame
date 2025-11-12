@@ -18,9 +18,10 @@ public class EnemyAnimationEvent : MonoBehaviour {
         if (enemy is EnemyArcher ea) enemyArcher = ea;
     }
 
-    public void TriggerAttackBox() => attackDetection.TriggerAttackBox();
+    public void EnableAttackBox() => attackDetection.SetAttackBoxEnabled(true);
+    public void DisableAttackBox() => attackDetection.SetAttackBoxEnabled(false);
     public void DisableEnemyIsHit() => enemy.Stun(false);
-    public void TriggerDeath() => enemy.Kill();
+    public void DestroyEnemy() => enemy.DestroyEnemy(); 
 
     #region Enemy Archer
     public void DisableSpineConstraint() => spineConstraint.enabled = false;

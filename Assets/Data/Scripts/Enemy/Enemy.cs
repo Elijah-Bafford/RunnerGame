@@ -224,8 +224,9 @@ public abstract class Enemy : MonoBehaviour {
     /// </returns>
     protected virtual bool ActionDead() {
         if (_lastState == State.Dead) return false;
+        //GetComponent<BoxCollider>() // Somehow make it where the player wont collide with the dead enemy.
         PInfo(_currentState);
-        gameObject.SetActive(false);
+        
         return true;
     }
     #endregion
@@ -242,7 +243,8 @@ public abstract class Enemy : MonoBehaviour {
     /// <param name="damage"> Positive value, the damage to deal to the enemy</param>
     public virtual void Hurt(float damage = 10f) {
         _currentHealth -= damage;
-        if (_currentHealth == 0.1f) _currentHealth = 0.09f; // Since the animator doesn't have "equal to" then I have to improvise
+        if (_currentHealth <= 0) _isDead = true;
+        
         Stun();
     }
 
@@ -252,17 +254,18 @@ public abstract class Enemy : MonoBehaviour {
     /// </summary>
     /// <param name="isStunned"></param>
     public virtual void Stun(bool isStunned = true) {
-        if (_currentHealth <= 0) {
-            //GetComponent<BoxCollider>() // Somehow make it where the player wont collide with the dead enemy.
+        if (_currentHealth <= 0 && !isStunned) {
             _isStunned = true;
             return;
         }
         _isStunned = isStunned;
     }
 
-    public virtual void Kill(bool isKilled = true) => _isDead = isKilled;
-    
+    public void DestroyEnemy() => Destroy(gameObject);
+
+    public virtual void SetIsDead(bool isDead) => _isDead = isDead;
     public bool IsDead() => _isDead;
+    public bool IsStunned() => _isStunned;
 
     protected void PInfo(object message, int severity = 0) {
         if (!_showDebugMessages) return;
