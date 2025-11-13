@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour {
     public static MainMenu Instance { get; private set; }
@@ -16,9 +19,20 @@ public class MainMenu : MonoBehaviour {
     [SerializeField] private GameObject creditsMenu;
     [SerializeField] private GameObject settingsMenu;
 
-    private enum MenuType { TitleMenu, LevelSelect, Credits, Settings }
+    [Header("Navigation")]
+    [SerializeField] private FirstSelectLink[] pageFirstSelectConfig;
+    private Dictionary<MenuType, GameObject> pageFirstSelectDict;
+    private EventSystem eventSystem;
+
+    public enum MenuType { TitleMenu, LevelSelect, Credits, Settings }
     private MenuType currentMenu = MenuType.TitleMenu;
     private GameObject[] menus = new GameObject[Enum.GetValues(typeof(MenuType)).Length];
+
+    [System.Serializable]
+    public struct FirstSelectLink {
+        public MenuType menuType;
+        public GameObject selectable;
+    }
 
     private void Awake() {
         if (Instance != null && Instance != this) {
@@ -39,20 +53,27 @@ public class MainMenu : MonoBehaviour {
             }
         }
         currentMenu = MenuType.TitleMenu;
-        ShowMenu(currentMenu);
+        ShowMenu(currentMenu, switchSelectable: false);
+    }
+
+    private void OnEnable() {
+        eventSystem = FindFirstObjectByType<EventSystem>();
+        if (eventSystem == null) Debug.LogWarning("Event System is null", this);
     }
 
     private void Start() {
         RecordHandler.OnRecordUpdated += HandleRecordUpdated;
         SceneHandler.OnLevelLoad += OnLevelLoad;
         RefreshLevelButtons();
+        CreateNavigationButtons();
     }
+
+    #region Level Selectable Buttons
 
     private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {
         RefreshLevelButtons();
+        CreateNavigationButtons();
     }
-
-    private GameObject tutorialLevelButton;
 
     private void RefreshLevelButtons() {
         // Clear existing buttons
@@ -68,7 +89,8 @@ public class MainMenu : MonoBehaviour {
             LevelButtonUI buttonUI = btnObj.GetComponent<LevelButtonUI>();
 
             if (i == 2) {
-                tutorialLevelButton = btnObj;
+                pageFirstSelectConfig[3].selectable = btnObj;
+
                 buttonUI.levelText.text = $"Tutorial";
             } else {
                 buttonUI.levelText.text = $"Level {i - 1}";
@@ -88,13 +110,22 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
+    #endregion
+
+    private void CreateNavigationButtons() {
+        pageFirstSelectDict = new Dictionary<MenuType, GameObject>();
+        for (int i = 0; i < pageFirstSelectConfig.Length; i++)
+            pageFirstSelectDict.Add(pageFirstSelectConfig[i].menuType, pageFirstSelectConfig[i].selectable);
+    }
 
     private void OnLevelLoad(int level) {
         if (level == 1) {
             MainMenuUI.SetActive(true);
-            ShowMenu(MenuType.TitleMenu);
+
             RecordHandler.Instance.LoadRecords();
 
+            CreateNavigationButtons();
+            ShowMenu(MenuType.TitleMenu);
         } else {
             AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
         }
@@ -110,10 +141,15 @@ public class MainMenu : MonoBehaviour {
         MainMenuUI.SetActive(false);
     }
 
-    private void ShowMenu(MenuType menu, bool show = true) {
-        menus[(int)currentMenu].SetActive(!show);
-        menus[(int)menu].SetActive(show);
+    private void ShowMenu(MenuType menu, bool switchSelectable = true) {
+        menus[(int)currentMenu].SetActive(false);
+        menus[(int)menu].SetActive(true);
         currentMenu = menu;
+        if (switchSelectable) {
+            if (pageFirstSelectDict.TryGetValue(menu, out GameObject go))
+                if (eventSystem != null)
+                    eventSystem.SetSelectedGameObject(go);
+        }
     }
 
     // Button events

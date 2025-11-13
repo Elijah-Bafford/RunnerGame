@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class GameStateHandler : MonoBehaviour {
@@ -18,6 +20,16 @@ public class GameStateHandler : MonoBehaviour {
     [SerializeField] GameObject deathOverlay;
     [SerializeField] GameObject levelCompleteOverlay;
 
+    [SerializeField] private List<OverlaySet> overlayDefinition;
+    private Dictionary<GameState, OverlaySet> overlaySets = new();
+
+    [System.Serializable]
+    public struct OverlaySet {
+        public GameState gameState;
+        public GameObject overlay;
+        public GameObject firstSelected;
+    }
+
     private string fastestTime;
     private string highestMomentum;
 
@@ -28,11 +40,27 @@ public class GameStateHandler : MonoBehaviour {
 
     public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
 
-    private GameState state;
+    private GameState state = GameState.Playing;
     private GameState lastState;
 
+
+
+    public static EventSystem SceneEventSystem { get; private set; }
+    public static GameStateHandler Instance { get; private set; }
+
     private void Awake() {
-        state = GameState.Playing;
+        Instance = this;
+        SceneEventSystem = FindFirstObjectByType<EventSystem>();
+
+        foreach (var set in overlayDefinition) {
+            if (!overlaySets.ContainsKey(set.gameState))
+                overlaySets.Add(set.gameState, set);
+        }
+
+        foreach (var kvp in overlaySets) {
+            if (kvp.Value.overlay != null)
+                kvp.Value.overlay.SetActive(false);
+        }
     }
 
     private void Start() {
@@ -40,9 +68,20 @@ public class GameStateHandler : MonoBehaviour {
         UpdateLevelStats(SceneHandler.currentLevel);
     }
 
-    private void OnLevelLoad(int level) {
-        UpdateLevelStats(level);
+    private void Update() {
+        if (gameOver) {
+            gameOver = false;
+            SetGameState(GameState.Death);
+        }
+        if (state != lastState) {
+            lastState = state;
+            UpdateGameState();
+        }
     }
+
+    private void OnDestroy() => SceneHandler.OnLevelLoad -= OnLevelLoad;
+
+    private void OnLevelLoad(int level) => UpdateLevelStats(level);
 
     private void UpdateLevelStats(int level) {
         LevelRecord thisRecord = RecordHandler.Instance.GetRecord(level);
@@ -57,59 +96,80 @@ public class GameStateHandler : MonoBehaviour {
             highestMomentum = thisRecord.highestMomentum.ToString();
         }
     }
-    
-    private void Update() {
-        if (gameOver) {
-            gameOver = false;
-            SetGameState(GameState.Death);
-        }
-        if (state != lastState) {
-            lastState = state;
-            UpdateGameState();
-        }
-    }
+
 
     private void UpdateGameState() {
         switch (state) {
             case GameState.MainMenu:
+                // No in-game overlay here, just go to main menu scene
+                ToggleMenuMode(true);
                 playerInput.SwitchCurrentActionMap("UI");
-                Time.timeScale = 1;
+                Time.timeScale = 1f;
                 SceneHandler.Instance.LoadLevel(1); // Main menu
                 gameTimer.ResetTimer();
                 break;
+
             case GameState.Playing:
-                ShowPauseOverlay(false);
+                // No overlay visible, game running
+                ShowOverlayForState(GameState.Playing, false);
                 break;
+
             case GameState.Paused:
-                ShowPauseOverlay(true);
+                // Show pause overlay & stats, freeze gameplay
+                ShowOverlayForState(GameState.Paused, true);
+                if (timeNum != null) timeNum.text = fastestTime;
+                if (speedNum != null) speedNum.text = highestMomentum;
                 break;
+
             case GameState.LevelRestart:
                 OnLevelRestart?.Invoke();
-                state = GameState.Playing;
                 gameTimer.ResetTimer();
-                ShowPauseOverlay(false);
-                ShowDeathOverlay(false);
+                ShowOverlayForState(GameState.Playing, false);
+                state = GameState.Playing;
                 break;
+
             case GameState.Death:
                 gameTimer.ResetTimer();
-                ShowPauseOverlay(false);
-                ShowDeathOverlay(true);
-                gameTimer.ResetTimer();
+                ShowOverlayForState(GameState.Death, true);
                 break;
+
             case GameState.LevelComplete:
-                ShowPauseOverlay(false);
-                ShowDeathOverlay(false);
-                ShowLevelCompleteOverlay(true);
+                ShowOverlayForState(GameState.LevelComplete, true);
                 break;
+
             case GameState.NextLevel:
-                ShowLevelCompleteOverlay(false);
-                ShowPauseOverlay(false);
-                ShowDeathOverlay(false);
+                ShowOverlayForState(GameState.Playing, false);
                 SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel + 1);
                 gameTimer.ResetTimer();
                 break;
         }
     }
+
+    /// <summary>
+    /// Generic overlay handler:
+    /// - toggles menu mode (pause, cursor, audio, input map)
+    /// - disables all overlays
+    /// - enables the overlay for the given state (if defined)
+    /// - sets first-selected button in EventSystem
+    /// </summary>
+    private void ShowOverlayForState(GameState newState, bool inMenuMode) {
+        ToggleMenuMode(inMenuMode);
+
+        // Disable all overlays
+        foreach (var kvp in overlaySets) {
+            if (kvp.Value.overlay != null)
+                kvp.Value.overlay.SetActive(false);
+        }
+
+        // Enable the overlay for this state (if it has one)
+        if (!(overlaySets.TryGetValue(newState, out var set) && set.overlay != null)) return;
+        set.overlay.SetActive(true);
+
+        if (SceneEventSystem != null && set.firstSelected != null)
+            SceneEventSystem.SetSelectedGameObject(set.firstSelected);
+    }
+
+
     /// <summary>
     /// Set in menu mode. Switches control scheme, shows/hides cursor, and pauses the game timer.
     /// </summary>
@@ -131,27 +191,7 @@ public class GameStateHandler : MonoBehaviour {
         gameTimer.RunTimer(!inMenuMode);
     }
 
-    private void ShowDeathOverlay(bool active) {
-        ToggleMenuMode(active);
-        deathOverlay.SetActive(active);
-    }
-
-    private void ShowPauseOverlay(bool active) {
-        ToggleMenuMode(active);
-        pauseOverlay.SetActive(active);
-        if (active) {
-            speedNum.text = highestMomentum;
-            timeNum.text = fastestTime;
-        }
-    }
-
-    private void ShowLevelCompleteOverlay(bool active) {
-        ToggleMenuMode(active);
-        levelCompleteOverlay.SetActive(active);
-    }
-
-    public GameState GetGameState() { return state; }
-    public void SetGameState(GameState gameState) { state = gameState; }
+    public void SetGameState(GameState gameState) => state = gameState;
 
     /*=====================================================================================
      *                                  Input events

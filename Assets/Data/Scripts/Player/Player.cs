@@ -113,7 +113,9 @@ public class Player : MonoBehaviour {
             transform.rotation = spawnPoint.rotation;
         }
 
+        isInAttack = false;
         playerAttack.SetAttackBoxEnabled(false);
+        
         momentumMech.OnLevelRestart();
         wallRunMech.OnLevelRestart();
     }
@@ -166,7 +168,7 @@ public class Player : MonoBehaviour {
     private void UpdatePhysics() {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
 
-        // NEW: find the ground normal when grounded
+        // Find the ground normal when grounded
         if (isGrounded) {
             // Small upward offset so the ray doesn't start inside the ground
             Vector3 origin = groundCheck.position + Vector3.up * 0.1f;

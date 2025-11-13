@@ -1136,7 +1136,7 @@ Transform:
   m_GameObject: {fileID: 1531472097726010510}
   serializedVersion: 2
   m_LocalRotation: {x: -0.3713467, y: -0.85377336, z: 0.17073318, w: 0.32252583}
-  m_LocalPosition: {x: -0.46123555, y: 1.1179109, z: 0.1303087}
+  m_LocalPosition: {x: -0.46123487, y: 1.1179111, z: 0.13030852}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1276,7 +1276,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2029289997014063055}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Triggers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5873,7 +5873,7 @@ GameObject:
   - component: {fileID: 4995756881913296576}
   - component: {fileID: 8524820722848926904}
   - component: {fileID: 652204001365573186}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Player Detection
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -6521,7 +6521,7 @@ Transform:
   m_GameObject: {fileID: 7273489494321310860}
   serializedVersion: 2
   m_LocalRotation: {x: -0.86815387, y: -0.2687764, z: 0.41651335, w: -0.02418213}
-  m_LocalPosition: {x: -0.5063576, y: 1.1241912, z: 0.15170313}
+  m_LocalPosition: {x: -0.50635713, y: 1.1241913, z: 0.15170296}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7579,7 +7579,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7595626854376885292}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: Ground Check
   m_TagString: Enemy
   m_Icon: {fileID: 0}

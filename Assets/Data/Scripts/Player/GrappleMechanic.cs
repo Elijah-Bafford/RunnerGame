@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,14 +5,18 @@ public class GrappleMechanic : MonoBehaviour {
     [Header("Lock-on/Grapple Mechanics")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private RectTransform lockOnReticle;
-    [SerializeField] private LayerMask enemyLayer, wallLayer, groundLayer;
+    [SerializeField] private LayerMask obstructionMask;   // enemy | walls | ground
+    [SerializeField] private LayerMask enemyLayer;        // ONLY the enemy hitbox colliders
     [SerializeField] private float detectRange = 20f;
     [SerializeField] private float grappleRange = 10f;
     [SerializeField] private float grappleSpeed = 30f;
 
-    private Enemy lockOnTarget = null;
-    private Enemy lastLockTarget = null;
-    private Enemy grappleTargetEnemy = null;
+    [Tooltip("Half-angle of the lock-on cone in degrees.")]
+    [SerializeField] private float fovDegrees = 60f;
+
+    private readonly Collider[] _enemyBuf = new Collider[16];
+
+    private Enemy currentTarget = null;
 
     private Player player;
     private RawImage reticle;
@@ -38,114 +41,121 @@ public class GrappleMechanic : MonoBehaviour {
         Vector3 toTarget = GetGrappleTarget() - transform.position;
         float dist = toTarget.magnitude;
 
-        // Move directly toward the enemy
-
         player.SetLinearVelocity(GetGrappleDirection() * GetGrappleSpeed());
 
-        // Stop when close enough
         if (dist < GetGrappleArrivalDistance()) {
-            //player.ForceHitEnemy(grappleTargetEnemy);
             SetIsGrappling(false);
             player.Attack();
-            grappleTargetEnemy = null;
         }
         return true;
     }
 
-    /// <summary>
-    /// Return true when Grapple is performed. False otherwise.
-    /// </summary>
-    /// <param name="isGrounded"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     public bool Grapple(bool isGrounded, Vector3 position) {
-        if (isGrounded || !hasSpeedStat || !inGrappleRange || lastLockTarget == null) return false;
+        if (isGrounded || !hasSpeedStat || !inGrappleRange || currentTarget == null) return false;
 
         isGrappling = true;
-        grappleTarget = lastLockTarget.transform.position + lockOnOffset;
+        grappleTarget = currentTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
-        grappleTargetEnemy = lastLockTarget;
         return true;
     }
 
-
     public void UpdateLockOnReticle(bool isGrounded, Transform cameraTransform) {
-        if (isGrounded) {
-            lockOnTarget = null;
-            lastLockTarget = null;
-            lockOnReticle.gameObject.SetActive(false);
+        if (HandleGroundedState(isGrounded))
             return;
-        }
 
-        // Find all colliders in a sphere in front of the camera
         Vector3 origin = cameraTransform.position;
-        Vector3 direction = cameraTransform.forward;
-        Collider[] hits = Physics.OverlapSphere(origin + direction * (detectRange * 0.5f), detectRange * 0.5f, enemyLayer);
-        if (hits.Length > 0) {
-            print(hits.ToString());
+        Vector3 forward = cameraTransform.forward;
+        float cosThreshold = Mathf.Cos(fovDegrees * Mathf.Deg2Rad);
+
+        Enemy best = FindBestTarget(origin, forward, cosThreshold);
+
+        if (best != null) {
+            currentTarget = best;
+        } else {
+            ValidateExistingTarget(origin, forward, cosThreshold);
         }
 
-        Enemy bestTarget = null;
-        float bestDot = -1f; // Closest to 1 is most centered
+        UpdateReticleUI();
+    }
+
+    // -----------------------------
+    // --- private helpers below ---
+    // -----------------------------
+
+    private bool HandleGroundedState(bool isGrounded) {
+        if (!isGrounded) return false;
+        currentTarget = null;
+        lockOnReticle.gameObject.SetActive(false);
+        return true;
+    }
+
+    private Enemy FindBestTarget(Vector3 origin, Vector3 forward, float cosThreshold) {
+        float sphereRadius = detectRange * 0.5f;
+        Vector3 sphereCenter = origin + forward * sphereRadius;
+        int count = Physics.OverlapSphereNonAlloc(
+            sphereCenter, sphereRadius, _enemyBuf, enemyLayer, QueryTriggerInteraction.Ignore);
+
+        Enemy best = null;
+        float bestDot = -1f;
         float bestDistance = float.MaxValue;
 
-        foreach (var hit in hits) {
-            if (!hit.CompareTag("Enemy")) continue;
-            Enemy enemy = hit.GetComponent<Enemy>();
-            if (enemy == null || enemy.IsDead()) continue;
+        for (int i = 0; i < count; i++) {
+            Collider col = _enemyBuf[i];
+            if (!col) continue;
 
-            Vector3 toEnemy = (enemy.transform.position - origin).normalized;
-            float dot = Vector3.Dot(direction, toEnemy);
-            float distance = Vector3.Distance(origin, enemy.transform.position);
+            Enemy enemy = col.GetComponent<Enemy>();
+            if (!enemy || enemy.IsDead()) continue;
 
-            // Don't allow grapple through walls
-            if (Physics.Raycast(origin, toEnemy.normalized, out RaycastHit hit_, distance, groundLayer))
-                if (!hit_.collider.GetComponent<Enemy>()) continue;
+            Vector3 toEnemy = col.transform.position - origin;
+            float distance = toEnemy.magnitude;
+            if (distance > detectRange || distance <= 0.0001f) continue;
 
-            Debug.DrawLine(origin, enemy.transform.position, Color.green, 1.0f);
-            RaycastHit rayHit;
-            if (Physics.Raycast(origin, toEnemy.normalized, out rayHit, distance, enemyLayer | wallLayer))
-                if (!rayHit.collider.GetComponent<Enemy>()) continue;
+            Vector3 dir = toEnemy / distance;
+            float dot = Vector3.Dot(forward, dir);
+            if (dot < cosThreshold) continue;
 
-            // Only consider those within a certain angle of the camera center (e.g., 60 degrees)
-            if (dot > 0.5f && distance <= detectRange) {
-                // Pick the most centered, break ties by closer distance
-                if (dot > bestDot || (Mathf.Approximately(dot, bestDot) && distance < bestDistance)) {
-                    bestTarget = enemy;
-                    bestDot = dot;
-                    bestDistance = distance;
-                }
+            if (!HasLineOfSight(origin, dir, distance, col)) continue;
+
+            if (dot > bestDot || (Mathf.Approximately(dot, bestDot) && distance < bestDistance)) {
+                best = enemy;
+                bestDot = dot;
+                bestDistance = distance;
             }
         }
 
-        if (bestTarget != null) {
-            lockOnTarget = bestTarget;
-            lastLockTarget = bestTarget;
-        } else if (lastLockTarget != null) {
-            float lastDistance = Vector3.Distance(origin, lastLockTarget.transform.position);
-            Vector3 toLast = (lastLockTarget.transform.position - origin).normalized;
-            bool losBlocked = false;
+        return best;
+    }
 
-            // Check occlusion
-            RaycastHit lastHit;
-            int mask = enemyLayer.value | wallLayer.value | groundLayer.value;
-            if (Physics.Raycast(origin, toLast, out lastHit, lastDistance, mask)) {
-                if (!lastHit.collider.GetComponent<Enemy>()) {
-                    losBlocked = true;
-                }
-            }
+    private void ValidateExistingTarget(Vector3 origin, Vector3 forward, float cosThreshold) {
+        if (currentTarget == null) return;
 
-            bool stillVisible = lastDistance <= detectRange && !losBlocked;
-            if (!stillVisible) lastLockTarget = null;
+        Collider targetCol = currentTarget.GetComponent<Collider>();
+        if (!targetCol) {
+            currentTarget = null;
+            return;
         }
 
-        // Update UI
-        if (lastLockTarget == null) {
+        Vector3 toTarget = targetCol.transform.position - origin;
+        float distance = toTarget.magnitude;
+
+        if (distance > detectRange || distance <= 0.0001f) {
+            currentTarget = null;
+            return;
+        }
+
+        Vector3 dir = toTarget / distance;
+        float dot = Vector3.Dot(forward, dir);
+        bool visible = dot >= cosThreshold && HasLineOfSight(origin, dir, distance, targetCol);
+        if (!visible) currentTarget = null;
+    }
+
+    private void UpdateReticleUI() {
+        if (currentTarget == null) {
             lockOnReticle.gameObject.SetActive(false);
             return;
         }
 
-        Vector3 targetWorld = lastLockTarget.transform.position + lockOnOffset;
+        Vector3 targetWorld = currentTarget.transform.position + lockOnOffset;
         Vector3 screenPos = mainCamera.WorldToScreenPoint(targetWorld);
 
         if (screenPos.z <= 0f) {
@@ -156,15 +166,22 @@ public class GrappleMechanic : MonoBehaviour {
         lockOnReticle.gameObject.SetActive(true);
         lockOnReticle.position = screenPos;
 
-        inGrappleRange = Vector3.Distance(transform.position, lastLockTarget.transform.position) <= grappleRange;
-        reticle.color = inGrappleRange && hasSpeedStat ? Color.red : Color.white;
+        inGrappleRange = Vector3.Distance(transform.position, currentTarget.transform.position) <= grappleRange;
+        reticle.color = (inGrappleRange && hasSpeedStat) ? Color.red : Color.white;
     }
 
-    public bool IsGrappling() { return isGrappling; }
-    public void SetIsGrappling(bool isGrappling) { this.isGrappling = isGrappling; }
-    public Vector3 GetGrappleTarget() { return grappleTarget; }
-    public Vector3 GetGrappleDirection() { return grappleDirection; }
-    public float GetGrappleSpeed() { return grappleSpeed; }
-    public float GetGrappleArrivalDistance() { return grappleArrivalDistance; }
-    public bool HasTarget() { return lockOnTarget == null || lastLockTarget == null; }
+    private bool HasLineOfSight(Vector3 origin, Vector3 dir, float distance, Collider expectedHitbox) {
+        if (Physics.Raycast(origin, dir, out RaycastHit hit, distance, obstructionMask, QueryTriggerInteraction.Ignore)) {
+            return hit.collider == expectedHitbox;
+        }
+        return true;
+    }
+
+    public bool IsGrappling() => isGrappling;
+    public void SetIsGrappling(bool val) => isGrappling = val;
+    public Vector3 GetGrappleTarget() => grappleTarget;
+    public Vector3 GetGrappleDirection() => grappleDirection;
+    public float GetGrappleSpeed() => grappleSpeed;
+    public float GetGrappleArrivalDistance() => grappleArrivalDistance;
+    public bool HasTarget() => currentTarget != null;
 }

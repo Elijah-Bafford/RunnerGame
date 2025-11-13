@@ -845,6 +845,28 @@
                 },
                 {
                     "name": "",
+                    "id": "5ef24334-fcbd-4d8a-b4e6-be247796d97e",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4a06e4b0-8ea3-4c36-88b1-7bd8f0e6969e",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c52c8e0b-8179-41d3-b8a1-d149033bbe86",
                     "path": "<Mouse>/position",
                     "interactions": "",
