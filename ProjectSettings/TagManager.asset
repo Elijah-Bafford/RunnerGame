@@ -10,6 +10,7 @@ TagManager:
   - Wall
   - EnemyAttackTrigger
   - GroundAuto
+  - DeathPlane
   layers:
   - Default
   - TransparentFX
