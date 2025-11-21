@@ -11,23 +11,25 @@ public class GroundCollider : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.gameObject.CompareTag("SlopedGround")) {
-            player.isOnSlope = true;
+
+        if(other.CompareTag("DeathPlane")) {
+            player.SetDead(died: true, force: true);
+            return;
         }
 
-        if (other.gameObject.CompareTag("GroundAuto")) {
+        if (other.CompareTag("SlopedGround")) player.isOnSlope = true;
+
+        if (other.CompareTag("GroundAuto")) {
             PlatformAuto auto = other.GetComponent<PlatformAuto>();
             if (auto == null) return;
             LevelMain = player.transform.parent;
-            player.transform.SetParent(auto.transform, true);
+            player.transform.SetParent(auto.transform, worldPositionStays: true);
             player.SetConveyorVelocity(Vector3.zero);
         }
     }
 
     private void OnTriggerExit(Collider other) {
-        if (other.gameObject.CompareTag("SlopedGround")) {
-            player.isOnSlope = false;
-        }
+        if (other.gameObject.CompareTag("SlopedGround")) player.isOnSlope = false;
 
         if (other.gameObject.CompareTag("GroundAuto")) {
             PlatformAuto auto = other.GetComponent<PlatformAuto>();
