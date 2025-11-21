@@ -224,13 +224,24 @@ public abstract class Enemy : MonoBehaviour {
     /// </returns>
     protected virtual bool ActionDead() {
         if (_lastState == State.Dead) return false;
-        GetComponent<BoxCollider>().enabled = false;
-        rb.useGravity = false;
         PInfo(_currentState);
-        
+        AllowClipping(true);
         return true;
     }
     #endregion
+
+    public virtual void AllowClipping(bool allow) {
+        BoxCollider c = GetComponent<BoxCollider>();
+        int layer = LayerMask.NameToLayer("Player");
+
+        if (allow) {
+            // ADD layer to exclusion
+            c.excludeLayers |= (1 << layer);
+        } else {
+            // REMOVE layer from exclusion
+            c.excludeLayers &= ~(1 << layer);
+        }
+    }
 
     protected virtual IEnumerator AttackCooldown() {
         yield return new WaitForSeconds(_attackCooldownTime);

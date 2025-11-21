@@ -56,6 +56,7 @@ public class GrappleMechanic : MonoBehaviour {
         isGrappling = true;
         grappleTarget = currentTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
+        if (currentTarget != null) currentTarget.AllowClipping(true);
         return true;
     }
 
