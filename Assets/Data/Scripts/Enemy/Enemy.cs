@@ -224,7 +224,8 @@ public abstract class Enemy : MonoBehaviour {
     /// </returns>
     protected virtual bool ActionDead() {
         if (_lastState == State.Dead) return false;
-        //GetComponent<BoxCollider>() // Somehow make it where the player wont collide with the dead enemy.
+        GetComponent<BoxCollider>().enabled = false;
+        rb.useGravity = false;
         PInfo(_currentState);
         
         return true;
