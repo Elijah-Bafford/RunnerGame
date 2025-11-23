@@ -44,7 +44,8 @@ public class Player : MonoBehaviour {
 
     public bool isSliding { get; set; } = false;
     public bool isGrounded { get; set; } = false;
-    public bool isOnSlope { get; set; } = false;
+    public float onSlopeAngle { get; set; } = 0f;
+    public float onSlopeLowY { get; set; } = 0f;
 
     ///<summary>Whether or not the player is in the attack animation.</summary>
     public bool isInAttack { get; set; } = false;
@@ -59,7 +60,7 @@ public class Player : MonoBehaviour {
     public enum Act { Attack, Slide, Jump, Move, Grapple }
     public enum Direction { Forward, Backward, Left, Right, Other, None }
 
-    private Direction currentDir = Direction.None;
+    public Direction currentDir { get; private set; } = Direction.None;
 
     public static Player Instance { get; private set; }
 
@@ -319,10 +320,14 @@ public class Player : MonoBehaviour {
     /// <param name="speed"></param>
     public void ChangeSpeedStat(float speed) => speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
 
-    /// <summary>Buff the player's speed stat multiplier.</summary>
+    /// <summary>PowerUp the player's speed stat multiplier.</summary>
     /// <param name="time">Seconds the buff lasts.</param>
     /// <param name="multiplier">The amount to multiply the gain by.</param>
-    public void Buff(int time, float multiplier) => momentumMech.BuffSpeed(time, multiplier);
+    /// <param name="speedStatBoost">The amount to increase SpeedStat by.</param>
+    public void SpeedBuff(float time, float multiplier, float speedStatBoost) {
+        ChangeSpeedStat(speedStatBoost);
+        momentumMech.BuffSpeed(time, multiplier);
+    }
     public void SetLinearVelocity(Vector3 target) => rb.linearVelocity = target;
     public void SetConveyorVelocity(Vector3 velocity) => conveyorVelocity = velocity;
     public bool IsWallJumping() => wallRunMech.isWallJumping;

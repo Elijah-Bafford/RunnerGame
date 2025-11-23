@@ -21,9 +21,10 @@ public class MomentumMechanic : MonoBehaviour {
     private bool isGrappling = false;
     private bool justGrappled = false;
     private bool justWallRan = false;
-    private bool isOnSlope = false;
     private bool isWallRunning = false;
     private bool isWallJumping = false;
+
+    private float onSlopeAngle = 0f;
 
     private MomentumUI momentumUI;
 
@@ -40,12 +41,12 @@ public class MomentumMechanic : MonoBehaviour {
         justWallRan = false;
         isWallRunning = false;
         isWallJumping = false;
-           
+
     }
 
     private void Start() {
         player = Player.Instance;
-        momentumUI = MomentumUI.GetSelf();
+        momentumUI = MomentumUI.Instance;
     }
 
     /* How it works:
@@ -84,27 +85,28 @@ public class MomentumMechanic : MonoBehaviour {
 
         float momentum = 0.0f;
 
-
-
         if (hasSpeedStat) {
+            // Player is moving and not moving backwards
+            if (player.currentDir != Player.Direction.None && player.currentDir != Player.Direction.Backward) {
 
-            if (isSliding && isGrounded) {
-                momentum += 0.04f;
-            }
+                // Player is sliding on the ground
+                if (isSliding && isGrounded) momentum += 4f;
 
-            if (isOnSlope || isGrappling) {
-                momentum += 0.06f;
-            }
+                // Player is going DOWN a slope
+                if (onSlopeAngle > 0) momentum += 6f + (onSlopeAngle / 15f);
 
-            if (isWallJumping || isWallRunning) {
-                momentum += 0.02f;
+                // Player is grappling
+                if (isGrappling) momentum += 16f;
+
+                // Player is wall jumping or wall running
+                if (isWallJumping || isWallRunning) momentum += 2f;
             }
 
             // Maintain momentum if sliding when landing a jump, otherwise lose momentum
             if (isGrounded && !wasGroundedLastFrame) {
                 if (!isSliding && !isGrappling && !isWallRunning) {
                     if (!justGrappled && !justWallRan) {
-                        momentum -= 0.3f;
+                        momentum -= 100f;
                     } else {
                         justGrappled = false;
                         justWallRan = false;
@@ -112,34 +114,64 @@ public class MomentumMechanic : MonoBehaviour {
                 }
             }
 
-        } else if (!hasSpeedStat || currentDir == Player.Direction.None) momentum = -0.07f;
+        }
+        // Player has no speed stat
+        else momentum = -15f;
 
+        // Player is not moving
+        if (currentDir == Player.Direction.None) momentum -= 10f;
 
+        // Player is going UP a slope
+        if (onSlopeAngle < 0) momentum -= 6f + (onSlopeAngle / 15f);
+
+        // Correct momentum for usage
+        momentum /= 100f;
+
+        // Apply speed buff multiplier
         momentum *= speedBuffMultiplier;
-
 
         EditSpeedMult(momentum);
         momentumUI.UpdateSpeedBar(speedStat);
         momentumUI.UpdateSpeedMult(speedMult);
         UpdateHighestSpeed();
+
+        if (speedMult > m_temp) {
+            if (m_temp2 != 1) {
+                m_temp2 = 1;
+                momentumUI.UpdateIncDec("/\\");
+            }
+        } else if (speedMult < m_temp) {
+            if (m_temp2 != -1) {
+                m_temp2 = -1;
+                momentumUI.UpdateIncDec("\\/");
+            }
+        } else {
+            if (m_temp2 != 0) {
+                m_temp2 = 0;
+                momentumUI.UpdateIncDec("--");
+            }
+        }
+        m_temp = speedMult;
+    }
+    
+
+    float m_temp = 0f;
+    sbyte m_temp2 = 0;
+
+    public void BuffSpeed(float time, float multiplier) {
+        float mult = multiplier;
+        if (mult <= 1f) mult = 1.5f;
+
+        if (speedBuffMultiplier > 1) StopCoroutine("DisplayBuff");
+        
+        StartCoroutine(DisplayBuff(time, mult));
     }
 
-    public void BuffSpeed(int time, float multiplier = 2.0f) {
-        if (multiplier <= 1f) {
-            multiplier = 1.1f;
-            Debug.LogWarning("Cannot apply speed buff with a multiplier of less than or equal to 1. Argument changed to 1.1f");
-        }
-        if (speedBuffMultiplier > 1) {
-            StopCoroutine("DisplayBuff");
-        }
+    private IEnumerator DisplayBuff(float time, float multiplier) {
         speedBuffMultiplier = multiplier;
-        StartCoroutine(DisplayBuff(time));
-    }
-
-    private IEnumerator DisplayBuff(float time) {
-        MomentumUI.GetSelf().ToggleBuffOverlay(true);
+        MomentumUI.Instance.ToggleBuffOverlay(true, multiplier);
         yield return new WaitForSeconds(time);
-        MomentumUI.GetSelf().ToggleBuffOverlay(false);
+        MomentumUI.Instance.ToggleBuffOverlay(false, multiplier);
         speedBuffMultiplier = 1f;
     }
 
@@ -169,7 +201,7 @@ public class MomentumMechanic : MonoBehaviour {
         wasGroundedLastFrame = isGrounded;
         isSliding = player.isSliding;
         isGrounded = player.isGrounded;
-        isOnSlope = player.isOnSlope;
+        onSlopeAngle = player.onSlopeAngle;
         isWallJumping = player.IsWallJumping();
     }
 
