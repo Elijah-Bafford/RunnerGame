@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class MomentumMechanic : MonoBehaviour {
@@ -133,29 +133,8 @@ public class MomentumMechanic : MonoBehaviour {
         MomentumUI.Instance.UpdateSpeedMult(speedMult);
         UpdateHighestSpeed();
 
-        if (speedMult > m_temp) {
-            if (m_temp2 != 1) {
-                m_temp2 = 1;
-                MomentumUI.Instance.UpdateIncDec("/\\");
-            }
-        } else if (speedMult < m_temp) {
-            if (m_temp2 != -1) {
-                m_temp2 = -1;
-                MomentumUI.Instance.UpdateIncDec("\\/");
-            }
-        } else {
-            if (m_temp2 != 0) {
-                m_temp2 = 0;
-                MomentumUI.Instance.UpdateIncDec("--");
-            }
-        }
-        m_temp = speedMult;
+        MomentumUI.Instance.UpdateCrosshair(speedMult);
     }
-    
-
-    float m_temp = 0f;
-    sbyte m_temp2 = 0;
-
     public void BuffSpeed(float time, float multiplier) {
         float mult = multiplier;
         if (mult <= 1f) mult = 1.5f;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,7 +47,30 @@ public class MomentumUI : MonoBehaviour {
         else Debug.LogWarning(this + " Speed Mult Display is null");
     }
 
-    public void UpdateIncDec(string s) {
+    float m_temp = 0f;
+    sbyte m_temp2 = 0;
+
+    public void UpdateCrosshair(float speedMult) {
+        if (speedMult > m_temp) {
+            if (m_temp2 != 1) {
+                m_temp2 = 1;
+                SetCrosshair("▲");
+            }
+        } else if (speedMult < m_temp) {
+            if (m_temp2 != -1) {
+                m_temp2 = -1;
+                SetCrosshair("▼");
+            }
+        } else {
+            if (m_temp2 != 0) {
+                m_temp2 = 0;
+                SetCrosshair("-");
+            }
+        }
+        m_temp = speedMult;
+    }
+
+    private void SetCrosshair(string s) {
         if (_incDec != null) _incDec.text = s;
         else Debug.LogWarning(this + " Inc/Dec Display is null");
     }
