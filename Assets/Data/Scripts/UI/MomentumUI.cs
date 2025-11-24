@@ -11,6 +11,7 @@ public class MomentumUI : MonoBehaviour {
     [SerializeField] private Slider _speedStatBar;
     [SerializeField] private TextMeshProUGUI _incDec;
     [SerializeField] private TextMeshProUGUI _incNotification;
+    [SerializeField] private TextMeshProUGUI _speedStatValue;
 
     private TextMeshProUGUI _buffText;
 
@@ -57,6 +58,11 @@ public class MomentumUI : MonoBehaviour {
         }
         if (instant) _speedStatBar.value = value;
         else _speedStatBar.value = Mathf.MoveTowards(_speedStatBar.value, value, Time.fixedDeltaTime * 25f);
+        if (_speedStatValue == null) {
+            Debug.LogWarning(this + " Speed Stat Value is null");
+            return;
+        }
+        _speedStatValue.text = Mathf.Round(Player.Instance.CurrentSpeedStat) + "/" + Mathf.Round(Player.Instance.MaxSpeedStat);
     }
 
     public void ToggleBuffOverlay(bool toggle, float multuplier) {

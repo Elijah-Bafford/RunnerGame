@@ -11,10 +11,10 @@ public class Player : MonoBehaviour {
     [SerializeField] private float attackDamage;
 
     [Header("- Speed Stat")]
-    [SerializeField] private float MaxSpeedStat = 100f;
-    [SerializeField] private float StartSpeedStat = 0;
-    [SerializeField] private float CurrentSpeedStat = 0;
-    [SerializeField] private float speedLossMult = 1f;
+    [SerializeField] private float maxSpeedStat = 100f;
+    [SerializeField] private float startSpeedStat = 0;
+    [SerializeField] private float currentSpeedStat = 0;
+    [SerializeField] private float speedLossMult = 2f;
 
     [Header("- Movement")]
     [SerializeField] private float moveSpeed = 5f;
@@ -33,6 +33,8 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     public float AttackDamage => attackDamage;
+    public float MaxSpeedStat => maxSpeedStat;
+    public float CurrentSpeedStat => currentSpeedStat;
     public Vector3 TargetingPos => _TargetingPos.position;
 
     private Rigidbody rb;
@@ -101,7 +103,7 @@ public class Player : MonoBehaviour {
         wallRunMech.InitWallRunMechanic(this, rb);
         grappleMech.InitGrappleMechanic(this);
         playerAttack.InitPlayerAttack(this);
-        CurrentSpeedStat = StartSpeedStat;
+        currentSpeedStat = startSpeedStat;
 
         GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
@@ -114,7 +116,7 @@ public class Player : MonoBehaviour {
         currentDir = Direction.None;
 
         leanAmount = 0;
-        CurrentSpeedStat = StartSpeedStat;
+        currentSpeedStat = startSpeedStat;
 
         moveVector = Vector3.zero;
         lastMoveVector = Vector3.zero;
@@ -332,7 +334,7 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="speed"></param>
     public void ChangeSpeedStat(float speed, bool showUIIncrease = false) {
-        CurrentSpeedStat = Mathf.Clamp(CurrentSpeedStat += speed, 0f, MaxSpeedStat);
+        currentSpeedStat = Mathf.Clamp(currentSpeedStat += speed, 0f, MaxSpeedStat);
         if (showUIIncrease) MomentumUI.Instance.TriggerSSIncrease(speed);
     }
 

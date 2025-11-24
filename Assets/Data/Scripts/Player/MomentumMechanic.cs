@@ -48,10 +48,10 @@ public class MomentumMechanic : MonoBehaviour {
     * Directions have a basis, forward is faster than left and right, and backwards is slower than them.
     * 
     * Basis with no speedMult: Forward: 1.0, Left/Right 0.8, Backwards 0.6, sliding 0.5
-    * Basis with speedMult: Forward 1.2, Left/Right 1.0, Backward 0.8, sliding 1.4 (sliding requires CurrentSpeedStat so it's much higher)
+    * Basis with speedMult: Forward 1.2, Left/Right 1.0, Backward 0.8, sliding 1.4 (sliding requires currentSpeedStat so it's much higher)
     * 
     * 
-    * Certain actions will require CurrentSpeedStat: sliding, wall running, and grappling
+    * Certain actions will require currentSpeedStat: sliding, wall running, and grappling
     * When the player changes direction, speedMult will be reduced.
     * 
     * I think having a continous "fight" between losing and gaining speedMult would make this work.
