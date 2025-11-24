@@ -1,16 +1,25 @@
 using System;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [DefaultExecutionOrder(-2)]
 public class Player : MonoBehaviour {
 
-    [Header("Settings")]
+    [Header("Player Stats")]
+
     [SerializeField] private float attackDamage;
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float speedStat = 0;
+
+    [Header("- Speed Stat")]
+    [SerializeField] private float MaxSpeedStat = 100f;
+    [SerializeField] private float StartSpeedStat = 0;
+    [SerializeField] private float CurrentSpeedStat = 0;
     [SerializeField] private float speedLossMult = 1f;
+
+    [Header("- Movement")]
+    [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 7f;
+    
     [SerializeField] private bool isInvincible = false;
 
     [Header("General Refs")]
@@ -44,11 +53,13 @@ public class Player : MonoBehaviour {
 
     public bool isSliding { get; set; } = false;
     public bool isGrounded { get; set; } = false;
-    public float onSlopeAngle { get; set; } = 0f;
-    public float onSlopeLowY { get; set; } = 0f;
+    /// <summary>The angle of the slope. 0 if not on a slope (Abs value)</summary>
+    public float OnSlopeAngle { get; set; } = 0f;
+    /// <summary>The Y position of the player on the slope. Used to check if the player is going up or down a slope</summary>
+    public float OnSlopeY { get; set; } = 0f;
 
     ///<summary>Whether or not the player is in the attack animation.</summary>
-    public bool isInAttack { get; set; } = false;
+    public bool IsInAttack { get; set; } = false;
 
     ///<summary>Whether a restart is pending (execute on first FixedUpdate after true).</summary>
     private bool pendingRespawn = false;
@@ -57,11 +68,12 @@ public class Player : MonoBehaviour {
 
     private Vector3 groundNormal = Vector3.up;
 
+    /// <summary>Actions available to the player</summary>
     public enum Act { Attack, Slide, Jump, Move, Grapple }
+    /// <summary>Directions of the player. Other is a combination of movements, none is not moving.</summary>
     public enum Direction { Forward, Backward, Left, Right, Other, None }
-
+    /// <summary>The current direction the player is moving in.</summary>
     public Direction currentDir { get; private set; } = Direction.None;
-
     public static Player Instance { get; private set; }
 
     private void Awake() {
@@ -89,6 +101,7 @@ public class Player : MonoBehaviour {
         wallRunMech.InitWallRunMechanic(this, rb);
         grappleMech.InitGrappleMechanic(this);
         playerAttack.InitPlayerAttack(this);
+        CurrentSpeedStat = StartSpeedStat;
 
         GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
@@ -101,7 +114,7 @@ public class Player : MonoBehaviour {
         currentDir = Direction.None;
 
         leanAmount = 0;
-        speedStat = 0;
+        CurrentSpeedStat = StartSpeedStat;
 
         moveVector = Vector3.zero;
         lastMoveVector = Vector3.zero;
@@ -114,18 +127,18 @@ public class Player : MonoBehaviour {
             transform.rotation = spawnPoint.rotation;
         }
 
-        isInAttack = false;
+        IsInAttack = false;
         playerAttack.SetAttackBoxEnabled(false);
         
-        momentumMech.OnLevelRestart();
+        momentumMech.SetDefaultValues();
         wallRunMech.OnLevelRestart();
     }
 
     private void FixedUpdate() {
         if (pendingRespawn) Respawn();
 
-        momentumMech.UpdateMomentum(speedStat, currentDir);
-        if (grappleMech.UpdateGrapple(speedStat > 0)) return;    // The player is grappling, don't update the rest.
+        momentumMech.UpdateMomentum(CurrentSpeedStat, currentDir);
+        if (grappleMech.UpdateGrapple(CurrentSpeedStat > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
         wallRunMech.UpdateWallRun(currentDir);
         UpdateDirection();
@@ -190,7 +203,7 @@ public class Player : MonoBehaviour {
         float speed = moveSpeed * momentumMech.GetTrueSpeedMult();
 
         if (currentDir != Direction.None) {
-            if (!isSliding && (isGrounded || IsWallRunning())) {
+            if (!isSliding && (isGrounded || IsWallRunning)) {
                 AudioHandler.Instance.PlaySoundRND(SoundType.Footstep);
             }
         }
@@ -213,7 +226,7 @@ public class Player : MonoBehaviour {
         targetVelocity.y = rb.linearVelocity.y;
 
         // Bend velocity to follow ground when grounded & not moving upward
-        if (isGrounded && !IsWallRunning() && targetVelocity.y <= 0f)
+        if (isGrounded && !IsWallRunning && targetVelocity.y <= 0f)
             targetVelocity = Vector3.ProjectOnPlane(targetVelocity, groundNormal);
 
         wallRunMech.UpdateWallJumpVelocity();
@@ -228,7 +241,7 @@ public class Player : MonoBehaviour {
     }
 
     public void Attack() {
-        if (isInAttack) return;
+        if (IsInAttack) return;
         AudioHandler.Instance.PlaySound(SoundType.SwordImpact);
         anim.SetTrigger("Attack");
     }
@@ -251,7 +264,7 @@ public class Player : MonoBehaviour {
 
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
-        if (!keyReleased && (isGrounded || (IsWallRunning() && speedStat > 0))) {
+        if (!keyReleased && (isGrounded || (IsWallRunning && CurrentSpeedStat > 0))) {
             AudioHandler.Instance.PlaySound(SoundType.Jump);
         }
 
@@ -272,12 +285,12 @@ public class Player : MonoBehaviour {
         TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, failedCondition: (!isGrounded && !grappleMech.HasTarget()));
 
     private void TryAction(Func<bool> action, float cost, bool failedCondition) {
-        if (speedStat > 0f) {
+        if (CurrentSpeedStat > 0f) {
             if (action()) {
                 ChangeSpeedStat(cost);
             }
         } else if (failedCondition) {
-            // TODO: call MomentumUI.ActionFailed
+            MomentumUI.Instance.ActionFailed();
         }
     }
 
@@ -318,7 +331,10 @@ public class Player : MonoBehaviour {
     /// Add/subtract to/from currentSpeed (speed AV)
     /// </summary>
     /// <param name="speed"></param>
-    public void ChangeSpeedStat(float speed) => speedStat = Mathf.Clamp(speedStat += speed, 0f, 100f);
+    public void ChangeSpeedStat(float speed, bool showUIIncrease = false) {
+        CurrentSpeedStat = Mathf.Clamp(CurrentSpeedStat += speed, 0f, MaxSpeedStat);
+        if (showUIIncrease) MomentumUI.Instance.TriggerSSIncrease(speed);
+    }
 
     /// <summary>PowerUp the player's speed stat multiplier.</summary>
     /// <param name="time">Seconds the buff lasts.</param>
@@ -330,9 +346,9 @@ public class Player : MonoBehaviour {
     }
     public void SetLinearVelocity(Vector3 target) => rb.linearVelocity = target;
     public void SetConveyorVelocity(Vector3 velocity) => conveyorVelocity = velocity;
-    public bool IsWallJumping() => wallRunMech.isWallJumping;
-    public bool IsWallRunning() => wallRunMech.isWallRunning;
-    public bool IsGrappling() => grappleMech.IsGrappling();
+    public bool IsWallJumping => wallRunMech.isWallJumping;
+    public bool IsWallRunning => wallRunMech.isWallRunning;
+    public bool IsGrappling => grappleMech.IsGrappling();
     public float GetJumpForce() => jumpForce;
 
     public void SetAttackBoxEnabled(bool enabled) => playerAttack.SetAttackBoxEnabled(enabled);

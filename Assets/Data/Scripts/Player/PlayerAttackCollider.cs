@@ -33,7 +33,6 @@ public class PlayerAttackCollider : MonoBehaviour {
 
         if (target.IsDead()) return;
 
-        player.ChangeSpeedStat(18f);
         target.Hurt(player.AttackDamage);
 
     }

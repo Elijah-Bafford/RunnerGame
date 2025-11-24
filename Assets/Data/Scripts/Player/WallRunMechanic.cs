@@ -83,7 +83,7 @@ public class WallRunMechanic : MonoBehaviour {
     }
 
     public void UpdateWallJumpVelocity() {
-        if (player.IsGrappling()) { isWallJumping = false; return; }
+        if (player.IsGrappling) { isWallJumping = false; return; }
         /*
          * If the player is grounded
          * or was NOT on a wall last frame and is this frame

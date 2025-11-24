@@ -46,6 +46,7 @@ public class GrappleMechanic : MonoBehaviour {
         if (dist < GetGrappleArrivalDistance()) {
             SetIsGrappling(false);
             player.Attack();
+            if (currentTarget != null) currentTarget.Hurt(Player.Instance.AttackDamage);
         }
         return true;
     }
@@ -56,7 +57,6 @@ public class GrappleMechanic : MonoBehaviour {
         isGrappling = true;
         grappleTarget = currentTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
-        if (currentTarget != null) currentTarget.AllowClipping(true);
         return true;
     }
 
