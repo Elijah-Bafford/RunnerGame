@@ -42,7 +42,8 @@ public class MomentumUI : MonoBehaviour {
     }
 
     public void UpdateSpeedMult(float value) {
-        if (_momentumValueOverlay != null) _momentumValueOverlay.text = "Momentum: " + value;
+        float r_val = (float)Math.Round(value, 3, MidpointRounding.AwayFromZero);
+        if (_momentumValueOverlay != null) _momentumValueOverlay.text = "Momentum: x" + r_val.ToString("F3");
         else Debug.LogWarning(this + " Speed Mult Display is null");
     }
 
