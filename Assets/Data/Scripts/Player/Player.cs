@@ -10,16 +10,16 @@ public class Player : MonoBehaviour {
 
     [SerializeField] private float attackDamage;
 
-    [Header("- Speed Stat")]
-    [SerializeField] private float maxSpeedStat = 100f;
-    [SerializeField] private float startSpeedStat = 0;
-    [SerializeField] private float currentSpeedStat = 0;
-    [SerializeField] private float speedLossMult = 2f;
+    [Header("- Focus Stat")]
+    [SerializeField] private float maxFocus = 100f;
+    [SerializeField] private float startFocus = 0;
+    [SerializeField] private float currentFocus = 0;
+    [SerializeField] private float focusLossMult = 2f;
 
     [Header("- Movement")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 7f;
-    
+
     [SerializeField] private bool isInvincible = false;
 
     [Header("General Refs")]
@@ -33,8 +33,8 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     public float AttackDamage => attackDamage;
-    public float MaxSpeedStat => maxSpeedStat;
-    public float CurrentSpeedStat => currentSpeedStat;
+    public float MaxSpeedStat => maxFocus;
+    public float CurrentSpeedStat => currentFocus;
     public Vector3 TargetingPos => _TargetingPos.position;
 
     private Rigidbody rb;
@@ -103,7 +103,7 @@ public class Player : MonoBehaviour {
         wallRunMech.InitWallRunMechanic(this, rb);
         grappleMech.InitGrappleMechanic(this);
         playerAttack.InitPlayerAttack(this);
-        currentSpeedStat = startSpeedStat;
+        currentFocus = startFocus;
 
         GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
@@ -116,7 +116,7 @@ public class Player : MonoBehaviour {
         currentDir = Direction.None;
 
         leanAmount = 0;
-        currentSpeedStat = startSpeedStat;
+        currentFocus = startFocus;
 
         moveVector = Vector3.zero;
         lastMoveVector = Vector3.zero;
@@ -131,7 +131,7 @@ public class Player : MonoBehaviour {
 
         IsInAttack = false;
         playerAttack.SetAttackBoxEnabled(false);
-        
+
         momentumMech.SetDefaultValues();
         wallRunMech.OnLevelRestart();
     }
@@ -202,7 +202,7 @@ public class Player : MonoBehaviour {
     }
 
     private void Move() {
-        float speed = moveSpeed * momentumMech.GetTrueSpeedMult();
+        float speed = moveSpeed * momentumMech.GetTrueMomentum();
 
         if (currentDir != Direction.None) {
             if (!isSliding && (isGrounded || IsWallRunning)) {
@@ -251,7 +251,7 @@ public class Player : MonoBehaviour {
     private void Slide() {
         isSliding = !isSliding;
         anim.SetBool("Slide", isSliding);
-        speedLossMult = isSliding ? speedLossMult + 1.5f : speedLossMult - 1.5f;
+        focusLossMult = isSliding ? focusLossMult + 1.5f : focusLossMult - 1.5f;
         AdjustHitboxHeight(isSliding ? 2 : 1);
     }
 
@@ -271,28 +271,26 @@ public class Player : MonoBehaviour {
         }
 
         if (wallRunMech.IsOnWall()) {
-            TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), -2.5f, wallRunMech.IsOnWall() && !keyReleased);
+            TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), -2.5f, !keyReleased);
             return;
         }
 
-        if (!keyReleased && isGrounded) {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetTrueSpeedMult()), rb.linearVelocity.z);
-        } else if (keyReleased && rb.linearVelocity.y > 0f) {
+        if (!keyReleased && isGrounded)
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetTrueMomentum()), rb.linearVelocity.z);
+        else if (keyReleased && rb.linearVelocity.y > 0f)
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        }
-
     }
 
-    private void Grapple() =>
-        TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, failedCondition: (!isGrounded && !grappleMech.HasTarget()));
-
-    private void TryAction(Func<bool> action, float cost, bool failedCondition) {
+    private void Grapple() {
+        if (grappleMech.HasTarget())
+            TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, noFocusFlashCondition: !isGrounded);
+    }
+    private void TryAction(Func<bool> action, float cost, bool noFocusFlashCondition) {
         if (CurrentSpeedStat > 0f) {
-            if (action()) {
-                ChangeSpeedStat(cost);
-            }
-        } else if (failedCondition) {
-            MomentumUI.Instance.ActionFailed();
+            if (action()) ChangeFocus(cost);
+
+        } else if (noFocusFlashCondition) {
+            StatusUI.Instance.ActionFailed();
         }
     }
 
@@ -330,20 +328,20 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
-    /// Add/subtract to/from currentSpeed (speed AV)
+    /// Add/subtract to/from currentSpeed (focus AV)
     /// </summary>
-    /// <param name="speed"></param>
-    public void ChangeSpeedStat(float speed, bool showUIIncrease = false) {
-        currentSpeedStat = Mathf.Clamp(currentSpeedStat += speed, 0f, MaxSpeedStat);
-        if (showUIIncrease) MomentumUI.Instance.TriggerSSIncrease(speed);
+    /// <param name="focus"></param>
+    public void ChangeFocus(float focus, bool showUIIncrease = false) {
+        currentFocus = Mathf.Clamp(currentFocus += focus, 0f, MaxSpeedStat);
+        if (showUIIncrease) StatusUI.Instance.ShowFocusIncrease(focus);
     }
 
-    /// <summary>PowerUp the player's speed stat multiplier.</summary>
+    /// <summary>PowerUp the player's focus stat multiplier.</summary>
     /// <param name="time">Seconds the buff lasts.</param>
     /// <param name="multiplier">The amount to multiply the gain by.</param>
     /// <param name="speedStatBoost">The amount to increase SpeedStat by.</param>
     public void SpeedBuff(float time, float multiplier, float speedStatBoost) {
-        ChangeSpeedStat(speedStatBoost);
+        ChangeFocus(speedStatBoost);
         momentumMech.BuffSpeed(time, multiplier);
     }
     public void SetLinearVelocity(Vector3 target) => rb.linearVelocity = target;

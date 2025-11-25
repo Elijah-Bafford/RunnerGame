@@ -255,7 +255,7 @@ public abstract class Enemy : MonoBehaviour {
     /// </summary>
     /// <param name="damage"> Positive value, the damage to deal to the enemy</param>
     public virtual void Hurt(float damage = 10f) {
-        Player.Instance.ChangeSpeedStat(damage * 1.5f, showUIIncrease: true);
+        Player.Instance.ChangeFocus(damage * 1.5f, showUIIncrease: true);
         _currentHealth -= damage;
         if (_currentHealth <= 0) _isDead = true;
         

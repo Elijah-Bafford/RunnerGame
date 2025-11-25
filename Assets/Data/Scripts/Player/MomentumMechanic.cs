@@ -3,15 +3,18 @@ using UnityEngine;
 
 public class MomentumMechanic : MonoBehaviour {
     [Header("Momentum Settings")]
-    [Tooltip("How Fast the player loses SpeedStat")]
-    [SerializeField] private float speedLossMult = 2f;
-    [Tooltip("Multiply deltaTime by this value.")]
+    [Tooltip("How Fast the player loses Focus.")]
+    [SerializeField] private float focusLossMult = 2f;
+    [Tooltip("Multiply fixedDeltaTime by this value.")]
     [SerializeField] private float timeScale = 1f;
 
     private float speedBuffMultiplier = 1f;
-    private float speedMult = 1.0f;
-    private float speedBasis = 1.0f;
-    private float highestSpeed = 0f;
+    /// <summary>Displayed Momentum</summary>
+    private float rawMomentum = 1.0f;
+    /// <summary>Directional based momentum multiplier</summary>
+    private float basis = 1.0f;
+    /// <summary>Highest (displayed) momentum.</summary>
+    private float highestMomentum = 0f;
 
     private bool wasGroundedLastFrame = false;
 
@@ -25,13 +28,13 @@ public class MomentumMechanic : MonoBehaviour {
 
     private float onSlopeAngle = 0f;
 
-    private bool runOnce = true;
+    private bool pendingRunOnce = true;
 
     public void SetDefaultValues() {
         speedBuffMultiplier = 1f;
-        speedMult = 1.0f;
-        speedBasis = 1.0f;
-        highestSpeed = 0f;
+        rawMomentum = 1.0f;
+        basis = 1.0f;
+        highestMomentum = 0f;
         wasGroundedLastFrame = false;
         isSliding = false;
         isGrounded = false;
@@ -40,50 +43,25 @@ public class MomentumMechanic : MonoBehaviour {
         justWallRan = false;
         isWallRunning = false;
         isWallJumping = false;
-        runOnce = true;
+        pendingRunOnce = true;
     }
 
-    /* How it works:
-    * 
-    * Directions have a basis, forward is faster than left and right, and backwards is slower than them.
-    * 
-    * Basis with no speedMult: Forward: 1.0, Left/Right 0.8, Backwards 0.6, sliding 0.5
-    * Basis with speedMult: Forward 1.2, Left/Right 1.0, Backward 0.8, sliding 1.4 (sliding requires currentSpeedStat so it's much higher)
-    * 
-    * 
-    * Certain actions will require currentSpeedStat: sliding, wall running, and grappling
-    * When the player changes direction, speedMult will be reduced.
-    * 
-    * I think having a continous "fight" between losing and gaining speedMult would make this work.
-    * By trying to bring the speedMult continuously down to the basis, and stopping it from reaching 2x (although possible to momentarily bring it above that)
-    * 
-    * 
-    * Without Speed Stat:
-    * The player will begin to slowly lose their momentum, all the way down to the basis
-    * 
-    * With Speed Stat:
-    * When Sliding, grappling, and on slopes the player will gain speedMult
-    * 
-    * When the player jumps, if they land while sliding they will maintain their momentum otherwise they will lose most of it
-    */
-    public void UpdateMomentum(float speedStat, Player.Direction currentDir) {
-        if (runOnce) {
-            runOnce = false;
-            MomentumUI.Instance.UpdateSpeedBar(speedStat, true);
+    public void UpdateMomentum(float focus, Player.Direction currentDir) {
+        if (pendingRunOnce) {
+            pendingRunOnce = false;
+            StatusUI.Instance.UpdateSpeedBar(focus, instant: true);
         }
         // Always drain speed stat, this value is clamped.
-        Player.Instance.ChangeSpeedStat(-speedLossMult * Time.fixedDeltaTime);
+        Player.Instance.ChangeFocus(-focusLossMult * Time.fixedDeltaTime);
 
-        //if (buffTimer > 0) buffTimer--;
+        bool hasFocus = focus > 0f;
 
-        bool hasSpeedStat = speedStat > 0f;
-
-        SetBasis(currentDir, hasSpeedStat);
+        basis = GetBasis(currentDir, hasFocus);
         UpdateStates();
 
         float momentum = 0.0f;
 
-        if (hasSpeedStat) {
+        if (hasFocus) {
             // Player is moving and not moving backwards
             if (Player.Instance.currentDir != Player.Direction.None && Player.Instance.currentDir != Player.Direction.Backward) {
 
@@ -104,7 +82,8 @@ public class MomentumMechanic : MonoBehaviour {
             if (isGrounded && !wasGroundedLastFrame) {
                 if (!isSliding && !isGrappling && !isWallRunning) {
                     if (!justGrappled && !justWallRan) {
-                        momentum -= 100f;
+                        print("Slide on landing to maintain momentum!");
+                        momentum = 0f;
                     } else {
                         justGrappled = false;
                         justWallRan = false;
@@ -113,7 +92,7 @@ public class MomentumMechanic : MonoBehaviour {
             }
 
         }
-        // Player has no speed stat
+        // Player has no focus
         else momentum = -15f;
 
         // Player is not moving
@@ -129,11 +108,11 @@ public class MomentumMechanic : MonoBehaviour {
         momentum *= speedBuffMultiplier;
 
         EditSpeedMult(momentum);
-        MomentumUI.Instance.UpdateSpeedBar(speedStat);
-        MomentumUI.Instance.UpdateSpeedMult(speedMult);
+        StatusUI.Instance.UpdateSpeedBar(focus);
+        StatusUI.Instance.UpdateMomentumUI(rawMomentum);
         UpdateHighestSpeed();
 
-        MomentumUI.Instance.UpdateCrosshair(speedMult);
+        StatusUI.Instance.UpdateCrosshair(rawMomentum);
     }
     public void BuffSpeed(float time, float multiplier) {
         float mult = multiplier;
@@ -146,29 +125,34 @@ public class MomentumMechanic : MonoBehaviour {
 
     private IEnumerator DisplayBuff(float time, float multiplier) {
         speedBuffMultiplier = multiplier;
-        MomentumUI.Instance.ToggleBuffOverlay(true, multiplier);
+        StatusUI.Instance.ToggleBuffOverlay(true, multiplier);
         yield return new WaitForSeconds(time);
-        MomentumUI.Instance.ToggleBuffOverlay(false, multiplier);
+        StatusUI.Instance.ToggleBuffOverlay(false, multiplier);
         speedBuffMultiplier = 1f;
     }
 
-    private void SetBasis(Player.Direction currentDir, bool hasSpeedStat) {
+    private float GetBasis(Player.Direction currentDir, bool hasFocus) {
         float currBasis = 1.0f;
         switch (currentDir) {
-            case Player.Direction.Forward: currBasis = hasSpeedStat ? 1.2f : 1.0f; break;
+            case Player.Direction.Forward: currBasis = hasFocus ? 1.2f : 1.0f; break;
             case Player.Direction.Left:
-            case Player.Direction.Right: currBasis = hasSpeedStat ? 1.0f : 0.8f; break;
-            case Player.Direction.Backward: currBasis = hasSpeedStat ? 0.8f : 0.6f; break;
+            case Player.Direction.Right: currBasis = hasFocus ? 1.0f : 0.8f; break;
+            case Player.Direction.Backward: currBasis = hasFocus ? 0.8f : 0.6f; break;
             default: currBasis = 1.0f; break;
         }
-        if (Player.Instance.isSliding) currBasis = hasSpeedStat ? 1.4f : 0.5f;
-        if (Player.Instance.IsWallRunning) currBasis = 1.5f;
+        if (Player.Instance.isSliding) currBasis = hasFocus ? Average(currBasis, 1.5f) : Average(currBasis, 0.25f);
+        if (Player.Instance.IsWallRunning) currBasis = Average(currBasis, 1.75f);
+        if (Player.Instance.IsWallJumping) currBasis = Average(currBasis, 1.5f);
+        if (Player.Instance.IsGrappling) currBasis = Average(currBasis, 2.0f);
 
-        float timeMult = hasSpeedStat ? 15 : 5;
-
-        speedBasis = Mathf.Lerp(speedBasis, currBasis, Time.deltaTime * timeMult);
+        float timeMult = hasFocus ? 15 : 5;
+        
+        return Mathf.Lerp(basis, currBasis, Time.fixedDeltaTime * timeMult);
 
     }
+
+    private float Average(float a, float b) => (a + b) / 2;
+    
 
     private void UpdateStates() {
         isGrappling = Player.Instance.IsGrappling;
@@ -183,12 +167,16 @@ public class MomentumMechanic : MonoBehaviour {
     }
 
     public void EditSpeedMult(float speed, bool condition = true) {
-        if (condition) speedMult += speed * Time.fixedDeltaTime * timeScale;
-        if (speedMult < 1.0f) { speedMult = 1.0f; }
+        if (condition) rawMomentum += speed * Time.fixedDeltaTime * timeScale;
+        if (rawMomentum < 1.0f) { rawMomentum = 1.0f; }
     }
 
-    private void UpdateHighestSpeed() { if (speedMult > highestSpeed) highestSpeed = speedMult; }
-    public float GetTrueSpeedMult() { return speedMult * speedBasis; }
-    public float GetActualSpeedMult() { return speedMult; }
-    public float GetHighestSpeed() { return highestSpeed; }
+    private void UpdateHighestSpeed() { if (rawMomentum > highestMomentum) highestMomentum = rawMomentum; }
+    /// <summary>Get the actual momentum multiplier.</summary>
+    /// <returns>Speed Mult * Speed Basis.</returns>
+    public float GetTrueMomentum() => rawMomentum * basis;
+    /// <summary>Get the raw momentum multiplier (displayed).</summary>
+    /// <returns>Speed Mult</returns>
+    public float GetRawMomentum() => rawMomentum;
+    public float GetHighestSpeed() => highestMomentum; 
 }

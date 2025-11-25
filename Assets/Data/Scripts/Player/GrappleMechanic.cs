@@ -27,15 +27,15 @@ public class GrappleMechanic : MonoBehaviour {
     private bool inGrappleRange = false;
     private bool isGrappling = false;
 
-    private bool hasSpeedStat = false;
+    private bool hasFocus = false;
 
     public void InitGrappleMechanic(Player player) {
         this.player = player;
         reticle = lockOnReticle.GetComponent<RawImage>();
     }
 
-    public bool UpdateGrapple(bool hasSpeed) {
-        hasSpeedStat = hasSpeed;
+    public bool UpdateGrapple(bool hasFocus) {
+        this.hasFocus = hasFocus;
         if (!IsGrappling()) return false;
 
         Vector3 toTarget = GetGrappleTarget() - transform.position;
@@ -51,8 +51,12 @@ public class GrappleMechanic : MonoBehaviour {
         return true;
     }
 
+    /// <summary>Initiate grapple</summary>
+    /// <param name="isGrounded">Player is grounded</param>
+    /// <param name="position">Player's transform position</param>
+    /// <returns>True if success, false otherwise</returns>
     public bool Grapple(bool isGrounded, Vector3 position) {
-        if (isGrounded || !hasSpeedStat || !inGrappleRange || currentTarget == null) return false;
+        if (isGrounded || !hasFocus || !inGrappleRange || currentTarget == null) return false;
 
         isGrappling = true;
         grappleTarget = currentTarget.transform.position + lockOnOffset;
@@ -168,7 +172,7 @@ public class GrappleMechanic : MonoBehaviour {
         lockOnReticle.position = screenPos;
 
         inGrappleRange = Vector3.Distance(transform.position, currentTarget.transform.position) <= grappleRange;
-        reticle.color = (inGrappleRange && hasSpeedStat) ? Color.red : Color.white;
+        reticle.color = (inGrappleRange && hasFocus) ? Color.red : Color.white;
     }
 
     private bool HasLineOfSight(Vector3 origin, Vector3 dir, float distance, Collider expectedHitbox) {
