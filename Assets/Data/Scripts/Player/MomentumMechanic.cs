@@ -49,7 +49,7 @@ public class MomentumMechanic : MonoBehaviour {
     public void UpdateMomentum(float focus, Player.Direction currentDir) {
         if (pendingRunOnce) {
             pendingRunOnce = false;
-            StatusUI.Instance.UpdateSpeedBar(focus, instant: true);
+            StatusUI.Instance.UpdateFocusBar(focus, instant: true);
         }
         // Always drain speed stat, this value is clamped.
         Player.Instance.ChangeFocus(-focusLossMult * Time.fixedDeltaTime);
@@ -108,7 +108,7 @@ public class MomentumMechanic : MonoBehaviour {
         momentum *= speedBuffMultiplier;
 
         EditSpeedMult(momentum);
-        StatusUI.Instance.UpdateSpeedBar(focus);
+        StatusUI.Instance.UpdateFocusBar(focus);
         StatusUI.Instance.UpdateMomentumUI(rawMomentum);
         UpdateHighestSpeed();
 
@@ -125,9 +125,9 @@ public class MomentumMechanic : MonoBehaviour {
 
     private IEnumerator DisplayBuff(float time, float multiplier) {
         speedBuffMultiplier = multiplier;
-        StatusUI.Instance.ToggleBuffOverlay(true, multiplier);
+        StatusUI.Instance.SetMomentumUpOverlayActive(true, multiplier);
         yield return new WaitForSeconds(time);
-        StatusUI.Instance.ToggleBuffOverlay(false, multiplier);
+        StatusUI.Instance.SetMomentumUpOverlayActive(false, multiplier);
         speedBuffMultiplier = 1f;
     }
 

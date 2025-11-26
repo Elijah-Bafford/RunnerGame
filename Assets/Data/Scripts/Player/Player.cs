@@ -33,8 +33,9 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     public float AttackDamage => attackDamage;
-    public float MaxSpeedStat => maxFocus;
-    public float CurrentSpeedStat => currentFocus;
+    public float MaxFocus => maxFocus;
+    public Action<float> OnMaxFocusChanged;
+    public float CurrentFocus => currentFocus;
     public Vector3 TargetingPos => _TargetingPos.position;
 
     private Rigidbody rb;
@@ -139,8 +140,8 @@ public class Player : MonoBehaviour {
     private void FixedUpdate() {
         if (pendingRespawn) Respawn();
 
-        momentumMech.UpdateMomentum(CurrentSpeedStat, currentDir);
-        if (grappleMech.UpdateGrapple(CurrentSpeedStat > 0)) return;    // The player is grappling, don't update the rest.
+        momentumMech.UpdateMomentum(CurrentFocus, currentDir);
+        if (grappleMech.UpdateGrapple(CurrentFocus > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
         wallRunMech.UpdateWallRun(currentDir);
         UpdateDirection();
@@ -266,7 +267,7 @@ public class Player : MonoBehaviour {
 
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
-        if (!keyReleased && (isGrounded || (IsWallRunning && CurrentSpeedStat > 0))) {
+        if (!keyReleased && (isGrounded || (IsWallRunning && CurrentFocus > 0))) {
             AudioHandler.Instance.PlaySound(SoundType.Jump);
         }
 
@@ -286,11 +287,11 @@ public class Player : MonoBehaviour {
             TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, noFocusFlashCondition: !isGrounded);
     }
     private void TryAction(Func<bool> action, float cost, bool noFocusFlashCondition) {
-        if (CurrentSpeedStat > 0f) {
+        if (CurrentFocus > 0f) {
             if (action()) ChangeFocus(cost);
 
         } else if (noFocusFlashCondition) {
-            StatusUI.Instance.ActionFailed();
+            StatusUI.Instance.FlashFocusBar();
         }
     }
 
@@ -332,14 +333,25 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="focus"></param>
     public void ChangeFocus(float focus, bool showUIIncrease = false) {
-        currentFocus = Mathf.Clamp(currentFocus += focus, 0f, MaxSpeedStat);
+        currentFocus = Mathf.Clamp(currentFocus += focus, 0f, MaxFocus);
         if (showUIIncrease) StatusUI.Instance.ShowFocusIncrease(focus);
+    }
+
+    /// <summary>Change the player's max focus.</summary>
+    /// <param name="value">The value to change it to/by.</param>
+    /// <param name="addToMax">True: Add the 'value' to the max. False: Set the value.</param>
+    /// <param name="addToCurrent">True: Increase current focus. False: Don't change.</param>
+    public void ChangeMaxFocus(float value, bool addToMax = true, bool addToCurrent = true) {
+        if (addToMax) maxFocus += value;
+        else maxFocus = value;
+        if (addToCurrent) ChangeFocus(value);
+        OnMaxFocusChanged?.Invoke(MaxFocus);
     }
 
     /// <summary>PowerUp the player's focus stat multiplier.</summary>
     /// <param name="time">Seconds the buff lasts.</param>
     /// <param name="multiplier">The amount to multiply the gain by.</param>
-    /// <param name="speedStatBoost">The amount to increase SpeedStat by.</param>
+    /// <param name="speedStatBoost">The amount to Add SpeedStat by.</param>
     public void SpeedBuff(float time, float multiplier, float speedStatBoost) {
         ChangeFocus(speedStatBoost);
         momentumMech.BuffSpeed(time, multiplier);

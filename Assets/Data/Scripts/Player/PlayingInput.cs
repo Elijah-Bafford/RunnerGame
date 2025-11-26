@@ -18,4 +18,10 @@ public class PlayingInput : MonoBehaviour {
 
     public void OnGrapple(InputAction.CallbackContext context) { if (context.performed) player.Perform(Player.Act.Grapple); }
 
+    public void Temp(InputAction.CallbackContext context) {
+        if (context.performed) {
+            player.ChangeMaxFocus(20f);
+        }
+    }
+
 }

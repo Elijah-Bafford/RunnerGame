@@ -29,8 +29,11 @@ public class StatusUI : MonoBehaviour {
 
     public static StatusUI Instance { get; private set; }
 
+    private void Awake() {
+        Instance = this;
+    }
+
     private void Start() {
-        Instance = this; // temp // until I decided how I want to handle UI handlers
         _momentumBarAnimator = _focusBar.GetComponent<Animator>();
         _buffText = _momentumUp.GetComponent<TextMeshProUGUI>();
         incNotifyActivity = _incNotification.gameObject.GetComponent<UtilObjectActiveEvent>();
@@ -38,6 +41,7 @@ public class StatusUI : MonoBehaviour {
         incNotifyActivity.OnDisabled += incNotifyDisabled;
         gCrosshairNotifyActivity.OnDisabled += gCrosshairNotifyDisabled;
         gCrosshairNotifyActivity.OnEnabled += gCrosshairNotifyEnabled;
+        Player.Instance.OnMaxFocusChanged += SetMaxValueFocusBar;
     }
 
     private void OnDestroy() {
@@ -56,6 +60,44 @@ public class StatusUI : MonoBehaviour {
 
     #endregion
 
+    #region Crosshair
+
+    /// <summary>Display momentum change as crosshair.</summary>
+    /// <param name="rawMomentum">The raw momentum.</param>
+    public void UpdateCrosshair(float rawMomentum) {
+        if (crosshairState == 2) return;
+
+        if (crosshairState == 1) {
+            crosshairState = 2;
+            crosshairArrowState = 2;     // reset the crosshair
+            SetCrosshairText("");
+            return;
+        }
+
+        sbyte newArrowState = 0;
+        string newText = "●";
+
+        if (rawMomentum > lastRawMomentum) {
+            newArrowState = 1;
+            newText = "▲";
+        } else if (rawMomentum < lastRawMomentum) {
+            newArrowState = -1;
+            newText = "▼";
+        }
+
+        if (crosshairArrowState != newArrowState) {
+            crosshairArrowState = newArrowState;
+            SetCrosshairText(newText);
+        }
+
+        lastRawMomentum = rawMomentum;
+    }
+
+    private void SetCrosshairText(string s) => _crosshair.text = s;
+
+    #endregion
+
+    #region Focus Bar
     /// <summary>Display a temporary increase text to focus.</summary>
     /// <param name="value">Value to display. If a value is already displaying then it's added.</param>
     public void ShowFocusIncrease(float value) {
@@ -66,64 +108,38 @@ public class StatusUI : MonoBehaviour {
 
         _incNotification.gameObject.SetActive(true);
     }
-
-    public void UpdateMomentumUI(float value) {
-        float r_val = (float)Math.Round(value, 3, MidpointRounding.AwayFromZero);
-        if (_momentumValueOverlay != null) _momentumValueOverlay.text = "Momentum: x" + r_val.ToString("F3");
-        else Debug.LogWarning(this + " Speed Mult Display is null");
-    }
-
-    public void UpdateCrosshair(float rawMomentum) {
-        if (crosshairState == 2) return;
-        if (crosshairState == 0) {
-            if (rawMomentum > lastRawMomentum) {
-                if (crosshairArrowState != 1) {
-                    crosshairArrowState = 1;
-                    SetCrosshair("▲");
-                }
-            } else if (rawMomentum < lastRawMomentum) {
-                if (crosshairArrowState != -1) {
-                    crosshairArrowState = -1;
-                    SetCrosshair("▼");
-                }
-            } else {
-                if (crosshairArrowState != 0) {
-                    crosshairArrowState = 0;
-                    SetCrosshair("●");
-                }
-            }
-            lastRawMomentum = rawMomentum;
-        } else { // crosshair state == 1
-            crosshairState = 2;
-            crosshairArrowState = 2; // reset the crosshair
-            SetCrosshair("");
-        }
-    }
-
-    private void SetCrosshair(string s) {
-        if (_crosshair != null) _crosshair.text = s;
-        else Debug.LogWarning(this + " Inc/Dec Display is null");
-    }
-
-    public void UpdateSpeedBar(float value, bool instant = false) {
-        if (_focusBar == null) {
-            Debug.LogWarning(this + " Momentum Bar is null");
-            return;
-        }
+    /// <summary>Update the Focus Bar fill</summary>
+    /// <param name="value">The target value.</param>
+    /// <param name="instant">Instantly fill or MoveTowards.</param>
+    public void UpdateFocusBar(float value, bool instant = false) {
         if (instant) _focusBar.value = value;
         else _focusBar.value = Mathf.MoveTowards(_focusBar.value, value, Time.fixedDeltaTime * 25f);
-        if (_focusValue == null) {
-            Debug.LogWarning(this + " Speed Stat Value is null");
-            return;
-        }
-        _focusValue.text = Mathf.Round(Player.Instance.CurrentSpeedStat) + "/" + Mathf.Round(Player.Instance.MaxSpeedStat);
+
+        _focusValue.text = Mathf.Round(Player.Instance.CurrentFocus) + "/" + Mathf.Round(Player.Instance.MaxFocus);
+    }
+    /// <summary>Set the max Focus Bar value.</summary>
+    /// <param name="value">New max value.</param>
+    public void SetMaxValueFocusBar(float value) => _focusBar.maxValue = value;
+    
+
+    /// <summary>Flash the focus bar background red.</summary>
+    public void FlashFocusBar() => _momentumBarAnimator.SetTrigger("Flash");
+
+    #endregion
+
+    #region Momentum UI Status
+    public void UpdateMomentumUI(float value) {
+        float r_val = (float)Math.Round(value, 3, MidpointRounding.AwayFromZero);
+        _momentumValueOverlay.text = "Momentum: x" + r_val.ToString("F3");
     }
 
-    public void ToggleBuffOverlay(bool toggle, float multuplier) {
-        _momentumUp.SetActive(toggle);
-        if (_buffText != null) _buffText.text = "Gain Up! [x" + multuplier + "]";
+    /// <summary>Show Momentum Status Up arrow and multiplier.</summary>
+    /// <param name="show">Show the menu or not.</param>
+    /// <param name="multuplier">The multiplier to display.</param>
+    public void SetMomentumUpOverlayActive(bool show, float multuplier) {
+        _momentumUp.SetActive(show);
+        if (_buffText != null) _buffText.text = "▲ x" + ((float)Math.Round(multuplier, 1, MidpointRounding.AwayFromZero)) + "";
     }
 
-    public void ActionFailed() => _momentumBarAnimator.SetTrigger("Flash");
-
+    #endregion
 }
