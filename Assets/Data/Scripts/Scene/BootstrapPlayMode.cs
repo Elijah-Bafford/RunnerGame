@@ -1,8 +1,9 @@
 using System.IO;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
 [InitializeOnLoad]
 public class BootstrapPlayMode : MonoBehaviour {
     private const string bootstrapScenePath = "Assets/Scenes/Bootstrap.unity";
@@ -94,3 +95,4 @@ public class BootstrapPlayMode : MonoBehaviour {
         }
     }
 }
+#endif
