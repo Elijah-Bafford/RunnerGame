@@ -348,6 +348,11 @@ public class Player : MonoBehaviour {
         OnMaxFocusChanged?.Invoke(MaxFocus);
     }
 
+    public void ChangeStartFocus(float value, bool addToCurrent = true) {
+        if (addToCurrent) startFocus += value;
+        else startFocus = value;
+    }
+
     /// <summary>PowerUp the player's focus stat multiplier.</summary>
     /// <param name="time">Seconds the buff lasts.</param>
     /// <param name="multiplier">The amount to multiply the gain by.</param>

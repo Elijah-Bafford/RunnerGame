@@ -139,7 +139,7 @@ GameObject:
   - component: {fileID: 1170820554525168949}
   - component: {fileID: 4040854800145147208}
   m_Layer: 7
-  m_Name: Speed Buff
+  m_Name: Power Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

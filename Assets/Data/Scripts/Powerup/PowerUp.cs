@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PowerUp : MonoBehaviour {
 
-    //private enum PowerUpType { SpeedBuff, MaxMomentumUp, MaxSpeedStatUp, StartSpeedStatUp }
+    //private enum PowerUpType { MaxSpeedStatUp, StartSpeedStatUp }
 
     [SerializeField] private PowerUpEffect powerUpEffect;
 
