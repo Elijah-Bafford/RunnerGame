@@ -109,7 +109,7 @@ public class RecordHandler : MonoBehaviour {
             for (int i = 0; i < records.Length; i++) {
                 records[i] = new LevelRecord(i, 0f, 0f, false);
             }
-            if (records.Length > 1) records[1].unlocked = true;
+            if (records.Length > 2) records[2].unlocked = true;
             SaveRecords();
         }
     }
