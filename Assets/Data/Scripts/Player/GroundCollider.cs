@@ -37,9 +37,7 @@ public class GroundCollider : MonoBehaviour {
         }
     }
 
-    private void OnTriggerStay(Collider other) {
-        CheckSlope(other.gameObject);
-    }
+    private void OnTriggerStay(Collider other) => CheckSlope(other.gameObject);
 
     private void CheckSlope(GameObject colliderGameObject) {
         if (!colliderGameObject.CompareTag("SlopedGround")) return;

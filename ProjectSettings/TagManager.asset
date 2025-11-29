@@ -11,6 +11,7 @@ TagManager:
   - EnemyAttackTrigger
   - GroundAuto
   - DeathPlane
+  - Tunnel
   layers:
   - Default
   - TransparentFX
