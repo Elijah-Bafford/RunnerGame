@@ -91,7 +91,7 @@ public class SettingsHandler : MonoBehaviour {
     }
 
     private void ApplySettings() {
-        NotificationHandler.disableTutorials = !currentSettings.showTutorials;
+        NotificationHandler.DisableTutorials = !currentSettings.showTutorials;
         AudioHandler.Instance.SetVolume(currentSettings.volume);
 
         fullscreenToggle.isOn = currentSettings.isFullscreen;
@@ -138,7 +138,7 @@ public class SettingsHandler : MonoBehaviour {
 
     // Settings events
 
-    public void OnShowTutorialsChanged(bool isOn) { UISound(); NotificationHandler.disableTutorials = !isOn; }
+    public void OnShowTutorialsChanged(bool isOn) { UISound(); NotificationHandler.DisableTutorials = !isOn; }
     public void OnVolumeChanged() { UISound(allowOverlap: false); AudioHandler.Instance.SetVolume(volumeSlider.value); }
     public void OnSettingsMenuClosed() { SaveSettings(); }
     public void OnFullscreenChanged(bool isOn) { UISound(); Screen.fullScreen = isOn; }

@@ -182,8 +182,8 @@ public class GameStateHandler : MonoBehaviour {
         string input = inMenuMode ? "UI" : "Player";
         float newTime = inMenuMode ? 0 : 1;
 
-        if (newTime == 1 && NotificationHandler.timeSlowValue != 1) {
-            newTime = NotificationHandler.timeSlowValue;
+        if (newTime == 1 && NotificationHandler.NotificationTimeScale != 1) {
+            newTime = NotificationHandler.NotificationTimeScale;
         }
 
         playerInput.SwitchCurrentActionMap(input);

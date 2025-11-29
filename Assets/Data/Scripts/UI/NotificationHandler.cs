@@ -4,74 +4,78 @@ using UnityEngine;
 
 public class NotificationHandler : MonoBehaviour {
 
-    [Header("Notification Settings")]
-    [Tooltip("Message to display on entering the collider.")]
-    [SerializeField] private string message;
-    [Tooltip("How long to display the notification after leaving collider.")]
-    [SerializeField] private float displayTime;
-    [Tooltip("Slow time on entering the collider.")]
-    [SerializeField] private bool slowTime;
-    [Tooltip("This notification is a tutorial?")]
-    [SerializeField] private bool isTutorial = true;
-    [Tooltip("Parent UI object for the TMP")]
+    [SerializeField] private GameObject continueButton;
     [SerializeField] private GameObject notificationBox;
+    [SerializeField] private TextMeshProUGUI notificationMessage;
 
-    public static bool disableTutorials = false;
+    private Coroutine notificationEndDelay;
 
-    private Coroutine onExit = null;
-    private TextMeshProUGUI messageTMP;
+    /// <summary> The value that timeScale is set to due to Notifications.</summary>
+    public static float NotificationTimeScale { get; private set; } = 1f;
 
-    private static GameObject lastNode;
-    private bool playerHasEntered = false;
-    private bool playerHasExited = false;
+    public static bool DisableTutorials { get; set; } = false;
 
-    /// <summary>
-    /// The value that timeScale is set to due to Notifications.
-    /// </summary>
-    public static float timeSlowValue = 1f;
+    public static NotificationHandler Instance { get; private set; }
+
+    private void Awake() {
+        Instance = this;
+    }
 
     private void Start() {
-        messageTMP = notificationBox.GetComponentInChildren<TextMeshProUGUI>();
-    }
-
-    private void OnTriggerEnter(Collider collision) {
-        if (playerHasEntered) return;
-        if (collision.CompareTag("Player")) {
-            playerHasEntered = true;
-            if (lastNode != null && !lastNode) Destroy(lastNode);
-
-            if (disableTutorials && isTutorial) return;
-            messageTMP.text = message;
-            notificationBox.SetActive(true);
-
-            if (slowTime) {
-                Time.timeScale = 0.5f;
-                timeSlowValue = Time.timeScale;
-            }
-        }
-    }
-
-    private void OnTriggerExit(Collider collision) {
-        if (playerHasExited) return;
-        if (collision.CompareTag("Player")) {
-            playerHasExited = true;
-            lastNode = gameObject;
-            if (onExit != null) {
-                StopCoroutine(onExit);
-                onExit = null;
-            }
-            if (!(disableTutorials && isTutorial)) {
-                if (slowTime) {
-                    Time.timeScale = 1.0f;
-                    timeSlowValue = Time.timeScale;
-                }
-            }
-            onExit = StartCoroutine(OnExit());
-        }
-    }
-    private IEnumerator OnExit() {
-        yield return new WaitForSeconds(displayTime);
         notificationBox.SetActive(false);
-        Destroy(gameObject);
+        continueButton.SetActive(false);
     }
+
+    public void ShowNotification(string message, float timeScale = 1f) {
+        // A Notification is already shown
+        if (notificationBox.activeSelf) StopNotification();
+
+        notificationBox.SetActive(true);
+
+        notificationMessage.text = message;
+
+        if (timeScale == 0) continueButton.SetActive(true);
+
+        NotificationTimeScale = timeScale;
+        Time.timeScale = NotificationTimeScale;
+    }
+
+    private void StopNotification() {
+        // Disable overlays
+        if (notificationBox.activeSelf) notificationBox.SetActive(false);
+        if (continueButton.activeSelf) continueButton.SetActive(false);
+        // If a delayed end coroutine is running, stop it and set the var to null
+        if (notificationEndDelay != null) {
+            StopCoroutine(notificationEndDelay);
+            notificationEndDelay = null;
+        }
+        // Reset time scale
+        if (NotificationTimeScale != 1.0f) {
+            NotificationTimeScale = 1.0f;
+            Time.timeScale = NotificationTimeScale;
+        }
+    }
+
+    public void StartNotificationEndDelay(float time = 0) {
+        if (time == 0) {
+            StopNotification();
+            return;
+        }
+
+        if (notificationEndDelay != null) {
+            Debug.LogWarning("NOTIFICATION END DELAY COROUTINE IS RUNNING!");
+            StopNotification();
+            return;
+        }
+
+        notificationEndDelay = StartCoroutine(NotificationEndDelay(time));
+    }
+
+    private IEnumerator NotificationEndDelay(float time) {
+        yield return new WaitForSeconds(time);
+        StopNotification();
+    }
+
+    public void ContinueButton() => StopNotification();
+    
 }
