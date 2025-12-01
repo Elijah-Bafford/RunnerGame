@@ -63,7 +63,7 @@ public class WallRunMechanic : MonoBehaviour {
     public void UpdateWallRun(Player.Direction currentDir) {
         // If NOT on a wall OR is grounded THEN return
         allowWallRun = jumpKeyReleased || rb.linearVelocity.y < 0f;
-        if (!IsOnWall() || player.isGrounded) {
+        if (!IsOnWall() || player.IsGrounded) {
             jumpKeyReleased = false;
             currentWallGravity = wallGravity;
             isWallRunning = false;
@@ -90,7 +90,7 @@ public class WallRunMechanic : MonoBehaviour {
          * isWallJumping = false
          */
 
-        if (player.isGrounded || (!wasOnWallLastFrame && IsOnWall())) {
+        if (player.IsGrounded || (!wasOnWallLastFrame && IsOnWall())) {
             isWallJumping = false;
         }
 
@@ -110,7 +110,7 @@ public class WallRunMechanic : MonoBehaviour {
     /// <param name="keyReleased"></param>
     /// <returns></returns>
     public bool Jump(bool keyReleased, Transform cameraTransform) {
-        if (!IsOnWall() || player.isGrounded) return false;
+        if (!IsOnWall() || player.IsGrounded) return false;
         if (keyReleased) return true;   // Disallow double execution and jump cut logic
 
         isWallJumping = true;

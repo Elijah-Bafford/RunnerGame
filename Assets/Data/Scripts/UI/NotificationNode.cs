@@ -20,6 +20,7 @@ public class NotificationNode : MonoBehaviour {
 
     private void OnEnable() {
         if (isTutorial && NotificationHandler.DisableTutorials) {
+            Debug.Log("Notfication Disabled: " + gameObject.name);
             gameObject.SetActive(false);
             return;
         }

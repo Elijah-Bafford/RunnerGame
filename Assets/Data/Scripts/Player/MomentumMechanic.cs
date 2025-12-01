@@ -140,7 +140,7 @@ public class MomentumMechanic : MonoBehaviour {
             case Player.Direction.Backward: currBasis = hasFocus ? 0.8f : 0.6f; break;
             default: currBasis = 1.0f; break;
         }
-        if (Player.Instance.isSliding) currBasis = hasFocus ? Average(currBasis, 1.5f) : Average(currBasis, 0.25f);
+        if (Player.Instance.IsSliding) currBasis = hasFocus ? Average(currBasis, 1.5f) : Average(currBasis, 0.25f);
         if (Player.Instance.IsWallRunning) currBasis = Average(currBasis, 1.75f);
         if (Player.Instance.IsWallJumping) currBasis = Average(currBasis, 1.5f);
         if (Player.Instance.IsGrappling) currBasis = Average(currBasis, 2.0f);
@@ -160,8 +160,8 @@ public class MomentumMechanic : MonoBehaviour {
         isWallRunning = Player.Instance.IsWallRunning;
         if (isWallRunning) justWallRan = true;
         wasGroundedLastFrame = isGrounded;
-        isSliding = Player.Instance.isSliding;
-        isGrounded = Player.Instance.isGrounded;
+        isSliding = Player.Instance.IsSliding;
+        isGrounded = Player.Instance.IsGrounded;
         onSlopeAngle = Player.Instance.OnSlopeAngle;
         isWallJumping = Player.Instance.IsWallJumping;
     }

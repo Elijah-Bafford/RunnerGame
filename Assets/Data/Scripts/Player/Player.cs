@@ -1,4 +1,5 @@
 using System;
+using Unity.Burst.CompilerServices;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -39,7 +40,7 @@ public class Player : MonoBehaviour {
     public Vector3 TargetingPos => _TargetingPos.position;
 
     private Rigidbody rb;
-    private BoxCollider hitbox;
+    private CapsuleCollider hitbox;
     private Animator anim;
 
     private CinemachineCamera fstPersonCamera;
@@ -54,8 +55,10 @@ public class Player : MonoBehaviour {
     private Vector2 lastMoveVector = Vector2.zero;
     private Vector3 conveyorVelocity = Vector3.zero;
 
-    public bool isSliding { get; set; } = false;
-    public bool isGrounded { get; set; } = false;
+    public bool IsSliding { get; set; } = false;
+    public bool CanStand { get; set; } = true;
+    
+    public bool IsGrounded { get; set; } = false;
     /// <summary>The angle of the slope. 0 if not on a slope (Abs value)</summary>
     public float OnSlopeAngle { get; set; } = 0f;
     /// <summary>The Y position of the player on the slope. Used to check if the player is going up or down a slope</summary>
@@ -66,6 +69,8 @@ public class Player : MonoBehaviour {
 
     ///<summary>Whether a restart is pending (execute on first FixedUpdate after true).</summary>
     private bool pendingRespawn = false;
+    /// <summary>Player released slide key but couldn't stand.</summary>
+    private bool pendingStand = false;
 
     private float leanAmount = 0.0f;
 
@@ -93,7 +98,7 @@ public class Player : MonoBehaviour {
     private void Start() {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        hitbox = GetComponent<BoxCollider>();
+        hitbox = GetComponent<CapsuleCollider>();
         anim = GetComponentInChildren<Animator>();
         fstPersonCamera = GetComponentInChildren<CinemachineCamera>();
         cameraPanTilt = GetComponentInChildren<CinemachinePanTilt>();
@@ -113,6 +118,7 @@ public class Player : MonoBehaviour {
 
     private void Respawn() {
         pendingRespawn = false;
+        CanStand = true;
         SetDead(false, force: true);
         currentDir = Direction.None;
 
@@ -139,7 +145,10 @@ public class Player : MonoBehaviour {
 
     private void FixedUpdate() {
         if (pendingRespawn) Respawn();
-
+        if (pendingStand) {
+            pendingStand = false;
+            Slide(true);
+        }
         momentumMech.UpdateMomentum(CurrentFocus, currentDir);
         if (grappleMech.UpdateGrapple(CurrentFocus > 0)) return;    // The player is grappling, don't update the rest.
         UpdatePhysics();
@@ -147,11 +156,11 @@ public class Player : MonoBehaviour {
         UpdateDirection();
         Move();
         UpdateLean();
-        AudioHandler.Instance.SetContPlaySoundLoop(SoundType.Slide, isSliding && isGrounded && currentDir != Direction.None);
+        AudioHandler.Instance.SetContPlaySoundLoop(SoundType.Slide, IsSliding && IsGrounded && currentDir != Direction.None);
     }
 
     private void LateUpdate() {
-        grappleMech.UpdateLockOnReticle(isGrounded, cameraTransform);
+        grappleMech.UpdateLockOnReticle(IsGrounded, cameraTransform);
     }
 
     private void UpdateDirection() {
@@ -183,10 +192,10 @@ public class Player : MonoBehaviour {
     }
 
     private void UpdatePhysics() {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        IsGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
 
         // Find the ground normal when grounded
-        if (isGrounded) {
+        if (IsGrounded) {
             // Small upward offset so the ray doesn't start inside the ground
             Vector3 origin = groundCheck.position + Vector3.up * 0.1f;
 
@@ -199,14 +208,14 @@ public class Player : MonoBehaviour {
             groundNormal = Vector3.up;
         }
 
-        wallRunMech.UpdatePhysics(isGrounded);
+        wallRunMech.UpdatePhysics(IsGrounded);
     }
 
     private void Move() {
         float speed = moveSpeed * momentumMech.GetTrueMomentum();
 
         if (currentDir != Direction.None) {
-            if (!isSliding && (isGrounded || IsWallRunning)) {
+            if (!IsSliding && (IsGrounded || IsWallRunning)) {
                 AudioHandler.Instance.PlaySoundRND(SoundType.Footstep);
             }
         }
@@ -229,7 +238,7 @@ public class Player : MonoBehaviour {
         targetVelocity.y = rb.linearVelocity.y;
 
         // Bend velocity to follow ground when grounded & not moving upward
-        if (isGrounded && !IsWallRunning && targetVelocity.y <= 0f)
+        if (IsGrounded && !IsWallRunning && targetVelocity.y <= 0f)
             targetVelocity = Vector3.ProjectOnPlane(targetVelocity, groundNormal);
 
         wallRunMech.UpdateWallJumpVelocity();
@@ -249,25 +258,31 @@ public class Player : MonoBehaviour {
         anim.SetTrigger("Attack");
     }
 
-    private void Slide() {
-        isSliding = !isSliding;
-        anim.SetBool("Slide", isSliding);
-        focusLossMult = isSliding ? focusLossMult + 1.5f : focusLossMult - 1.5f;
-        AdjustHitboxHeight(isSliding ? 2 : 1);
+    private void Slide(bool keyReleased) {
+        if (!CanStand) {
+            pendingStand = keyReleased;
+            return;
+        }
+        pendingStand = false;
+        IsSliding = !keyReleased;
+        
+        anim.SetBool("Slide", IsSliding);
+        focusLossMult = IsSliding ? focusLossMult + 1.5f : focusLossMult - 1.5f;
+        AdjustHitboxHeight(IsSliding ? 2 : 1);
     }
 
     private void AdjustHitboxHeight(float divisor) {
         float hbSizeY = 0.9f / divisor;
-        if (hitbox.size.y == hbSizeY) return;
+        if (hitbox.height == hbSizeY) return;
 
         float hbCentY = (hbSizeY - 1f) / 2;
         hitbox.center = new Vector3(0f, hbCentY, 0f);
-        hitbox.size = new Vector3(0.8f, hbSizeY, 0.8f);
+        hitbox.height = hbSizeY;
     }
 
     private void Jump(bool keyReleased) {
         wallRunMech.JumpKeyReleased(keyReleased);
-        if (!keyReleased && (isGrounded || (IsWallRunning && CurrentFocus > 0))) {
+        if (!keyReleased && (IsGrounded || (IsWallRunning && CurrentFocus > 0))) {
             AudioHandler.Instance.PlaySound(SoundType.Jump);
         }
 
@@ -276,7 +291,7 @@ public class Player : MonoBehaviour {
             return;
         }
 
-        if (!keyReleased && isGrounded)
+        if (!keyReleased && IsGrounded)
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce * Mathf.Sqrt(momentumMech.GetTrueMomentum()), rb.linearVelocity.z);
         else if (keyReleased && rb.linearVelocity.y > 0f)
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -284,7 +299,7 @@ public class Player : MonoBehaviour {
 
     private void Grapple() {
         if (grappleMech.HasTarget())
-            TryAction(() => grappleMech.Grapple(isGrounded, transform.position), cost: -5f, noFocusFlashCondition: !isGrounded);
+            TryAction(() => grappleMech.Grapple(IsGrounded, transform.position), cost: -5f, noFocusFlashCondition: !IsGrounded);
     }
     private void TryAction(Func<bool> action, float cost, bool noFocusFlashCondition) {
         if (CurrentFocus > 0f) {
@@ -301,7 +316,7 @@ public class Player : MonoBehaviour {
                 Attack();
                 break;
             case Act.Slide:
-                Slide();
+                Slide(keyReleased);
                 break;
             case Act.Jump:
                 Jump(keyReleased);

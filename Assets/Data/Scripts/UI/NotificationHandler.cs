@@ -27,6 +27,7 @@ public class NotificationHandler : MonoBehaviour {
     }
 
     public void ShowNotification(string message, float timeScale = 1f) {
+        print("Show Notification: " + message);
         // A Notification is already shown
         if (notificationBox.activeSelf) StopNotification();
 
