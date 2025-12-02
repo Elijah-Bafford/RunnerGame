@@ -38,9 +38,9 @@ public class GameStateHandler : MonoBehaviour {
     private static bool gameOver = false;
     public static void GameOver() => gameOver = true;
 
-    public enum GameState { MainMenu, Playing, Paused, LevelRestart, Death, LevelComplete, NextLevel }
+    public enum GameState { MainMenu, Playing, Paused, LevelStart, LevelRestart, Death, LevelComplete, NextLevel }
 
-    private GameState state = GameState.Playing;
+    private GameState state = GameState.LevelStart;
     private GameState lastState;
 
 
@@ -100,6 +100,9 @@ public class GameStateHandler : MonoBehaviour {
 
     private void UpdateGameState() {
         switch (state) {
+            case GameState.LevelStart:
+                ShowOverlayForState(GameState.LevelStart, true);
+                break;
             case GameState.MainMenu:
                 // No in-game overlay here, just go to main menu scene
                 ToggleMenuMode(true);
@@ -124,8 +127,8 @@ public class GameStateHandler : MonoBehaviour {
             case GameState.LevelRestart:
                 OnLevelRestart?.Invoke();
                 gameTimer.ResetTimer();
-                ShowOverlayForState(GameState.Playing, false);
-                state = GameState.Playing;
+                ShowOverlayForState(GameState.LevelStart, true);
+                state = GameState.LevelStart;
                 break;
 
             case GameState.Death:
@@ -138,7 +141,7 @@ public class GameStateHandler : MonoBehaviour {
                 break;
 
             case GameState.NextLevel:
-                ShowOverlayForState(GameState.Playing, false);
+                ShowOverlayForState(GameState.LevelStart, true);
                 SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel + 1);
                 gameTimer.ResetTimer();
                 break;
