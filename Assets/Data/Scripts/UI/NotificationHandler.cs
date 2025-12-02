@@ -4,14 +4,10 @@ using UnityEngine;
 
 public class NotificationHandler : MonoBehaviour {
 
-    [SerializeField] private GameObject continueButton;
     [SerializeField] private GameObject notificationBox;
     [SerializeField] private TextMeshProUGUI notificationMessage;
 
     private Coroutine notificationEndDelay;
-
-    /// <summary> The value that timeScale is set to due to Notifications.</summary>
-    public static float NotificationTimeScale { get; private set; } = 1f;
 
     public static bool DisableTutorials { get; set; } = false;
 
@@ -23,7 +19,6 @@ public class NotificationHandler : MonoBehaviour {
 
     private void Start() {
         notificationBox.SetActive(false);
-        continueButton.SetActive(false);
     }
 
     public void ShowNotification(string message, float timeScale = 1f) {
@@ -35,26 +30,20 @@ public class NotificationHandler : MonoBehaviour {
 
         notificationMessage.text = message;
 
-        if (timeScale == 0) continueButton.SetActive(true);
-
-        NotificationTimeScale = timeScale;
-        Time.timeScale = NotificationTimeScale;
+        if (timeScale == 0) GameStateHandler.Instance.SetGameState(GameStateHandler.GameState.Notification);
+        if (timeScale > 0) Time.timeScale = timeScale;
     }
 
     private void StopNotification() {
         // Disable overlays
         if (notificationBox.activeSelf) notificationBox.SetActive(false);
-        if (continueButton.activeSelf) continueButton.SetActive(false);
         // If a delayed end coroutine is running, stop it and set the var to null
         if (notificationEndDelay != null) {
             StopCoroutine(notificationEndDelay);
             notificationEndDelay = null;
         }
         // Reset time scale
-        if (NotificationTimeScale != 1.0f) {
-            NotificationTimeScale = 1.0f;
-            Time.timeScale = NotificationTimeScale;
-        }
+        Time.timeScale = 1.0f;
     }
 
     public void StartNotificationEndDelay(float time = 0) {
@@ -77,6 +66,5 @@ public class NotificationHandler : MonoBehaviour {
         StopNotification();
     }
 
-    public void ContinueButton() => StopNotification();
-    
+    public void E_StopNotification() => StopNotification();
 }

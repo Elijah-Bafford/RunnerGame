@@ -38,7 +38,7 @@ public class GameStateHandler : MonoBehaviour {
     private static bool gameOver = false;
     public static void GameOver() => gameOver = true;
 
-    public enum GameState { MainMenu, Playing, Paused, LevelStart, LevelRestart, Death, LevelComplete, NextLevel }
+    public enum GameState { MainMenu, Playing, Paused, Notification, LevelStart, LevelRestart, Death, LevelComplete, NextLevel }
 
     private GameState state = GameState.LevelStart;
     private GameState lastState;
@@ -100,6 +100,9 @@ public class GameStateHandler : MonoBehaviour {
 
     private void UpdateGameState() {
         switch (state) {
+            case GameState.Notification:
+                ShowOverlayForState(GameState.Notification, true);
+                break;
             case GameState.LevelStart:
                 ShowOverlayForState(GameState.LevelStart, true);
                 break;
@@ -184,10 +187,6 @@ public class GameStateHandler : MonoBehaviour {
 
         string input = inMenuMode ? "UI" : "Player";
         float newTime = inMenuMode ? 0 : 1;
-
-        if (newTime == 1 && NotificationHandler.NotificationTimeScale != 1) {
-            newTime = NotificationHandler.NotificationTimeScale;
-        }
 
         playerInput.SwitchCurrentActionMap(input);
         Time.timeScale = newTime;
