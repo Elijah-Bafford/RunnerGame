@@ -1,25 +1,14 @@
 using System;
-using Unity.Burst.CompilerServices;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [DefaultExecutionOrder(-2)]
 public class Player : MonoBehaviour {
 
-    [Header("Player Stats")]
-
-    [SerializeField] private float attackDamage;
+    public static Player Instance { get; private set; }
 
     [Header("- Focus Stat")]
-    [SerializeField] private float maxFocus = 100f;
-    [SerializeField] private float startFocus = 0;
     [SerializeField] private float currentFocus = 0;
-    [SerializeField] private float focusLossMult = 2f;
-
-    [Header("- Movement")]
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float jumpForce = 7f;
 
     [SerializeField] private bool isInvincible = false;
 
@@ -33,11 +22,43 @@ public class Player : MonoBehaviour {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckRadius = 0.2f;
 
+    /// <summary>Event player's maxfocus has changed.</summary>
+    public Action<float> OnMaxFocusChanged { get; set; }
+    /// <summary>Directions of the player. Other is a combination of movements, none is not moving.</summary>
+    public enum Direction { Forward, Backward, Left, Right, Other, None }
+    /// <summary>Actions available to the player</summary>
+    public enum Act { Attack, Slide, Jump, Move, Grapple }
+
+    #region Properties
+
+    /// <summary>The current direction the player is moving in.</summary>
+    public Direction currentDir { get; private set; } = Direction.None;
     public float AttackDamage => attackDamage;
     public float MaxFocus => maxFocus;
-    public Action<float> OnMaxFocusChanged;
     public float CurrentFocus => currentFocus;
     public Vector3 TargetingPos => _TargetingPos.position;
+    public bool IsSliding { get; set; } = false;
+    public bool CanStand { get; set; } = true;
+    public bool IsGrounded { get; set; } = false;
+    /// <summary>The angle of the slope. 0 if not on a slope (Abs value)</summary>
+    public float OnSlopeAngle { get; set; } = 0f;
+    /// <summary>The Y position of the player on the slope. Used to check if the player is going up or down a slope</summary>
+    public float OnSlopeY { get; set; } = 0f;
+    ///<summary>Whether or not the player is in the attack animation.</summary>
+    public bool IsInAttack { get; set; } = false;
+
+    #endregion
+
+    #region Private fields
+
+    private float attackDamage = 10f;
+
+    private float moveSpeed = 5f;
+    private float jumpForce = 4.8f;
+
+    private float maxFocus = 100f;
+    private float startFocus = 0;
+    private float focusLossMult = 2f;
 
     private Rigidbody rb;
     private CapsuleCollider hitbox;
@@ -55,18 +76,6 @@ public class Player : MonoBehaviour {
     private Vector2 lastMoveVector = Vector2.zero;
     private Vector3 conveyorVelocity = Vector3.zero;
 
-    public bool IsSliding { get; set; } = false;
-    public bool CanStand { get; set; } = true;
-    
-    public bool IsGrounded { get; set; } = false;
-    /// <summary>The angle of the slope. 0 if not on a slope (Abs value)</summary>
-    public float OnSlopeAngle { get; set; } = 0f;
-    /// <summary>The Y position of the player on the slope. Used to check if the player is going up or down a slope</summary>
-    public float OnSlopeY { get; set; } = 0f;
-
-    ///<summary>Whether or not the player is in the attack animation.</summary>
-    public bool IsInAttack { get; set; } = false;
-
     ///<summary>Whether a restart is pending (execute on first FixedUpdate after true).</summary>
     private bool pendingRespawn = false;
     /// <summary>Player released slide key but couldn't stand.</summary>
@@ -76,18 +85,14 @@ public class Player : MonoBehaviour {
 
     private Vector3 groundNormal = Vector3.up;
 
-    /// <summary>Actions available to the player</summary>
-    public enum Act { Attack, Slide, Jump, Move, Grapple }
-    /// <summary>Directions of the player. Other is a combination of movements, none is not moving.</summary>
-    public enum Direction { Forward, Backward, Left, Right, Other, None }
-    /// <summary>The current direction the player is moving in.</summary>
-    public Direction currentDir { get; private set; } = Direction.None;
-    public static Player Instance { get; private set; }
+    #endregion
+
 
     private void Awake() {
         if (Instance != null && Instance != this)
             Debug.LogError("Duplicate Player Object");
         Instance = this;
+
     }
 
     private void OnDestroy() {
@@ -109,14 +114,15 @@ public class Player : MonoBehaviour {
         wallRunMech.InitWallRunMechanic(this, rb);
         grappleMech.InitGrappleMechanic(this);
         playerAttack.InitPlayerAttack(this);
-        currentFocus = startFocus;
 
         GameStateHandler.OnLevelRestart += OnLevelRestart;
+        OnLevelRestart();
     }
 
     private void OnLevelRestart() => pendingRespawn = true;
 
     private void Respawn() {
+        SetPersistentStats();
         pendingRespawn = false;
         CanStand = true;
         SetDead(false, force: true);
@@ -143,6 +149,18 @@ public class Player : MonoBehaviour {
         wallRunMech.OnLevelRestart();
     }
 
+    private void SetPersistentStats() {
+        ChangeStartFocus(PlayerData.Data.Stats.StartFocus, false);
+        ChangeMaxFocus(PlayerData.Data.Stats.MaxFocus, false, false);
+        focusLossMult = PlayerData.Data.Stats.FocusLossMult;
+
+        moveSpeed = PlayerData.Data.Stats.BaseMovementSpeed;
+        jumpForce = PlayerData.Data.Stats.JumpForce;
+
+        attackDamage = PlayerData.Data.Stats.AttackDamage;
+    }
+
+    #region Update
     private void FixedUpdate() {
         if (pendingRespawn) Respawn();
         if (pendingStand) {
@@ -159,9 +177,7 @@ public class Player : MonoBehaviour {
         AudioHandler.Instance.SetContPlaySoundLoop(SoundType.Slide, IsSliding && IsGrounded && currentDir != Direction.None);
     }
 
-    private void LateUpdate() {
-        grappleMech.UpdateLockOnReticle(IsGrounded, cameraTransform);
-    }
+    private void LateUpdate() => grappleMech.UpdateLockOnReticle(IsGrounded, cameraTransform);
 
     private void UpdateDirection() {
         if (moveVector == lastMoveVector) return;
@@ -211,6 +227,9 @@ public class Player : MonoBehaviour {
         wallRunMech.UpdatePhysics(IsGrounded);
     }
 
+    #endregion
+
+    #region Actions
     private void Move() {
         float speed = moveSpeed * momentumMech.GetTrueMomentum();
 
@@ -265,7 +284,7 @@ public class Player : MonoBehaviour {
         }
         pendingStand = false;
         IsSliding = !keyReleased;
-        
+
         anim.SetBool("Slide", IsSliding);
         focusLossMult = IsSliding ? focusLossMult + 1.5f : focusLossMult - 1.5f;
         AdjustHitboxHeight(IsSliding ? 2 : 1);
@@ -330,6 +349,8 @@ public class Player : MonoBehaviour {
         }
     }
 
+    #endregion
+
 
     /// <summary>
     /// Call to set the player to dead.
@@ -361,11 +382,15 @@ public class Player : MonoBehaviour {
         else maxFocus = value;
         if (addToCurrent) ChangeFocus(value);
         OnMaxFocusChanged?.Invoke(MaxFocus);
+        PlayerData.Data.Stats.MaxFocus = maxFocus;
+        PlayerData.Data.WriteStats();
     }
 
     public void ChangeStartFocus(float value, bool addToCurrent = true) {
         if (addToCurrent) startFocus += value;
         else startFocus = value;
+        PlayerData.Data.Stats.StartFocus = startFocus;
+        PlayerData.Data.WriteStats();
     }
 
     /// <summary>PowerUp the player's focus stat multiplier.</summary>

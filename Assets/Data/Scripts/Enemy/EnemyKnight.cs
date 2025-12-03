@@ -5,6 +5,7 @@ public class EnemyKnight : Enemy {
 
     protected override void ActionMove() {
         base.ActionMove();
+        if (!isGrounded) return;
         Vector3 playerDirection = player.transform.position - transform.position;
         playerDirection.y = 0f;
 

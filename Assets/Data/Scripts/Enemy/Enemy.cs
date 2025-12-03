@@ -24,8 +24,14 @@ public abstract class Enemy : MonoBehaviour {
     [SerializeField] protected float _attackCooldownTime = 0.8f;
     [Tooltip("The position of the enemy's head for player detection")]
     [SerializeField] protected Transform _headPosition;
+    [Header("Ground Check")]
+    [SerializeField] protected bool useGroundCheck = false;
+    [SerializeField] protected Transform groundCheck;
+    [SerializeField] protected LayerMask groundLayer;
+    [SerializeField] protected float groundCheckRadius = 0.2f;
     [Header("Debug")]
     [SerializeField] protected bool _showDebugMessages = false;
+
 
     protected float _currentHealth;
 
@@ -41,6 +47,8 @@ public abstract class Enemy : MonoBehaviour {
     protected bool _isStunned = false;
     protected bool _isDead = false;
 
+    protected bool isGrounded = true;
+
     protected Rigidbody rb;
     protected Player player;
     protected EnemyAnimator enemyAnimator;
@@ -55,6 +63,7 @@ public abstract class Enemy : MonoBehaviour {
     }
 
     protected virtual void FixedUpdate() {
+        if (useGroundCheck) isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
         _lastState = _currentState;
         _playerInSight = RunPlayerDetection();
         DecideState();

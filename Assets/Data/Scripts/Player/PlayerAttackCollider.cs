@@ -23,7 +23,7 @@ public class PlayerAttackCollider : MonoBehaviour {
             AudioHandler.Instance.PlaySound(SoundType.SwordImpactWall);
         }
 
-        if (!other.CompareTag("Enemy")) return;
+        if (!other.CompareTag("Enemy") || other.gameObject.name == "Player Detection") return;
 
         target = other.GetComponent<Enemy>();
         if (target == null) {
