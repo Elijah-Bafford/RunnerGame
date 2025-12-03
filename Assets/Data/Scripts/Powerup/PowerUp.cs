@@ -1,13 +1,14 @@
+using System;
 using UnityEngine;
 
 public class PowerUp : MonoBehaviour {
 
     //private enum PowerUpType { MaxSpeedStatUp, StartSpeedStatUp }
 
+    [Tooltip("Unique item ID for single time pick up. Leave as 0 to always respawn.")]
     [SerializeField] private int ItemID = 0;
     [SerializeField] private bool UseFloating = true;
     [SerializeField] private PowerUpEffect powerUpEffect;
-
 
     private bool entered = false;
 
@@ -18,9 +19,25 @@ public class PowerUp : MonoBehaviour {
     private Vector3 startPos;
 
     private void Start() {
-        if (PlayerData.Data.IsCollected(ItemID)) gameObject.SetActive(false);
+        if (IsCollected()) gameObject.SetActive(false);
 
         startPos = transform.position;
+        GameStateHandler.OnLevelRestart += OnLevelRestart;
+    }
+
+    private void OnDestroy() => GameStateHandler.OnLevelRestart -= OnLevelRestart;
+
+    private void OnLevelRestart() {
+        if (!entered) return;
+        if (IsCollected()) return;
+        entered = false;
+        gameObject.SetActive(true);
+    }
+
+    private bool IsCollected() {
+        if (ItemID != 0)
+            if (PlayerData.Data.IsCollected(ItemID)) return true;
+        return false;
     }
 
     private void FixedUpdate() {
@@ -33,11 +50,10 @@ public class PowerUp : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (entered) return;
         if (!other.CompareTag("Player")) return;
-        print("Player entered!");
-        PlayerData.Data.CollectItem(ItemID);
+        if (ItemID != 0) PlayerData.Data.CollectItem(ItemID);
         entered = true;
         powerUpEffect.Apply(Player.Instance);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }
 

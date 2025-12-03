@@ -38,6 +38,7 @@ public class StatusUI : MonoBehaviour {
         _buffText = _momentumUp.GetComponent<TextMeshProUGUI>();
         incNotifyActivity = _incNotification.gameObject.GetComponent<UtilObjectActiveEvent>();
         gCrosshairNotifyActivity = _grappleReticle.gameObject.GetComponent<UtilObjectActiveEvent>();
+        GameStateHandler.OnLevelRestart += OnLevelRestart;
         incNotifyActivity.OnDisabled += incNotifyDisabled;
         gCrosshairNotifyActivity.OnDisabled += gCrosshairNotifyDisabled;
         gCrosshairNotifyActivity.OnEnabled += gCrosshairNotifyEnabled;
@@ -45,6 +46,7 @@ public class StatusUI : MonoBehaviour {
     }
 
     private void OnDestroy() {
+        GameStateHandler.OnLevelRestart -= OnLevelRestart;
         incNotifyActivity.OnDisabled -= incNotifyDisabled;
         gCrosshairNotifyActivity.OnDisabled -= gCrosshairNotifyDisabled;
         gCrosshairNotifyActivity.OnEnabled -= gCrosshairNotifyEnabled;
@@ -142,4 +144,7 @@ public class StatusUI : MonoBehaviour {
     }
 
     #endregion
+
+    private void OnLevelRestart() => SetMomentumUpOverlayActive(false, 1);
+    
 }

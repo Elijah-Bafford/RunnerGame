@@ -832,6 +832,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1170820554525168949, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: ItemID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1170820554525168949, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
       propertyPath: powerUpEffect
       value: 
       objectReference: {fileID: 11400000, guid: d65cd7dcc13940540bec2b33f31042b0, type: 2}
@@ -841,7 +845,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6355922606061014312, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -854,6 +858,71 @@ PrefabInstance:
     - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
       propertyPath: m_LocalPosition.z
       value: 4.1105804
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+--- !u!1001 &320109988
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1170820554525168949, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: powerUpEffect
+      value: 
+      objectReference: {fileID: 11400000, guid: 7ff285a2332bdd94aa2a00a43e111b63, type: 2}
+    - target: {fileID: 6355922606061014312, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_Name
+      value: Speed Buff (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6355922606061014312, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.409
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.299
       objectReference: {fileID: 0}
     - target: {fileID: 8521867859810987166, guid: 7a4712e4be81ea9488acee428e56fd5c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -33123,7 +33192,8 @@ SceneRoots:
   - {fileID: 1435940294}
   - {fileID: 1341919468}
   - {fileID: 984421188}
-  - {fileID: 239268075}
   - {fileID: 617483672}
+  - {fileID: 239268075}
+  - {fileID: 320109988}
   - {fileID: 7745538511926410770}
   - {fileID: 1467632509}

@@ -5,7 +5,7 @@ public class EnemyKnight : Enemy {
 
     protected override void ActionMove() {
         base.ActionMove();
-        if (!isGrounded) return;
+        
         Vector3 playerDirection = player.transform.position - transform.position;
         playerDirection.y = 0f;
 
@@ -24,7 +24,7 @@ public class EnemyKnight : Enemy {
             _inRangeForAttack = Mathf.Abs(angleToPlayer) < 10f;
             return;
         }
-
+        if (!isGrounded) return;
         Vector3 vel = rb.linearVelocity;
         Vector3 targetXZ = playerDirection * _movementSpeed;
         Vector3 currentXZ = new Vector3(vel.x, 0f, vel.z);
