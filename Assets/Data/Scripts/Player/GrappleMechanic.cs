@@ -17,6 +17,7 @@ public class GrappleMechanic : MonoBehaviour {
     private readonly Collider[] _enemyBuf = new Collider[16];
 
     private Enemy currentTarget = null;
+    private Enemy lockCurrentTarget = null;
 
     private Player player;
     private RawImage reticle;
@@ -36,7 +37,7 @@ public class GrappleMechanic : MonoBehaviour {
 
     public bool UpdateGrapple(bool hasFocus) {
         this.hasFocus = hasFocus;
-        if (!IsGrappling()) return false;
+        if (!isGrappling) return false;
 
         Vector3 toTarget = GetGrappleTarget() - transform.position;
         float dist = toTarget.magnitude;
@@ -46,7 +47,8 @@ public class GrappleMechanic : MonoBehaviour {
         if (dist < GetGrappleArrivalDistance()) {
             SetIsGrappling(false);
             player.Attack();
-            if (currentTarget != null) currentTarget.Hurt(Player.Instance.AttackDamage);
+            if (lockCurrentTarget != null) lockCurrentTarget.Hurt(PlayerData.Data.Stats.AttackDamage);
+            lockCurrentTarget = null;
         }
         return true;
     }
@@ -61,6 +63,7 @@ public class GrappleMechanic : MonoBehaviour {
         isGrappling = true;
         grappleTarget = currentTarget.transform.position + lockOnOffset;
         grappleDirection = (grappleTarget - transform.position).normalized;
+        lockCurrentTarget = currentTarget;
         return true;
     }
 
@@ -82,10 +85,6 @@ public class GrappleMechanic : MonoBehaviour {
 
         UpdateReticleUI();
     }
-
-    // -----------------------------
-    // --- private helpers below ---
-    // -----------------------------
 
     private bool HandleGroundedState(bool isGrounded) {
         if (!isGrounded) return false;

@@ -23,7 +23,7 @@ public class Player : MonoBehaviour {
     [SerializeField] private float groundCheckRadius = 0.2f;
 
     /// <summary>Event player's maxfocus has changed.</summary>
-    public Action<float> OnMaxFocusChanged { get; set; }
+    public Action<float> OnMaxFocusChanged;
     /// <summary>Directions of the player. Other is a combination of movements, none is not moving.</summary>
     public enum Direction { Forward, Backward, Left, Right, Other, None }
     /// <summary>Actions available to the player</summary>
@@ -33,7 +33,6 @@ public class Player : MonoBehaviour {
 
     /// <summary>The current direction the player is moving in.</summary>
     public Direction currentDir { get; private set; } = Direction.None;
-    public float AttackDamage => attackDamage;
     public float MaxFocus => maxFocus;
     public float CurrentFocus => currentFocus;
     public Vector3 TargetingPos => _TargetingPos.position;
@@ -305,8 +304,8 @@ public class Player : MonoBehaviour {
             AudioHandler.Instance.PlaySound(SoundType.Jump);
         }
 
-        if (wallRunMech.IsOnWall()) {
-            TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), -2.5f, !keyReleased);
+        if (wallRunMech.IsOnWall() && !keyReleased) {
+            TryAction(() => wallRunMech.Jump(keyReleased, cameraTransform), cost: -2.5f, !keyReleased);
             return;
         }
 
@@ -317,8 +316,8 @@ public class Player : MonoBehaviour {
     }
 
     private void Grapple() {
-        if (grappleMech.HasTarget())
-            TryAction(() => grappleMech.Grapple(IsGrounded, transform.position), cost: -5f, noFocusFlashCondition: !IsGrounded);
+        if (!grappleMech.HasTarget()) return;
+        TryAction(() => grappleMech.Grapple(IsGrounded, transform.position), cost: -5f, noFocusFlashCondition: !IsGrounded);
     }
     private void TryAction(Func<bool> action, float cost, bool noFocusFlashCondition) {
         if (CurrentFocus > 0f) {
@@ -369,7 +368,7 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="focus"></param>
     public void ChangeFocus(float focus, bool showUIIncrease = false) {
-        currentFocus = Mathf.Clamp(currentFocus += focus, 0f, MaxFocus);
+        currentFocus = Mathf.Clamp(currentFocus += focus, 0f, maxFocus);
         if (showUIIncrease) StatusUI.Instance.ShowFocusIncrease(focus);
     }
 
@@ -381,7 +380,7 @@ public class Player : MonoBehaviour {
         if (addToMax) maxFocus += value;
         else maxFocus = value;
         if (addToCurrent) ChangeFocus(value);
-        OnMaxFocusChanged?.Invoke(MaxFocus);
+        OnMaxFocusChanged?.Invoke(maxFocus);
         PlayerData.Data.Stats.MaxFocus = maxFocus;
         PlayerData.Data.WriteStats();
     }

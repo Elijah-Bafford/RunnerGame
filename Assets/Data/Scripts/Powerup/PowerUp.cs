@@ -9,6 +9,7 @@ public class PowerUp : MonoBehaviour {
     [SerializeField] private int ItemID = 0;
     [SerializeField] private bool UseFloating = true;
     [SerializeField] private PowerUpEffect powerUpEffect;
+    [SerializeField] private PowerUpEffect powerUpEffectAlt;
 
     private bool entered = false;
 
@@ -19,7 +20,12 @@ public class PowerUp : MonoBehaviour {
     private Vector3 startPos;
 
     private void Start() {
-        if (IsCollected()) gameObject.SetActive(false);
+        if (IsCollected()) {
+            if (powerUpEffectAlt != null)
+                powerUpEffect = powerUpEffectAlt;
+            else
+                gameObject.SetActive(false);
+        }
 
         startPos = transform.position;
         GameStateHandler.OnLevelRestart += OnLevelRestart;
@@ -29,7 +35,12 @@ public class PowerUp : MonoBehaviour {
 
     private void OnLevelRestart() {
         if (!entered) return;
-        if (IsCollected()) return;
+        if (IsCollected()) {
+            if (powerUpEffectAlt != null)
+                powerUpEffect = powerUpEffectAlt;
+            else
+                return;
+        }
         entered = false;
         gameObject.SetActive(true);
     }
