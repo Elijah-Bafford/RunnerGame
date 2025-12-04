@@ -15,12 +15,12 @@ public class NotificationNode : MonoBehaviour {
     private byte triggerState = 0;
 
     private void Start() {
-        if (attachedToItem) return;
-        GameStateHandler.OnLevelRestart += OnLevelRestart;
+        if (!attachedToItem)
+            GameStateHandler.OnLevelRestart += OnLevelRestart;
     }
     private void OnDestroy() {
-        if (attachedToItem) return;
-        GameStateHandler.OnLevelRestart -= OnLevelRestart;
+        if (!attachedToItem)
+            GameStateHandler.OnLevelRestart -= OnLevelRestart;
     }
 
     private void OnLevelRestart() {
