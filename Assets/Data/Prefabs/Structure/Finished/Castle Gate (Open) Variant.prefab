@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6095659188332733456
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 41.62764
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -17.350975
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 136.37231
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9242927
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.3816844
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -44.876
+      objectReference: {fileID: 0}
+    - target: {fileID: 460673419377593507, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1036201722894372322, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_Name
+      value: Castle Gate (Open) Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 2520739486630688157, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: b90b1f36e1d821745858c21baccd9b0e, type: 2}
+    - target: {fileID: 4291128026900252666, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4291128026900252666, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
+      propertyPath: m_SelectedEditorRenderState
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 03e216e6119e4b6469e085abf9c5ac99, type: 3}
