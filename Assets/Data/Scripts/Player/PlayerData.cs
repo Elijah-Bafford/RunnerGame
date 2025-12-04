@@ -34,7 +34,10 @@ public class PlayerData : MonoBehaviour {
     }
 
     public bool IsCollected(int item) => Stats.CollectedItems.Contains(item);
-    public void CollectItem(int item) => Stats.CollectedItems.Add(item);
+    public void CollectItem(int item) {
+        if (!IsCollected(item))
+            Stats.CollectedItems.Add(item);
+    }
 
     public void WriteStats() {
         string json = JsonUtility.ToJson(Stats, true);

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61d33019c1dc5ba47b0176802f576e78, type: 3}
   m_Name: MaxFocusUp_1
   m_EditorClassIdentifier: Assembly-CSharp::MaxFocusUp
-  info: 
-  increaseValue: 20
+  info: Max Focus Up (10)
+  increaseValue: 10

@@ -8,8 +8,7 @@ public class StartFocusUp : PowerUpEffect {
     [Tooltip("False: Add 'value' to starting focus. True: Set starting focus to value.")]
     [SerializeField] private bool isSet = false;
     public override void Apply(Player player) {
-        if (isSet) player.ChangeStartFocus(value, addToCurrent: false);
-        else player.ChangeStartFocus(value);
+        player.ChangeStartFocus(value, addToCurrent: !isSet);
     }
 }
 

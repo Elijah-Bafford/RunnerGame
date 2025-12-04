@@ -30,7 +30,7 @@ public class MomentumMechanic : MonoBehaviour {
 
     private bool pendingRunOnce = true;
 
-    public void SetDefaultValues() {
+    public void OnLevelRestart() {
         speedBuffMultiplier = 1f;
         rawMomentum = 1.0f;
         basis = 1.0f;
@@ -119,7 +119,7 @@ public class MomentumMechanic : MonoBehaviour {
         if (mult <= 1f) mult = 1.5f;
 
         if (speedBuffMultiplier > 1) StopCoroutine("DisplayBuff");
-        
+
         StartCoroutine(DisplayBuff(time, mult));
     }
 
@@ -146,13 +146,13 @@ public class MomentumMechanic : MonoBehaviour {
         if (Player.Instance.IsGrappling) currBasis = Average(currBasis, 2.0f);
 
         float timeMult = hasFocus ? 15 : 5;
-        
+
         return Mathf.Lerp(basis, currBasis, Time.fixedDeltaTime * timeMult);
 
     }
 
     private float Average(float a, float b) => (a + b) / 2;
-    
+
 
     private void UpdateStates() {
         isGrappling = Player.Instance.IsGrappling;
@@ -166,9 +166,9 @@ public class MomentumMechanic : MonoBehaviour {
         isWallJumping = Player.Instance.IsWallJumping;
     }
 
-    public void EditSpeedMult(float speed, bool condition = true) {
-        if (condition) rawMomentum += speed * Time.fixedDeltaTime * timeScale;
-        if (rawMomentum < 1.0f) { rawMomentum = 1.0f; }
+    public void EditSpeedMult(float speed) {
+        rawMomentum += speed * Time.fixedDeltaTime * timeScale;
+        rawMomentum = Mathf.Clamp(rawMomentum, 1.0f, PlayerData.Data.Stats.MomentumCap);
     }
 
     private void UpdateHighestSpeed() { if (rawMomentum > highestMomentum) highestMomentum = rawMomentum; }
@@ -178,5 +178,5 @@ public class MomentumMechanic : MonoBehaviour {
     /// <summary>Get the raw momentum multiplier (displayed).</summary>
     /// <returns>Speed Mult</returns>
     public float GetRawMomentum() => rawMomentum;
-    public float GetHighestSpeed() => highestMomentum; 
+    public float GetHighestSpeed() => highestMomentum;
 }

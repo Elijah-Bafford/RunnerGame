@@ -144,8 +144,9 @@ public class Player : MonoBehaviour {
         IsInAttack = false;
         playerAttack.SetAttackBoxEnabled(false);
 
-        momentumMech.SetDefaultValues();
+        momentumMech.OnLevelRestart();
         wallRunMech.OnLevelRestart();
+        grappleMech.OnLevelRestart();
     }
 
     private void SetPersistentStats() {
@@ -389,6 +390,11 @@ public class Player : MonoBehaviour {
         if (addToCurrent) startFocus += value;
         else startFocus = value;
         PlayerData.Data.Stats.StartFocus = startFocus;
+        PlayerData.Data.WriteStats();
+    }
+
+    public void ChangeMomentumCap(float value, bool addToCurrent = true) {
+        PlayerData.Data.Stats.MomentumCap = (addToCurrent) ? PlayerData.Data.Stats.MomentumCap + value : value;
         PlayerData.Data.WriteStats();
     }
 

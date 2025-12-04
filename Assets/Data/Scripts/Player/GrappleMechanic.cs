@@ -10,6 +10,7 @@ public class GrappleMechanic : MonoBehaviour {
     [SerializeField] private float detectRange = 20f;
     [SerializeField] private float grappleRange = 10f;
     [SerializeField] private float grappleSpeed = 30f;
+    [SerializeField] private float maxGrappleTime = 2.0f; // seconds
 
     [Tooltip("Half-angle of the lock-on cone in degrees.")]
     [SerializeField] private float fovDegrees = 60f;
@@ -21,7 +22,7 @@ public class GrappleMechanic : MonoBehaviour {
 
     private Player player;
     private RawImage reticle;
-    private Vector3 lockOnOffset = new Vector3(0, 0.1f, 0);
+    private Vector3 lockOnOffset = new Vector3(0, 0.2f, 0);
     private Vector3 grappleDirection;
     private Vector3 grappleTarget;
     private float grappleArrivalDistance = 1.0f;
@@ -30,21 +31,36 @@ public class GrappleMechanic : MonoBehaviour {
 
     private bool hasFocus = false;
 
+    private float grappleTime = 0f;
+
     public void InitGrappleMechanic(Player player) {
         this.player = player;
         reticle = lockOnReticle.GetComponent<RawImage>();
     }
 
+    public void OnLevelRestart() {
+        isGrappling = false;
+        currentTarget = null;
+        lockCurrentTarget = null;
+        inGrappleRange = false;
+        grappleTime = 0;
+    }
+
     public bool UpdateGrapple(bool hasFocus) {
         this.hasFocus = hasFocus;
         if (!isGrappling) return false;
-
         Vector3 toTarget = GetGrappleTarget() - transform.position;
         float dist = toTarget.magnitude;
 
         player.SetLinearVelocity(GetGrappleDirection() * GetGrappleSpeed());
 
-        if (dist < GetGrappleArrivalDistance()) {
+        grappleTime += Time.fixedDeltaTime;
+
+        bool inRange = dist < GetGrappleArrivalDistance();
+        bool maxTimeExc = grappleTime >= maxGrappleTime;
+
+        if (inRange || maxTimeExc) {
+            grappleTime = 0;
             SetIsGrappling(false);
             player.Attack();
             if (lockCurrentTarget != null) lockCurrentTarget.Hurt(PlayerData.Data.Stats.AttackDamage);

@@ -10,11 +10,18 @@ public class NotificationNode : MonoBehaviour {
     [SerializeField] private bool isTutorial = false;
     [SerializeField, Range(0, 1)] private float timeScale = 1.0f;
     [SerializeField] private float endDelay = 0;
+    [SerializeField] private bool attachedToItem = false;
 
     private byte triggerState = 0;
 
-    private void Start() => GameStateHandler.OnLevelRestart += OnLevelRestart;
-    private void OnDestroy() => GameStateHandler.OnLevelRestart -= OnLevelRestart;
+    private void Start() {
+        if (attachedToItem) return;
+        GameStateHandler.OnLevelRestart += OnLevelRestart;
+    }
+    private void OnDestroy() {
+        if (attachedToItem) return;
+        GameStateHandler.OnLevelRestart -= OnLevelRestart;
+    }
 
     private void OnLevelRestart() {
         triggerState = 0;
@@ -22,6 +29,7 @@ public class NotificationNode : MonoBehaviour {
     }
 
     private void OnEnable() {
+        if (attachedToItem) return;
         if (isTutorial && NotificationHandler.DisableTutorials) {
             Debug.Log("Notfication Disabled: " + gameObject.name);
             gameObject.SetActive(false);
@@ -37,7 +45,8 @@ public class NotificationNode : MonoBehaviour {
     private void OnTriggerExit(Collider other) {
         if (CheckTriggerState(1, other)) {
             NotificationHandler.Instance.StartNotificationEndDelay(endDelay);
-            gameObject.SetActive(false);
+            if (!attachedToItem)
+                gameObject.SetActive(false);
         }
     }
 
@@ -58,4 +67,6 @@ public class NotificationNode : MonoBehaviour {
         }
         return message;
     }
+
+    public void Disable() => triggerState = 3;
 }

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152ca9de20bc72043ac7e45c82f85690, type: 3}
   m_Name: StartFocusUp_1
   m_EditorClassIdentifier: Assembly-CSharp::StartFocusUp
-  info: 
-  value: 10
+  info: Start focus Up (5)
+  value: 5
   isSet: 0

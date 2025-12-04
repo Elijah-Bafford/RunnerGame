@@ -11,6 +11,7 @@ public class PowerUp : MonoBehaviour {
     [SerializeField] private PowerUpEffect powerUpEffect;
     [SerializeField] private PowerUpEffect powerUpEffectAlt;
 
+    private NotificationNode node;
     private bool entered = false;
 
     // How far up and down the orb floats
@@ -20,36 +21,35 @@ public class PowerUp : MonoBehaviour {
     private Vector3 startPos;
 
     private void Start() {
-        if (IsCollected()) {
-            if (powerUpEffectAlt != null)
-                powerUpEffect = powerUpEffectAlt;
-            else
-                gameObject.SetActive(false);
-        }
-
+        node = GetComponent<NotificationNode>();
+        Init();
         startPos = transform.position;
         GameStateHandler.OnLevelRestart += OnLevelRestart;
+
     }
 
     private void OnDestroy() => GameStateHandler.OnLevelRestart -= OnLevelRestart;
 
-    private void OnLevelRestart() {
-        if (!entered) return;
-        if (IsCollected()) {
-            if (powerUpEffectAlt != null)
-                powerUpEffect = powerUpEffectAlt;
-            else
-                return;
+    private void Init() {
+        Debug.Log(powerUpEffect.info + " Collected = " + IsCollected());
+        if (!IsCollected()) return;
+        if (powerUpEffectAlt == null) {
+            gameObject.SetActive(false);
+            return;
         }
+        Debug.Log("Enabling alt. effect");
+        powerUpEffect = powerUpEffectAlt;
         entered = false;
-        gameObject.SetActive(true);
+        if (node != null) node.Disable();
+
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
     }
 
-    private bool IsCollected() {
-        if (ItemID != 0)
-            if (PlayerData.Data.IsCollected(ItemID)) return true;
-        return false;
+    private void OnLevelRestart() {
+        if (entered) Init(); // only reset if this item was picked up during the run
     }
+
+    private bool IsCollected() => ItemID != 0 && PlayerData.Data.IsCollected(ItemID);
 
     private void FixedUpdate() {
         if (!UseFloating) return;
