@@ -61,11 +61,18 @@ public class PowerUp : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (entered) return;
         if (!other.CompareTag("Player")) return;
-        if (ItemID != 0) PlayerData.Data.CollectItem(ItemID);
+        if (!IsCollected()) {
+            if (ItemID != 0) {
+                PlayerData.Data.CollectItem(ItemID);
+                RecordHandler.Instance.UpdateItemsCollected(SceneHandler.CurrentLevel);
+            }
+        }
         entered = true;
         powerUpEffect.Apply(Player.Instance);
         gameObject.SetActive(false);
     }
+    public int GetItemID() => ItemID;
+
 }
 
 public abstract class PowerUpEffect : ScriptableObject {

@@ -11,7 +11,7 @@ public class SceneHandler : MonoBehaviour {
 
     [Header("Set the number of scenes")]
     [SerializeField] private int _numberOfScenes;
-    public static int currentLevel;
+    public static int CurrentLevel;
     public static int numLevels;
 
     [Header("Loading UI")]
@@ -28,8 +28,8 @@ public class SceneHandler : MonoBehaviour {
         Instance = this;
         DontDestroyOnLoad(gameObject);
         numLevels = _numberOfScenes;
-        currentLevel = SceneManager.GetActiveScene().buildIndex;
-        print("Current Level: " + currentLevel);
+        CurrentLevel = SceneManager.GetActiveScene().buildIndex;
+        print("Current Level: " + CurrentLevel);
         
     }
     private void Start() {
@@ -45,7 +45,7 @@ public class SceneHandler : MonoBehaviour {
             Debug.LogWarning("Level index out of bounds.");
             return;
         }
-        currentLevel = level;
+        CurrentLevel = level;
         Time.timeScale = 1.0f;
         StartCoroutine(LoadSceneAsync(level));
     }
@@ -76,7 +76,7 @@ public class SceneHandler : MonoBehaviour {
 
         OnLevelLoad?.Invoke(levelIndex);
 
-        print("Current Level: " + currentLevel);
+        print("Current Level: " + CurrentLevel);
         loadingScreen?.SetActive(false);
     }
 

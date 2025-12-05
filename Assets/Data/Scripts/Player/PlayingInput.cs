@@ -3,7 +3,10 @@ using UnityEngine.InputSystem;
 
 public class PlayingInput : MonoBehaviour {
 
-    [SerializeField] private Player player;
+    private Player player;
+
+    private void Awake() => player = Player.Instance;
+    
 
     public void OnMove(InputAction.CallbackContext context) { player.Perform(Player.Act.Move, context.ReadValue<Vector2>().normalized); }
     public void OnJump(InputAction.CallbackContext context) {

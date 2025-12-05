@@ -194,6 +194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   records: []
+  numItemsOnLevel: 00000000000000000300000003000000
 --- !u!4 &585152670
 Transform:
   m_ObjectHideFlags: 0
@@ -235,7 +236,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1055808249}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff471e9363f2b3a4fa8aee94f76bcfe5, type: 3}
+  m_Script: {fileID: 11500000, guid: d6ae65bfbf9b6104ebd58788567e8705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1055808251
@@ -1458,7 +1459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7d5d47b649e2054aa51ad21d9ac6069, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numberOfScenes: 6
+  _numberOfScenes: 4
   loadingScreen: {fileID: 4341976039995959640}
   progressBar: {fileID: 168580911542432757}
 --- !u!114 &4519303787151421595
@@ -1881,7 +1882,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: 0.0000009536743, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0.0000019073486, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &6755629113282241168
@@ -2220,6 +2221,7 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

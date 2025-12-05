@@ -11,6 +11,7 @@ public class GameStateHandler : MonoBehaviour {
     [SerializeField] GameObject pauseOverlay;
     [SerializeField] TextMeshProUGUI timeNum;
     [SerializeField] TextMeshProUGUI speedNum;
+    [SerializeField] TextMeshProUGUI itemsCollected;
 
     [Header("General Refs")]
     [SerializeField] GameTimer gameTimer;
@@ -65,7 +66,7 @@ public class GameStateHandler : MonoBehaviour {
 
     private void Start() {
         SceneHandler.OnLevelLoad += OnLevelLoad;
-        UpdateLevelStats(SceneHandler.currentLevel);
+        UpdateLevelStats(SceneHandler.CurrentLevel);
     }
 
     private void Update() {
@@ -93,7 +94,7 @@ public class GameStateHandler : MonoBehaviour {
                 return;
             }
             fastestTime = GameTimer.GetTimeAsString(false, thisRecord.fastestTime);
-            highestMomentum = thisRecord.highestMomentum.ToString();
+            highestMomentum = "x" + thisRecord.highestMomentum.ToString("F3");
         }
     }
 
@@ -125,9 +126,11 @@ public class GameStateHandler : MonoBehaviour {
                 ShowOverlayForState(GameState.Paused, true);
                 if (timeNum != null) timeNum.text = fastestTime;
                 if (speedNum != null) speedNum.text = highestMomentum;
+                if (itemsCollected != null) itemsCollected.text = RecordHandler.Instance.ItemsCollectedToString(SceneHandler.CurrentLevel);
                 break;
 
             case GameState.LevelRestart:
+                UpdateLevelStats(SceneHandler.CurrentLevel);
                 OnLevelRestart?.Invoke();
                 gameTimer.ResetTimer();
                 ShowOverlayForState(GameState.LevelStart, true);
@@ -145,7 +148,7 @@ public class GameStateHandler : MonoBehaviour {
 
             case GameState.NextLevel:
                 ShowOverlayForState(GameState.LevelStart, true);
-                SceneHandler.Instance.LoadLevel(SceneHandler.currentLevel + 1);
+                SceneHandler.Instance.LoadLevel(SceneHandler.CurrentLevel + 1);
                 gameTimer.ResetTimer();
                 break;
         }

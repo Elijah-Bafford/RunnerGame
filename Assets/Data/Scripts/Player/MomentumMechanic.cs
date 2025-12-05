@@ -178,5 +178,7 @@ public class MomentumMechanic : MonoBehaviour {
     /// <summary>Get the raw momentum multiplier (displayed).</summary>
     /// <returns>Speed Mult</returns>
     public float GetRawMomentum() => rawMomentum;
-    public float GetHighestSpeed() => highestMomentum;
+    public float GetHighestMomentum() => highestMomentum;
+
+    public string HighestMomentumToString() => "x" + highestMomentum.ToString("F3");
 }

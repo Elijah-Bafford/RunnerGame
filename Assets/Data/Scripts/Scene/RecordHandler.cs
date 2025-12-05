@@ -7,6 +7,7 @@ public class RecordHandler : MonoBehaviour {
     public static RecordHandler Instance { get; private set; }
 
     [SerializeField] private LevelRecord[] records;
+    [SerializeField] private int[] numItemsOnLevel;
 
     public static event Action<int, LevelRecord, bool, bool> OnRecordUpdated;
 
@@ -29,12 +30,12 @@ public class RecordHandler : MonoBehaviour {
 
             if (records.Length < SceneHandler.numLevels) {
                 LevelRecord[] temp = new LevelRecord[SceneHandler.numLevels];
-                for (int i = 0; i < temp.Length; i++) {
-                    if (i < records.Length && records[i] != null) {
-                        temp[i] = records[i];
+                for (int record_i = 0; record_i < temp.Length; record_i++) {
+                    if (record_i < records.Length && records[record_i] != null) {
+                        temp[record_i] = records[record_i];
                     } else {
-                        bool unlocked = (temp[i - 1].fastestTime > 0 && i > 1) || i == 1;
-                        temp[i] = new LevelRecord(i, 0f, 0f, unlocked);
+                        bool unlocked = (temp[record_i - 1].fastestTime > 0 && record_i > 1) || record_i == 2;
+                        temp[record_i] = new LevelRecord(record_i, 0f, 0f, 0, unlocked);
                     }
                 }
                 records = temp;
@@ -43,12 +44,26 @@ public class RecordHandler : MonoBehaviour {
         } else {
             records = new LevelRecord[SceneHandler.numLevels];
             for (int i = 0; i < records.Length; i++) {
-                records[i] = new LevelRecord(i, 0f, 0f, false);
+                bool unlocked = i == 2;
+                records[i] = new LevelRecord(i, 0f, 0f, 0, unlocked);
             }
-            if (records.Length > 1) records[1].unlocked = true;
             SaveRecords();
         }
         BootstrapProcess.ProcessFinished(gameObject);
+    }
+
+    /// <summary>Increment the record's number of items collected by 'value'.</summary>
+    /// <param name="level">The current level (SceneHandler.currentLevel)</param>
+    /// <param name="value">The value to add to the number of items collected. (Default: 1)</param>
+    public void UpdateItemsCollected(int level, int value = 1) {
+        var rec = records[level];
+        rec.itemsCollected += value;
+        SaveRecords();
+    }
+
+    public string ItemsCollectedToString(int level) {
+        if (level > records.Length) return "ERROR!";
+        return records[level].itemsCollected + "/" + numItemsOnLevel[level];
     }
 
     public void UpdateRecord(int level, float newTime, float newMomentum) {
@@ -107,7 +122,7 @@ public class RecordHandler : MonoBehaviour {
             Debug.LogWarning("Failed to load records, creating new ones.");
             records = new LevelRecord[SceneHandler.numLevels];
             for (int i = 0; i < records.Length; i++) {
-                records[i] = new LevelRecord(i, 0f, 0f, false);
+                records[i] = new LevelRecord(i, 0f, 0f, 0, false);
             }
             if (records.Length > 2) records[2].unlocked = true;
             SaveRecords();
@@ -120,20 +135,15 @@ public class LevelRecord {
     public int level;
     public float fastestTime;
     public float highestMomentum;
+    public int itemsCollected;
     public bool unlocked;
 
-    public LevelRecord(int level, float fastestTime, float highestMomentum, bool unlocked) {
+    public LevelRecord(int level, float fastestTime, float highestMomentum, int itemsCollected, bool unlocked) {
         this.level = level;
         this.fastestTime = fastestTime;
         this.highestMomentum = highestMomentum;
+        this.itemsCollected = itemsCollected;
         this.unlocked = unlocked;
-    }
-
-    public override string ToString() {
-        return
-            $"Level: {level}\n" +
-            $"Fastest Time: {fastestTime}\n" +
-            $"Highest Momentum: {highestMomentum}";
     }
 }
 

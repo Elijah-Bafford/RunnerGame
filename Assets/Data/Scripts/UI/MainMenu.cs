@@ -93,14 +93,14 @@ public class MainMenu : MonoBehaviour {
 
                 buttonUI.levelText.text = $"Tutorial";
             } else {
-                buttonUI.levelText.text = $"Level {i - 1}";
+                buttonUI.levelText.text = $"Level {i - 2}";
             }
 
             LevelRecord record = RecordHandler.Instance.GetRecord(i);
 
-            buttonUI.momentumNum.text = record.highestMomentum == 0 && record != null ? "None" : record.highestMomentum.ToString();
+            buttonUI.momentumNum.text = record.highestMomentum == 0 && record != null ? "None" : "x" + record.highestMomentum.ToString("F3");
             buttonUI.timeNum.text = record.fastestTime == 0 && record != null ? "None" : GameTimer.GetTimeAsString(false, record.fastestTime);
-
+            buttonUI.itemsCollected.text = RecordHandler.Instance.ItemsCollectedToString(i);
             int levelIndex = i;
             if (!record.unlocked) {
                 buttonUI.button.interactable = false;
@@ -127,13 +127,12 @@ public class MainMenu : MonoBehaviour {
             CreateNavigationButtons();
             ShowMenu(MenuType.TitleMenu);
         } else {
-            AudioHandler.Instance.SetPlaySoundLoop(SoundType.Slide, false);
+            AudioHandler.Instance.StopAll();
         }
     }
 
-    private void UISound() {
-        AudioHandler.Instance.PlaySound(SoundType.UISelect);
-    }
+    private void UISound() => AudioHandler.Instance.PlaySound(SoundType.UISelect);
+    
 
     private void OnLevelButtonClicked(int levelIndex) {
         UISound();

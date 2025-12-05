@@ -6,5 +6,6 @@ public class LevelButtonUI : MonoBehaviour {
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI momentumNum;
     public TextMeshProUGUI timeNum;
+    public TextMeshProUGUI itemsCollected;
     public Button button;
 }

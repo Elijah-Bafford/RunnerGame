@@ -11,11 +11,12 @@ public class LevelComplete : MonoBehaviour {
     [Header("Level Complete Overlay TMPs")]
     [SerializeField] private TextMeshProUGUI timeNum;
     [SerializeField] private TextMeshProUGUI momentumNum;
+    [SerializeField] private TextMeshProUGUI itemsCollected;
     [Header("The \"record\" text in the Level Complete Overlay")]
     [SerializeField] private GameObject ARecord;
     [Header("Colors")]
     [SerializeField] private Color gold;
-    [SerializeField] private Color blue;
+    [SerializeField] private Color purple;
     [SerializeField] private Color red;
 
     private MomentumMechanic momentumMech;
@@ -25,23 +26,25 @@ public class LevelComplete : MonoBehaviour {
         RecordHandler.OnRecordUpdated += HandleRecordUpdated;
     }
 
+    private void OnDestroy() => RecordHandler.OnRecordUpdated -= HandleRecordUpdated;
+
+
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player"))
-            OnLevelComplete();
+        if (other.CompareTag("Player")) OnLevelComplete();
     }
 
     private void OnLevelComplete() {
-        
         gameStateHandler.TriggerLevelComplete();
-        momentumNum.text = momentumMech.GetHighestSpeed().ToString();
+        momentumNum.text = momentumMech.HighestMomentumToString();
         timeNum.text = GameTimer.GetTimeAsString(true);
-        RecordHandler.Instance.UpdateRecord(SceneHandler.currentLevel, timer.GetCurrentTime(), momentumMech.GetHighestSpeed());
+        itemsCollected.text = RecordHandler.Instance.ItemsCollectedToString(SceneHandler.CurrentLevel);
+        RecordHandler.Instance.UpdateRecord(SceneHandler.CurrentLevel, timer.GetCurrentTime(), momentumMech.GetHighestMomentum());
         AudioHandler.Instance.StopAll();
     }
 
     private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {
         if (ARecord != null) ARecord.SetActive(isTimeRecord || isMomentumRecord);
-        momentumNum.color = isMomentumRecord ? gold : blue;
+        momentumNum.color = isMomentumRecord ? gold : purple;
         timeNum.color = isTimeRecord ? gold : red;
     }
 }
