@@ -19,7 +19,7 @@ public class PlayerAttackCollider : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         print("Player Hit: " + other.name);
 
-        if (other.CompareTag("Wall")) {
+        if (other.CompareTag("Wall") || other.CompareTag("Tunnel")) {
             AudioHandler.Instance.PlaySound(SoundType.SwordImpactWall);
         }
 
