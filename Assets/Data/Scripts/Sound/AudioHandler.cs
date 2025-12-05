@@ -122,6 +122,19 @@ public class AudioHandler : MonoBehaviour {
         }
     }
 
+    public void StopAll() {
+        foreach (var kvp in soundDict) {
+            // Skip UI sounds
+            if (kvp.Key == SoundType.UISelect)
+                continue;
+
+            // Loop through all AudioSources for this type
+            foreach (var audioSource in kvp.Value) {
+                audioSource.Stop();
+            }
+        }
+    }
+
     public void SetVolume(float volume) {
         foreach (var kvp in soundDict) {
             foreach (var audioSource in kvp.Value) {

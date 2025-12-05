@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -25,14 +26,17 @@ public class LevelComplete : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
-        if (other.CompareTag("Player")) OnLevelComplete();
+        if (other.CompareTag("Player"))
+            OnLevelComplete();
     }
 
     private void OnLevelComplete() {
+        
         gameStateHandler.TriggerLevelComplete();
         momentumNum.text = momentumMech.GetHighestSpeed().ToString();
         timeNum.text = GameTimer.GetTimeAsString(true);
         RecordHandler.Instance.UpdateRecord(SceneHandler.currentLevel, timer.GetCurrentTime(), momentumMech.GetHighestSpeed());
+        AudioHandler.Instance.StopAll();
     }
 
     private void HandleRecordUpdated(int level, LevelRecord record, bool isTimeRecord, bool isMomentumRecord) {

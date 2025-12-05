@@ -121,6 +121,8 @@ public class Player : MonoBehaviour {
     private void OnLevelRestart() => pendingRespawn = true;
 
     private void Respawn() {
+        AudioHandler.Instance.StopAll();
+
         SetPersistentStats();
         pendingRespawn = false;
         CanStand = true;
@@ -128,10 +130,16 @@ public class Player : MonoBehaviour {
         currentDir = Direction.None;
 
         leanAmount = 0;
+        IsSliding = false;
+        OnSlopeAngle = 0;
+        OnSlopeY = 0;
+
         currentFocus = startFocus;
 
         moveVector = Vector3.zero;
         lastMoveVector = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
+        anim.Play("Idle", 0, 0f);
 
         cameraPanTilt.PanAxis.Value = 0;
         cameraPanTilt.TiltAxis.Value = 0;
