@@ -46,7 +46,16 @@ public class PowerUp : MonoBehaviour {
     }
 
     private void OnLevelRestart() {
-        if (entered) Init(); // only reset if this item was picked up during the run
+        // Items with ID 0 should always respawn
+        if (ItemID == 0) {
+            entered = false;                       // allow pickup again
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);        // re-enable if it was disabled
+            return;
+        }
+
+        // For items with an ID, only reset if this item was picked up during the run
+        if (entered) Init();
     }
 
     private bool IsCollected() => ItemID != 0 && PlayerData.Data.IsCollected(ItemID);

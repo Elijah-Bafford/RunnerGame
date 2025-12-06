@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 8168911857997366511}
   - component: {fileID: 2731193643265729115}
   - component: {fileID: 8654287933425764693}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall Corner (1s)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647

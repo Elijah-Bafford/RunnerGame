@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 3446367736193871995}
   - component: {fileID: 5189230034712390761}
   - component: {fileID: 4367351053796863332}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall Corner (2s)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -5061,7 +5061,7 @@ GameObject:
   - component: {fileID: 7791826543388034457}
   - component: {fileID: 6998098585060843895}
   - component: {fileID: 1508584087451596917}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
