@@ -88,13 +88,9 @@ public class MainMenu : MonoBehaviour {
             GameObject btnObj = Instantiate(levelButtonPrefab, scrollContent);
             LevelButtonUI buttonUI = btnObj.GetComponent<LevelButtonUI>();
 
-            if (i == 2) {
-                pageFirstSelectConfig[3].selectable = btnObj;
+            if (i == 2) pageFirstSelectConfig[3].selectable = btnObj;
 
-                buttonUI.levelText.text = $"Tutorial";
-            } else {
-                buttonUI.levelText.text = $"Level {i - 2}";
-            }
+            buttonUI.levelText.text = $"Level {i - 1}";
 
             LevelRecord record = RecordHandler.Instance.GetRecord(i);
 
@@ -132,7 +128,7 @@ public class MainMenu : MonoBehaviour {
     }
 
     private void UISound() => AudioHandler.Instance.PlaySound(SoundType.UISelect);
-    
+
 
     private void OnLevelButtonClicked(int levelIndex) {
         UISound();

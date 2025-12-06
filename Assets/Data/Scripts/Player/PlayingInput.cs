@@ -6,9 +6,10 @@ public class PlayingInput : MonoBehaviour {
     private Player player;
 
     private void Awake() => player = Player.Instance;
-    
 
-    public void OnMove(InputAction.CallbackContext context) { player.Perform(Player.Act.Move, context.ReadValue<Vector2>().normalized); }
+    public void OnMove(InputAction.CallbackContext context) {
+        player.Perform(Player.Act.Move, context.ReadValue<Vector2>().normalized); 
+    }
     public void OnJump(InputAction.CallbackContext context) {
         if (context.performed) player.Perform(Player.Act.Jump, default, false);
         else if (context.canceled) player.Perform(Player.Act.Jump, default, true);
@@ -29,5 +30,4 @@ public class PlayingInput : MonoBehaviour {
             player.ChangeMaxFocus(20f);
         }
     }
-
 }
