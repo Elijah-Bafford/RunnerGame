@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour {
     [Header("Level Buttons")]
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private RectTransform scrollContent;
+    [SerializeField] private string[] levelNames = new string[] { "Awaken", "Evade", "Unleash", "Escape" };
 
     [Header("Menus")]
     [SerializeField] private GameObject MainMenuUI;
@@ -90,7 +91,7 @@ public class MainMenu : MonoBehaviour {
 
             if (i == 2) pageFirstSelectConfig[3].selectable = btnObj;
 
-            buttonUI.levelText.text = $"Level {i - 1}";
+            buttonUI.levelText.text = levelNames[i - 2];
 
             LevelRecord record = RecordHandler.Instance.GetRecord(i);
 

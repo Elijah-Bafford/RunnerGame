@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpeedBuff
   info: 
   SpeedBuffMultiplier: 4
-  SpeedBuffTime: 5
-  SpeedStatBoost: 100
+  SpeedBuffTime: 3
+  SpeedStatBoost: 50

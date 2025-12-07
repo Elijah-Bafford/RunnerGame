@@ -52,7 +52,7 @@ public class MomentumMechanic : MonoBehaviour {
             StatusUI.Instance.UpdateFocusBar(focus, instant: true);
         }
         // Always drain speed stat, this value is clamped.
-        Player.Instance.ChangeFocus(-focusLossMult * Time.fixedDeltaTime);
+        Player.Instance.ChangeFocus(-focusLossMult * Time.fixedDeltaTime * 1.75f);
 
         bool hasFocus = focus > 0f;
 

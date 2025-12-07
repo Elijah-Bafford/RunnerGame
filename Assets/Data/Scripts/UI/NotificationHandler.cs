@@ -47,17 +47,18 @@ public class NotificationHandler : MonoBehaviour {
     }
 
     public void StartNotificationEndDelay(float time = 0) {
+        Debug.Log("Start Notification End Delay: param: " + time);
         if (time == 0) {
             StopNotification();
             return;
         }
-
+        
         if (notificationEndDelay != null) {
             Debug.LogWarning("NOTIFICATION END DELAY COROUTINE IS RUNNING!");
             StopNotification();
             return;
         }
-
+        Debug.Log("Starting coroutine: NotificationEndDelay for time: " + time + " seconds.");
         notificationEndDelay = StartCoroutine(NotificationEndDelay(time));
     }
 

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: MaxMomentumUp_3
   m_EditorClassIdentifier: Assembly-CSharp::MomentumCapUp
   info: 
-  value: 10
+  value: 5
   isSet: 1

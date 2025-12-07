@@ -385,11 +385,12 @@ public class Player : MonoBehaviour {
     /// <param name="value">The value to change it to/by.</param>
     /// <param name="addToMax">True: Add the 'value' to the max. False: Set the value.</param>
     /// <param name="addToCurrent">True: Increase current focus. False: Don't change.</param>
-    public void ChangeMaxFocus(float value, bool addToMax = true, bool addToCurrent = true) {
+    public void ChangeMaxFocus(float value, bool addToMax = true, bool addToCurrent = true, bool isPerm = true) {
         if (addToMax) maxFocus += value;
         else maxFocus = value;
         if (addToCurrent) ChangeFocus(value);
         OnMaxFocusChanged?.Invoke(maxFocus);
+        if (!isPerm) return;
         PlayerData.Data.Stats.MaxFocus = maxFocus;
         PlayerData.Data.WriteStats();
     }
