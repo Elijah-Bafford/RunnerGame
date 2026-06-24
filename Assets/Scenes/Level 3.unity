@@ -51039,10 +51039,10 @@ MonoBehaviour:
   Stats:
     StartFocus: 0
     MaxFocus: 50
-    MomentumCap: 2
+    MomentumCap: 1.27
     BaseMovementSpeed: 5
     JumpForce: 4.8
-    FocusLossMult: 2
+    FocusLossMult: 1.2
     AttackDamage: 10
     CollectedItems: 
 --- !u!114 &9015375245850311855

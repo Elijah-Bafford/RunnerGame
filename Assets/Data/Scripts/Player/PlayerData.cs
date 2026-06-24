@@ -14,7 +14,7 @@ public class PlayerData : MonoBehaviour {
         public float MomentumCap = 2f;
         public float BaseMovementSpeed = 5f;
         public float JumpForce = 4.8f;
-        public float FocusLossMult = 2f;
+        public float FocusLossMult = 1.25f;
         public float AttackDamage = 10f;
         public List<int> CollectedItems = new();
     }

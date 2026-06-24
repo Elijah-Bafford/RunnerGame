@@ -7901,7 +7901,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6676485130966240285, guid: ac2d7719ecfd91441968fb47c214f80e, type: 3}
       propertyPath: message
-      value: <b>I'm close...</b>
+      value: <b>Almost there...</b>
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -11887,27 +11887,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 13.000011, y: 12, z: 4.999982}
   m_Center: {x: 6.0000076, y: -2.5, z: -2.0000112}
---- !u!65 &987081532003004738
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6233939006314739305}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 512
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 7615
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 18, y: 10, z: 11.000004}
-  m_Center: {x: 9.149998, y: -0.8499994, z: -0.000057401085}
 --- !u!65 &992938910424062440
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -33697,21 +33676,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -60, z: 0}
---- !u!4 &6077992880226306242
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6233939006314739305}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.24386884, z: 0, w: 0.9698082}
-  m_LocalPosition: {x: 21.854359, y: -7.8297834, z: -89.397675}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 28.23, z: 0}
 --- !u!224 &6132516637024585436
 RectTransform:
   m_ObjectHideFlags: 0
@@ -33896,24 +33860,6 @@ GameObject:
   - component: {fileID: 6676485130064841300}
   m_Layer: 7
   m_Name: Notification Node
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
---- !u!1 &6233939006314739305
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6077992880226306242}
-  - component: {fileID: 987081532003004738}
-  - component: {fileID: 6676485130608603995}
-  m_Layer: 7
-  m_Name: Notification Node (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35725,26 +35671,6 @@ MonoBehaviour:
   isTutorial: 0
   timeScale: 1
   endDelay: 1
-  attachedToItem: 0
---- !u!114 &6676485130608603995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6233939006314739305}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bc95d640a9bf9a42a03809df51e3d0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NotificationNode
-  message: <b>My {}... I am <color=#C02929>Unstoppable.</color></b>
-  useHighlight: 1
-  highlight: {r: 0.48584908, g: 0.6198218, b: 1, a: 1}
-  highlightMessage: Focus
-  isTutorial: 0
-  timeScale: 1
-  endDelay: 2
   attachedToItem: 0
 --- !u!114 &6676485131372345420
 MonoBehaviour:
@@ -47033,7 +46959,7 @@ MonoBehaviour:
     MomentumCap: 2
     BaseMovementSpeed: 5
     JumpForce: 4.8
-    FocusLossMult: 2
+    FocusLossMult: 1.25
     AttackDamage: 10
     CollectedItems: 
 --- !u!114 &9015375245850311855
@@ -47430,7 +47356,6 @@ SceneRoots:
   - {fileID: 8521867858288278375}
   - {fileID: 8521867859416854666}
   - {fileID: 6077992878638182861}
-  - {fileID: 6077992880226306242}
   - {fileID: 6077992879878587349}
   - {fileID: 1956413857}
   - {fileID: 554615994}

@@ -77,3 +77,4 @@ crashlytics-build.properties
 # --- Custom ignores ---
 /[Aa]ssets/[Ss]ortify/
 /[Aa]ssets/[Ss]ortify.meta
+Game.zip

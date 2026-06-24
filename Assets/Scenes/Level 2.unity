@@ -36571,7 +36571,7 @@ MonoBehaviour:
     MomentumCap: 2
     BaseMovementSpeed: 5
     JumpForce: 4.8
-    FocusLossMult: 2
+    FocusLossMult: 1.1
     AttackDamage: 10
     CollectedItems: 
 --- !u!114 &9015375245850311855

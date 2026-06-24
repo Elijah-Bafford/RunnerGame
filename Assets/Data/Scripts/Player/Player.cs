@@ -57,7 +57,7 @@ public class Player : MonoBehaviour {
 
     private float maxFocus = 100f;
     private float startFocus = 0;
-    private float focusLossMult = 2f;
+    private float focusLossMult = 1.25f;
 
     private Rigidbody rb;
     private CapsuleCollider hitbox;
